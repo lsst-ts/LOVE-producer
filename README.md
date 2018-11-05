@@ -53,11 +53,14 @@ docker run -it --rm --name opsim \
     oboberg/opsim4_fbs_py3:latest \
     /home/opsim/fix_opsim/simple_start.sh
 ```
+
 Copy libraries from salmaker container
 ```
 docker cp salmaker:/home/opsim/sal_libs .
 docker cp sal_libs opsim:/home/opsim
+rm -rf sal_libs
 ```
+
 Copy files from lib folder to proper one (from opsim container)
 ```
 cp /home/opsim/sal_libs/* dds/lib/
