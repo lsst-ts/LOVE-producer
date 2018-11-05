@@ -39,3 +39,26 @@ Build libraries
 ```
 ./build_topics.sh
 ```
+
+### Run opsim container from oboberg/opsim4_fbs_py3:latest
+Execute
+```
+docker run -it --rm --name opsim \
+    -v $HOME/.config:/home/opsim/.config \
+    -v $HOME/UW/LSST/tsrepos/:/home/opsim/tsrepos \
+    -v $HOME/UW/Config/docker/fix_opsim:/home/opsim/fix_opsim \
+    -e OPSIM_HOSTNAME=rowen_mac \
+    -e DISPLAY=127.0.0.1:0 \
+    -p 8884:8884 \
+    oboberg/opsim4_fbs_py3:latest \
+    /home/opsim/fix_opsim/simple_start.sh
+```
+Copy libraries from salmaker container
+```
+docker cp salmaker:~/sal_libs .
+docker cp sal_libs opsim:/home/opsim
+```
+Copy files from lib folder to proper one (from opsim container)
+```
+cp /home/opsim/sal_libs/* dds/lib/
+```
