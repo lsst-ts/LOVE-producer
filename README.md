@@ -66,6 +66,14 @@ Copy files from lib folder to proper one (from opsim container)
 cp /home/opsim/sal_libs/* dds/lib/
 ```
 
+Install SALobj library
+```
+cd /home/opsim/tsrepos/salobj
+setup -r . 
+scons
+scons install declare
+```
+
 ## Running LDAP server
 Create `var/lib/ldap` and `etc/ldap/slapd.d` folders
 ```
