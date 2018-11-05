@@ -68,6 +68,7 @@ cp /home/opsim/sal_libs/* dds/lib/
 
 ## Running LDAP server
 Create `var/lib/ldap` and `etc/ldap/slapd.d` folders
-```docker run -v /home/ec2-user/var/lib/ldap:/var/lib/ldap -v /home/ec2-user/etc/ldap/slapd.d:/etc/ldap/slapd.d -e LDAP_ORGANISATION="Inria Chile" -e LDAP_DOMAIN="inria.cl" -e LDAP_ADMIN_PASSWORD="lala" -d -p 389:389 -p 636:636 osixia/openldap
+```
+docker run -v /home/ec2-user/var/lib/ldap:/var/lib/ldap -v /home/ec2-user/etc/ldap/slapd.d:/etc/ldap/slapd.d -e LDAP_ORGANISATION="Inria Chile" -e LDAP_DOMAIN="inria.cl" -e LDAP_ADMIN_PASSWORD="lala" -d -p 389:389 -p 636:636 osixia/openldap
 ```
 
