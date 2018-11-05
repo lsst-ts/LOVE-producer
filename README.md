@@ -55,7 +55,7 @@ docker run -it --rm --name opsim \
 ```
 Copy libraries from salmaker container
 ```
-docker cp salmaker:~/sal_libs .
+docker cp salmaker:/home/opsim/sal_libs .
 docker cp sal_libs opsim:/home/opsim
 ```
 Copy files from lib folder to proper one (from opsim container)
