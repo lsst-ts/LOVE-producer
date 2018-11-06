@@ -1,6 +1,3 @@
-[submodule "LOVE-backend"]
-	path = LOVE-backend
-	url = https://github.com/spereirag/sal_build
 [submodule "sal_build"]
 	path = sal_build
 	url = git@github.com:spereirag/sal_build.git
