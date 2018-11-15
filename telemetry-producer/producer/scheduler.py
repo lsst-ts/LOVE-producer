@@ -66,9 +66,8 @@ if __name__ == "__main__":
     ### SAL ###
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
-    WS_PORT = os.environ["WEBSOCKET_PORT"]
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://%s:%s/" % (WS_HOST, WS_PORT),
+    ws = websocket.WebSocketApp("ws://%s/" % WS_HOST,
                               on_message = on_ws_message,
                               on_error = on_ws_error,
                               on_close = on_ws_close)
