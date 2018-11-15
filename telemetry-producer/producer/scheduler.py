@@ -45,7 +45,10 @@ def on_ws_open(ws):
             time.sleep(2)
             values = get_remote_values(remote)
             # print(json.dumps(values, cls=NumpyEncoder))
-            ws.send(json.dumps(values, cls=NumpyEncoder))
+            output = {
+                "data": json.dumps(values, cls=NumpyEncoder)
+            }
+            ws.send(json.dumps(output))
         time.sleep(1)
         ws.close()
         print("thread terminating...")
