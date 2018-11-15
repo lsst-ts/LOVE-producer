@@ -12,33 +12,40 @@ import SALPY_scheduler
 import salobj
 import time
 import json
+import os
+from utils import NumpyEncoder
 
+def get_remote_values(remote):
+    tel_names = remote.salinfo.manager.getTelemetryNames()
+    values = []
+    for tel in tel_names:
+        tel_remote = getattr(remote, "tel_" + tel)
+        data = tel_remote.get()
+        if data is None:
+            continue
+        tel_parameters = [x for x in dir(data) if not x.startswith('__')]
+        tel_result = {p:getattr(data, p) for p in tel_parameters}
+        values.append(tel_result)
+    return values
 
-def on_message(ws, message):
+def on_ws_message(ws, message):
     print("### message ###")
     print(message)
 
-def on_error(ws, error):
+def on_ws_error(ws, error):
     print("### error ###")
     print(error)
 
-def on_close(ws):
+def on_ws_close(ws):
     print("### closed ###")
 
-def on_open(ws):
+def on_ws_open(ws):
     def run(*args):
         while True:
             time.sleep(2)
-            data_input = remote.tel_seeing.get()
-            if data_input is None:
-                print("none received")
-                continue
-            tel_parameters = [x for x in dir(data_input) if not x.startswith('__')]
-            tel_result = {p:getattr(data_input, p) for p in tel_parameters}
-            print("latest result:")
-            print(data_input.seeing)
-            print(json.dumps(tel_result))
-
+            values = get_remote_values(remote)
+            # print(json.dumps(values, cls=NumpyEncoder))
+            ws.send(json.dumps(values, cls=NumpyEncoder))
         time.sleep(1)
         ws.close()
         print("thread terminating...")
@@ -55,16 +62,17 @@ if __name__ == "__main__":
 
     # def callback(data):
     #     ws.send("Hello %d" % i)
-
     # remote.tel_seeing.callback = callback
     ### SAL ###
 
+    WS_HOST = os.environ["WEBSOCKET_HOST"]
+    WS_PORT = os.environ["WEBSOCKET_PORT"]
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://echo.websocket.org:80/",
-                              on_message = on_message,
-                              on_error = on_error,
-                              on_close = on_close)
-    ws.on_open = on_open
+    ws = websocket.WebSocketApp("ws://%s:%s/" % (WS_HOST, WS_PORT),
+                              on_message = on_ws_message,
+                              on_error = on_ws_error,
+                              on_close = on_ws_close)
+    ws.on_open = on_ws_open
 
 
     #Emitter

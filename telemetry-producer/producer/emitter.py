@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 def randomize_single_value(value):
-    if isinstance(value, int):
+    if isinstance(value, (int, np.integer)):
         return random.choice([0,1])
     if isinstance(value, float):
         return random.random()
@@ -16,7 +16,10 @@ def randomize_params(data):
     for param_name in tel_param_names:
         tel_param = getattr(data, param_name)
         if isinstance(tel_param, (list, tuple, np.ndarray)):
-            map(lambda x: setattr(data, param_name, randomize_single_value(x)), tel_param)
+            new_array = map(lambda x: randomize_single_value(x), tel_param)
+            for i in range(len(tel_param)):
+                tel_param[i] = randomize_single_value(tel_param[i])
+                # setattr(data, param_name, new_array)
         else:
             setattr(data, param_name, randomize_single_value(tel_param))
 
