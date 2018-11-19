@@ -16,6 +16,11 @@ Checkout to a safe commit
 cd ts_sal
 git checkout b16c2900df2b09ab33719320a280c62bc8da825e
 ```
+Build the image
+
+```
+docker build -t telemetry-producer .
+```
 
 Run container
 ```
