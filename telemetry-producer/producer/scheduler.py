@@ -17,7 +17,7 @@ from utils import NumpyEncoder
 
 def get_remote_values(remote):
     tel_names = remote.salinfo.manager.getTelemetryNames()
-    values = []
+    values = {}
     for tel in tel_names:
         tel_remote = getattr(remote, "tel_" + tel)
         data = tel_remote.get()
@@ -25,7 +25,7 @@ def get_remote_values(remote):
             continue
         tel_parameters = [x for x in dir(data) if not x.startswith('__')]
         tel_result = {p:getattr(data, p) for p in tel_parameters}
-        values.append(tel_result)
+        values[tel] = tel_result
     return values
 
 def on_ws_message(ws, message):
