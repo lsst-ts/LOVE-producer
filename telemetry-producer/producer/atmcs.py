@@ -9,7 +9,7 @@ import time
 
 
 import SALPY_ATMCS
-import salobj
+from lsst.ts import salobj
 import time
 import json
 import os
