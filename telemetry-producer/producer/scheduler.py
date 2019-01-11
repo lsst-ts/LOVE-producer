@@ -55,18 +55,47 @@ def on_ws_open(ws):
     thread.start_new_thread(run, ())
     print("open")
 
-
-if __name__ == "__main__":
-    ### SAL ###
-    print("\nmake remote")
+def create_remote_and_controller(sallib):
+    """
+    
+    """
+    print("\n make remote")
     remote = salobj.Remote(SALPY_scheduler, 0)
+    
     print("make controller")
     controller = salobj.Controller(SALPY_scheduler, 0)
 
-    # def callback(data):
-    #     ws.send("Hello %d" % i)
-    # remote.tel_seeing.callback = callback
-    ### SAL ###
+    return remote, controller
+
+def launch_emitter_once(controller, test_seed=None):
+    """
+        Launches an emitter that fills the data to be read
+        later in the salobj remote
+    """
+    import eventlet
+    eventlet.monkey_patch()
+    from emitter import emit
+    freq = 0.5
+    eventlet.spawn(emit, controller, test_seed)
+
+def launch_emitter_forever(controller):
+    """
+        Launches an emitter that fills the data to be read
+        later in the salobj remote
+    """
+    import eventlet
+    eventlet.monkey_patch()
+    from emitter import emit_forever
+    freq = 0.5
+    eventlet.spawn(emit_forever, controller, freq)
+
+if __name__ == "__main__":
+
+
+    remote, controller = create_remote_and_controller(SALPY_scheduler)
+
+    launch_emitter_forever(controller)
+
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     websocket.enableTrace(True)
@@ -77,12 +106,6 @@ if __name__ == "__main__":
     ws.on_open = on_ws_open
 
 
-    #Emitter
-    import eventlet
-    eventlet.monkey_patch()
-    from emitter import run
-    freq = 0.5
-    eventlet.spawn(run, controller, freq)
     #Emitter
 
 

@@ -12,6 +12,7 @@ def randomize_single_value(value):
     return value
 
 def randomize_params(data):
+
     tel_param_names = [x for x in dir(data) if not x.startswith('__')]
     for param_name in tel_param_names:
         tel_param = getattr(data, param_name)
@@ -23,14 +24,18 @@ def randomize_params(data):
         else:
             setattr(data, param_name, randomize_single_value(tel_param))
 
-def run(controller, frequency):
+def emit(controller, test_seed=None):
+    print("putting data")
+    if(not test_seed == None): random.seed(test_seed)
+    tel_names = controller.salinfo.manager.getTelemetryNames()
+    for tel in tel_names:
+        tel_controller = getattr(controller, "tel_" + tel)
+        data_output = tel_controller.DataType()
+        randomize_params(data_output)
+        tel_controller.put(data_output)
+
+def emit_forever(controller, frequency):
     period = 1/frequency
     while True:
-        print("putting data")
         time.sleep(period)
-        tel_names = controller.salinfo.manager.getTelemetryNames()
-        for tel in tel_names:
-            tel_controller = getattr(controller, "tel_" + tel)
-            data_output = tel_controller.DataType()
-            randomize_params(data_output)
-            tel_controller.put(data_output)
+        emit(controller)
