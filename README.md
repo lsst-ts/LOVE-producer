@@ -1,4 +1,4 @@
-# LOVE-backend
+# LOVE-producer
 ## Running Telemetry Producer
 Note: these steps are not necessary if you are working with LOVE-integration-tools and this repo (LOVE-backend) as submodule.
 
