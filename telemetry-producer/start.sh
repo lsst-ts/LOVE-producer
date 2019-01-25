@@ -20,7 +20,7 @@ alias cdtsrepos="cd /home/opsim/tsrepos"
 
 source /home/opsim/.opsim4_profile_fbs
 
-cd /home/opsim/tsrepos/salobj
+cd /home/opsim/tsrepos/ts_salobj
 setup -r .
 scons
 scons install declare

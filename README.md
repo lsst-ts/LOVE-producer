@@ -12,7 +12,7 @@ mkdir -p $HOME/UW/LSST/tsrepos
 cd $HOME/UW/LSST/tsrepos
 git clone https://github.com/lsst-ts/ts_sal
 git clone https://github.com/lsst-ts/ts_xml
-git clone https://github.com/lsst-ts/salobj
+git clone https://github.com/lsst-ts/ts_salobj
 ```
 
 Checkout to a safe commit
@@ -56,7 +56,7 @@ mkdir -p $HOME/UW/LSST/tsrepos
 cd $HOME/UW/LSST/tsrepos
 git clone https://github.com/lsst-ts/ts_sal
 git clone https://github.com/lsst-ts/ts_xml
-git clone https://github.com/lsst-ts/salobj
+git clone https://github.com/lsst-ts/ts_salobj
 ```
 
 Checkout to a safe commit
@@ -111,7 +111,7 @@ cp /home/opsim/sal_libs/* dds/lib/
 
 Install SALobj library
 ```
-cd /home/opsim/tsrepos/salobj
+cd /home/opsim/tsrepos/ts_salobj
 setup -r .
 scons
 scons install declare
