@@ -10,9 +10,6 @@ export LSST_DDS_DOMAIN=SOCS-DOCKER-${HOSTNAME}-${NEW_UUID}
 export LD_LIBRARY_PATH="/home/opsim/tsrepos/lib:"$LD_LIBRARY_PATH
 export PYTHONPATH="/home/opsim/tsrepos/lib/python:/home/opsim/tsrepos/ts_salobj/python:"$PYTHONPATH
 
-#export WEBSOCKET_HOST="echo.websocket.org:80"
-export WEBSOCKET_HOST="localhost:8000/ws/subscription"
-
 alias cdtsrepos="cd /home/opsim/tsrepos"
 
 # avoid running the myriad tests
