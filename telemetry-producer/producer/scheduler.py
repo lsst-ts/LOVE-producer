@@ -1,5 +1,6 @@
 import websocket
 import time
+import numpy as np
 
 try:
     import thread
@@ -15,6 +16,18 @@ import json
 import os
 from utils import NumpyEncoder
 
+def getDataType(value):
+    if isinstance(value, (list, tuple, np.ndarray)):
+        return 'Array<%s>' % getDataType(value[0])
+    if isinstance(value, (int, np.integer)):
+        return 'Int'
+    if isinstance(value, float):
+        return 'Float'
+    if isinstance(value, str):
+        return 'String'
+    return 'None'
+
+
 def get_remote_values(remote):
     tel_names = remote.salinfo.manager.getTelemetryNames()
     values = {}
@@ -24,7 +37,7 @@ def get_remote_values(remote):
         if data is None:
             continue
         tel_parameters = [x for x in dir(data) if not x.startswith('__')]
-        tel_result = {p:getattr(data, p) for p in tel_parameters}
+        tel_result = {p:{'value': getattr(data, p), 'dataType': getDataType(getattr(data, p))} for p in tel_parameters}
         values[tel] = tel_result
     return values
 
