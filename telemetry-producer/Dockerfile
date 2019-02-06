@@ -13,6 +13,6 @@ WORKDIR /home/opsim/inria/producer
 
 ENV PYTHONPATH "${PYTHONPATH}:/home/opsim/tsrepos/ts_salobj/python"
 ENV LD_LIBRARY_PATH "/root/tsrepos/lib:/opt/rh/devtoolset-6/root/usr/lib64:/opt/rh/devtoolset-6/root/usr/lib:/opt/rh/devtoolset-6/root/usr/lib64:/opt/rh/devtoolset-6/root/usr/lib:${LD_LIBRARY_PATH}"
-ENV WEBSOCKET_HOST "localhost:8000/ws/subscription"
+ENV WEBSOCKET_HOST "localhost:8000/manager/ws/subscription"
 
 ENTRYPOINT [ "/home/opsim/start-daemon.sh" ]
