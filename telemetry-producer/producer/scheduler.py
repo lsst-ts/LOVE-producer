@@ -10,6 +10,7 @@ import time
 
 
 import SALPY_scheduler
+import SALPY_ScriptQueue
 from lsst.ts import salobj
 import time
 import json
@@ -56,12 +57,17 @@ def on_ws_open(ws):
     def run(*args):
         while True:
             time.sleep(2)
-            values = get_remote_values(remote)
-            # print(json.dumps(values, cls=NumpyEncoder))
-            output = {
-                "data": json.dumps(values, cls=NumpyEncoder)
-            }
-            ws.send(json.dumps(output))
+            output_dict = {}
+            for i in range(len(remote_list)):
+                remote = remote_list[i]
+                values = get_remote_values(remote)
+                output = json.dumps(values, cls=NumpyEncoder)
+
+                output_dict["component" + str(i)] = output
+            # print(json.dumps(output_dict))
+            ws.send(json.dumps({
+                "data": output_dict
+            }))
         time.sleep(1)
         ws.close()
         print("thread terminating...")
@@ -73,10 +79,10 @@ def create_remote_and_controller(sallib):
     
     """
     print("\n make remote")
-    remote = salobj.Remote(SALPY_scheduler, 0)
+    remote = salobj.Remote(sallib, 0)
     
     print("make controller")
-    controller = salobj.Controller(SALPY_scheduler, 0)
+    controller = salobj.Controller(sallib, 0)
 
     return remote, controller
 
@@ -104,11 +110,18 @@ def launch_emitter_forever(controller):
 
 if __name__ == "__main__":
 
+    sal_lib_list = [SALPY_scheduler, SALPY_ScriptQueue]
+    remote_list = []
+    controller_list = []
+    for i in range(len(sal_lib_list)):
+        sal_lib = sal_lib_list[i]
+        remote, controller = create_remote_and_controller(sal_lib)
+        remote_list.append(remote)
+        controller_list.append(controller)
 
-    remote, controller = create_remote_and_controller(SALPY_scheduler)
-
-    launch_emitter_forever(controller)
-
+    for i in range(len(controller_list)):
+        controller = controller_list[i]
+        launch_emitter_forever(controller)
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     websocket.enableTrace(True)
