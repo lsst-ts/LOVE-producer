@@ -29,7 +29,7 @@ def getDataType(value):
     return 'None'
 
 
-def get_remote_values(remote):
+def get_remote_tel_values(remote):
     tel_names = remote.salinfo.manager.getTelemetryNames()
     values = {}
     for tel in tel_names:
@@ -40,6 +40,19 @@ def get_remote_values(remote):
         tel_parameters = [x for x in dir(data) if not x.startswith('__')]
         tel_result = {p:{'value': getattr(data, p), 'dataType': getDataType(getattr(data, p))} for p in tel_parameters}
         values[tel] = tel_result
+    return values
+
+def get_remote_event_values(remote):
+    evt_names = remote.salinfo.manager.getEventNames()
+    values = {}
+    for evt in evt_names:
+        evt_remote = getattr(remote, "evt_" + evt)
+        data = evt_remote.get()
+        if data is None:
+            continue
+        evt_parameters = [x for x in dir(data) if not x.startswith('__')]
+        evt_result = {p:{'value': getattr(data, p), 'dataType': getDataType(getattr(data, p))} for p in evt_parameters}
+        values[evt] = evt_result
     return values
 
 def on_ws_message(ws, message):
@@ -57,15 +70,29 @@ def on_ws_open(ws):
     def run(*args):
         while True:
             time.sleep(2)
+            #Send telemetry stream
             output_dict = {}
             for i in range(len(remote_list)):
                 remote = remote_list[i]
-                values = get_remote_values(remote)
+                values = get_remote_tel_values(remote)
                 output = json.dumps(values, cls=NumpyEncoder)
 
-                output_dict["component" + str(i)] = output
-            # print(json.dumps(output_dict))
+                output_dict[remote.salinfo.name] = output
             ws.send(json.dumps({
+                "category": "telemetry",
+                "data": output_dict
+            }))
+
+            #Send event stream
+            output_dict = {}
+            for i in range(len(remote_list)):
+                remote = remote_list[i]
+                values = get_remote_event_values(remote)
+                output = json.dumps(values, cls=NumpyEncoder)
+
+                output_dict[remote.salinfo.name] = output
+            ws.send(json.dumps({
+                "category": "event",
                 "data": output_dict
             }))
         time.sleep(1)
@@ -94,8 +121,10 @@ def launch_emitter_once(controller, test_seed=None):
     import eventlet
     eventlet.monkey_patch()
     from emitter import emit
+    from event_emitter import emit as emit_event
     freq = 0.5
     eventlet.spawn(emit, controller, test_seed)
+    eventlet.spawn(emit_event, controller, freq)
 
 def launch_emitter_forever(controller):
     """
@@ -105,8 +134,10 @@ def launch_emitter_forever(controller):
     import eventlet
     eventlet.monkey_patch()
     from emitter import emit_forever
+    from event_emitter import emit_forever as emit_event_forever
     freq = 0.5
     eventlet.spawn(emit_forever, controller, freq)
+    eventlet.spawn(emit_event_forever, controller, freq)
 
 if __name__ == "__main__":
 
