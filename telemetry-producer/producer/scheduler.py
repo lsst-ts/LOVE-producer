@@ -8,14 +8,12 @@ except ImportError:
     import _thread as thread
 import time
 
-
-import SALPY_scheduler
-import SALPY_ScriptQueue
 from lsst.ts import salobj
 import time
 import json
 import os
 from utils import NumpyEncoder
+import importlib
 
 def getDataType(value):
     if isinstance(value, (list, tuple, np.ndarray)):
@@ -141,7 +139,7 @@ def launch_emitter_forever(controller):
 
 if __name__ == "__main__":
 
-    sal_lib_list = [SALPY_scheduler, SALPY_ScriptQueue]
+    sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('sallibs.config')]
     remote_list = []
     controller_list = []
     for i in range(len(sal_lib_list)):
