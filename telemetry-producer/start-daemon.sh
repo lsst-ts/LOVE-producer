@@ -28,4 +28,4 @@ source /home/opsim/.opsim4_profile_fbs
 cd /home/opsim/inria/producer
 # pip install -r requirements.txt
 
-python scheduler.py
+python producer.py
