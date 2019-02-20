@@ -45,12 +45,17 @@ def get_remote_event_values(remote):
     values = {}
     for evt in evt_names:
         evt_remote = getattr(remote, "evt_" + evt)
-        data = evt_remote.get()
-        if data is None:
+        evt_results = []
+        while True:
+            data = evt_remote.get_oldest()
+            if data is None:
+                break
+            evt_parameters = [x for x in dir(data) if not x.startswith('__')]
+            evt_result = {p:{'value': getattr(data, p), 'dataType': getDataType(getattr(data, p))} for p in evt_parameters}
+            evt_results.append(evt_result)
+        if len(evt_results) == 0:
             continue
-        evt_parameters = [x for x in dir(data) if not x.startswith('__')]
-        evt_result = {p:{'value': getattr(data, p), 'dataType': getDataType(getattr(data, p))} for p in evt_parameters}
-        values[evt] = evt_result
+        values[evt] = evt_results
     return values
 
 def on_ws_message(ws, message):
