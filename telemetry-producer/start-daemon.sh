@@ -23,6 +23,6 @@ source /home/opsim/.opsim4_profile_fbs
 # scons install declare
 
 cd /home/opsim/inria/producer
-pip install -r requirements.txt
+# pip install -r requirements.txt
 
-python scheduler.py
+python producer.py
