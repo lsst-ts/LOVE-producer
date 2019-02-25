@@ -24,7 +24,7 @@ WORKDIR /home/opsim/inria/producer
 
 RUN pip install -r requirements.txt
 
-COPY --chown=opsim ./producer /home/opsim/inria/producer
+# COPY --chown=opsim ./producer /home/opsim/inria/producer
 
 
 

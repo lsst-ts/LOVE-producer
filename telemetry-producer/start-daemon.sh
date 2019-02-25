@@ -25,7 +25,7 @@ source /home/opsim/.opsim4_profile_fbs
 # scons
 # scons install declare
 
-cd /home/opsim/inria/producer
+# cd /home/opsim/inria/producer
 # pip install -r requirements.txt
 
 python producer.py
