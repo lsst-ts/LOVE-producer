@@ -16,7 +16,7 @@ ENV AUTH_LDAP_SERVER_URI "ldap://45.79.13.50:389"
 ENV PATH="/home/opsim/stack/python/miniconda3-4.5.4/bin:${PATH}"
 ENV LSST_CONDA_ENV_NAME="${LSST_CONDA_ENV_NAME:-lsst-scipipe-fcd27eb}"
 
-RUN mkdir -p /home/opsim/inria/producer 
+RUN mkdir -p /home/opsim/inria/producer
 
 COPY --chown=opsim ./producer/requirements.txt /home/opsim/inria/producer/requirements.txt
 
@@ -29,4 +29,3 @@ COPY --chown=opsim ./producer /home/opsim/inria/producer
 
 
 ENTRYPOINT [ "/home/opsim/start-daemon.sh" ]
-# ENTRYPOINT [ "bash" ]

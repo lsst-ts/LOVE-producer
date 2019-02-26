@@ -106,11 +106,11 @@ def on_ws_open(ws):
 
 def create_remote_and_controller(sallib):
     """
-    
+
     """
     print("\n make remote")
     remote = salobj.Remote(sallib, 0)
-    
+
     print("make controller")
     controller = salobj.Controller(sallib, 0)
 
@@ -158,8 +158,10 @@ if __name__ == "__main__":
         launch_emitter_forever(controller)
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
+    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://%s/" % WS_HOST,
+    url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+    ws = websocket.WebSocketApp(url,
                               on_message = on_ws_message,
                               on_error = on_ws_error,
                               on_close = on_ws_close)
