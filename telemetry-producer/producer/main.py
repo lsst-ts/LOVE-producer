@@ -48,4 +48,4 @@ if __name__=='__main__':
     #Emitter
     while True:
         time.sleep(3)
-        ws.run_forever()    
+        ws.run_forever()
