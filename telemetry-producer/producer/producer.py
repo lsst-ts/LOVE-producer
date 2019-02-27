@@ -69,35 +69,39 @@ def on_ws_error(ws, error):
 def on_ws_close(ws):
     print("### closed ###")
 
+def send_ws_data(ws):
+    #Send telemetry stream
+    output_dict = {}
+    for i in range(len(remote_list)):
+        remote = remote_list[i]
+        values = get_remote_tel_values(remote)
+        output = json.dumps(values, cls=NumpyEncoder)
+
+        output_dict[remote.salinfo.name] = output
+    ws.send(json.dumps({
+        "category": "telemetry",
+        "data": output_dict
+    }))
+
+    #Send event stream
+    output_dict = {}
+    for i in range(len(remote_list)):
+        remote = remote_list[i]
+        values = get_remote_event_values(remote)
+        output = json.dumps(values, cls=NumpyEncoder)
+
+        output_dict[remote.salinfo.name] = output
+    ws.send(json.dumps({
+        "category": "event",
+        "data": output_dict
+    }))
+
 def on_ws_open(ws):
     def run(*args):
         while True:
             time.sleep(2)
-            #Send telemetry stream
-            output_dict = {}
-            for i in range(len(remote_list)):
-                remote = remote_list[i]
-                values = get_remote_tel_values(remote)
-                output = json.dumps(values, cls=NumpyEncoder)
-
-                output_dict[remote.salinfo.name] = output
-            ws.send(json.dumps({
-                "category": "telemetry",
-                "data": output_dict
-            }))
-
-            #Send event stream
-            output_dict = {}
-            for i in range(len(remote_list)):
-                remote = remote_list[i]
-                values = get_remote_event_values(remote)
-                output = json.dumps(values, cls=NumpyEncoder)
-
-                output_dict[remote.salinfo.name] = output
-            ws.send(json.dumps({
-                "category": "event",
-                "data": output_dict
-            }))
+            send_ws_data(ws)
+            
         time.sleep(1)
         ws.close()
         print("thread terminating...")
@@ -167,8 +171,6 @@ if __name__ == "__main__":
 
 
     #Emitter
-
-
     while True:
         time.sleep(3)
         ws.run_forever()
