@@ -12,9 +12,6 @@ export LD_LIBRARY_PATH="/home/opsim/tsrepos/lib:"$LD_LIBRARY_PATH
 # export PYTHONPATH="/home/opsim/tsrepos/ts_scriptqueue/python/lsst/ts/scriptqueue/ui":$PYTHONPATH
 # export PYTHONPATH="/home/opsim/tsrepos/ts_scriptqueue/python/lsst":$PYTHONPATH
 
-#export WEBSOCKET_HOST="echo.websocket.org:80"
-export WEBSOCKET_HOST="localhost:8000/ws/subscription"
-
 alias cdtsrepos="cd /home/opsim/tsrepos"
 
 # avoid running the myriad tests
