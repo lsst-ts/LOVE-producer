@@ -8,7 +8,9 @@ export LSST_DDS_DOMAIN=SOCS-DOCKER-${HOSTNAME}-${NEW_UUID}
 
 # make the libraries from salmaker available
 export LD_LIBRARY_PATH="/home/opsim/tsrepos/lib:"$LD_LIBRARY_PATH
-export PYTHONPATH="/home/opsim/tsrepos/lib/python:/home/opsim/tsrepos/ts_salobj/python:"$PYTHONPATH
+# export PYTHONPATH="/home/opsim/tsrepos/lib/python:/home/opsim/tsrepos/ts_salobj/python:"$PYTHONPATH
+# export PYTHONPATH="/home/opsim/tsrepos/ts_scriptqueue/python/lsst/ts/scriptqueue/ui":$PYTHONPATH
+# export PYTHONPATH="/home/opsim/tsrepos/ts_scriptqueue/python/lsst":$PYTHONPATH
 
 #export WEBSOCKET_HOST="echo.websocket.org:80"
 export WEBSOCKET_HOST="localhost:8000/ws/subscription"
@@ -26,6 +28,6 @@ source /home/opsim/.opsim4_profile_fbs
 # scons install declare
 
 # cd /home/opsim/inria/producer
-# pip install -r requirements.txt
+pip install -r requirements.txt
 
-python producer.py
+python main.py
