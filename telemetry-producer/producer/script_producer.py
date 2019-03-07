@@ -39,6 +39,12 @@ class ScriptQueueProducer:
         queue_state = self.queue.get_queue_state()
         # run script1 from standard
         #TODO: donde se ven los parametros del config?
+
+    def get_available_scripts(self):
+        # get available scripts
+        return self.queue.get_scripts()  
+    
+    def do_run(self):
         script = 'script1'
         is_standard = True
         config = "{wait_time: '10'}"
@@ -46,11 +52,6 @@ class ScriptQueueProducer:
         print(10*'\n','duration',self.queue.state.scripts[self.salindex]['duration'])
 
         self.monitor_script(self.salindex)
-        self.send_ws_data(1)
-
-    def get_available_scripts(self):
-        # get available scripts
-        return self.queue.get_scripts()  
     
     def monitor_script(self, salindex):
         self.queue.get_script_remote(salindex)
