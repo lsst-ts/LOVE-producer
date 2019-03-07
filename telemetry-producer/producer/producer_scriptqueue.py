@@ -58,21 +58,53 @@ class ScriptQueueProducer:
 
         t = threading.Thread(target=self.queue.monitor_script, args=[salindex])
         t.start()
-
-    def send_ws_data(self, ws):
-        i = 0
-        while True:
-            i+=1
-            print(10*'\n','duration', self.queue.state.scripts[self.salindex]['duration'])
-            # queue.state.update_script_info(queue.queue.evt_script.get())
-            if self.queue.state.scripts[self.salindex]['process_state'] >= ScriptProcessState.DONE:
-                print('done')
-                break
-            remote = self.queue.state.scripts[self.salindex]['remote']        
-            values = get_remote_event_values(remote)
-            print(5*'\n',i, self.queue.state.scripts[self.salindex]['process_state'])
-            print(values)
-            time.sleep(1.0)
     
+    def send_ws_data(self, ws):
+        """
+            Prepares a message to be sent with websockets (for example),
+            based on the updated state of the queue.
+        """
 
-sqp = ScriptQueueProducer()
+        indices = list(self.queue.state.scripts.keys())
+
+        if len(indices) == 0: 
+            print('no data')
+            return
+
+        self.queue.update_scripts_info()
+        self.queue.update_queue_state()
+
+        message = {
+          'script_queue_state': {
+            'waiting_script_indices': self.queue.state._queue_script_indices,
+            'finished_script_indices': self.queue.state._past_script_indices,
+            'current_script_index': self.queue.state._current_script_index,
+            'state': self.queue.state.state
+            'scripts': {},
+          }
+        }
+        
+        print('\n\n\n\t current', self.queue.state._current_script_index)
+        print('\t waiting:', self.queue.state._queue_script_indices)
+        print('\t finished', self.queue.state._past_script_indices)
+        import pprint
+        
+        
+        for salindex in indices:
+            info = {**self.queue.state.scripts[salindex]}
+            info['script_state'] = info['script_state'].name
+            info['process_state'] = info['process_state'].name
+            info['elapsed_time'] = info['duration']
+            del info['duration']
+            message['script_queue_state']['scripts'][salindex] = info
+        
+        return message
+
+        # # print(10*'\n','duration', self.queue.state.scripts[salindex]['duration'])
+        # if self.queue.state.scripts[salindex]['process_state'] >= ScriptProcessState.DONE:
+        #     print('done')
+        #     return
+        # remote = self.queue.state.scripts[salindex]['remote']        
+        # values = get_remote_event_values(remote)
+        # print(5*'\n', self.queue.state.scripts[salindex]['process_state'])
+        # print(values)
