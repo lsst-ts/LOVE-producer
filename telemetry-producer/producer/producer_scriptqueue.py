@@ -62,10 +62,10 @@ class ScriptQueueProducer:
         # t.start()
     
     def update(self):
-        self.queue.update_scripts_info()
         self.queue.update_queue_state()
+        self.queue.update_scripts_info()
 
-    def parse_script(script):
+    def parse_script(self, script):
         new_script = {**script}
         new_script['script_state'] = new_script['script_state'].name
         new_script['process_state'] = new_script['process_state'].name
@@ -82,15 +82,15 @@ class ScriptQueueProducer:
 
         # "get_queue_state" makes the update before parsing the state
         queue_state = self.queue.get_queue_state() 
-        queue_state['finished_scripts'] = queue_state['past_scripts']
-        queue_state['waiting_scripts'] = queue_state['queue_scripts']
+        queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
+        queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
         del queue_state['past_scripts']
         del queue_state['queue_scripts']
 
         for queue_name in ['waiting_scripts', 'finished_scripts']:
             queue = queue_state[queue_name]
-            for script in list(queue.keys()):
-                queue[script] = self.parse_script(queue[script])
+            for i, script in enumerate(queue):
+                queue[i] = self.parse_script(queue[i])
 
         if queue_state['current'] == None:
             queue_state['current'] = 'None'
