@@ -3,119 +3,103 @@ from lsst.ts import salobj
 import SALPY_Script
 import pprint
 import time
-# from importlib import reload
-# reload(producer_scriptqueue)
-
-# logfile = open('log.txtadsf','w')
-
+import asyncio
 sqp = ScriptQueueProducer()
 
-while True:
-    message = sqp.parse_queue_state()
-    pprint.pprint(message)
-    time.sleep(1)
 # while True:
-#     try:
-#         state = sqp.queue.get_queue_state()
-#         # pprint.pprint(state)
-#         for queue in ['past_scripts', 'queue_scripts']:
-#             if state[queue] is None:
-#                 continue
-#             script = parseScript(queue[100000])
-#             print(queue, script[queue])
-#             # for script in state[queue].keys():
-#             #     pprint.pprint(queue, script)
-#     except:
-#         print('error')
-#     time.sleep(1)
+#     message = sqp.parse_queue_state()
+#     pprint.pprint(message)
+#     time.sleep(0.5)
 
 
-# sqp.do_run()
-# import time
-# while True:
-#     sqp.send_ws_data(1)
-#     # time.sleep(2)
-#     break
-
-# script_indices = []
-# remotes = {}
-
-# # while True:
-# print('-')
-# for salindex in list(sqp.queue.state.scripts.keys()):
-#     remotes[salindex] = sqp.queue.state.scripts[salindex]['remote']
-#     print(salindex, remotes[salindex])
-
-# sqp.queue.update_queue_state
-
-
-
-# for salindex in script_indices:
-#     values = get_remote_event_values(remotes[salindex])
-#     if any(values): 
-#         print(values)
-#         break
-# time.sleep(1)
-# i = 0
-# while True:
-#     i+=1
-
-#     if queue.state.scripts[salindex]['process_state'] >= ScriptProcessState.DONE:
-#         print('done')
-#         break
-#     values = get_remote_event_values(remote)
-#     print(5*'\n',i,queue.state.scripts[salindex]['process_state'])
-#     print(values)
-#     time.sleep(1.0)
-    
-
-# get script remote        
-# sqp.queue.get_script_remote(salindex)
-# remote = queue.state.scripts[salindex]['remote']
-
-# queue.state.scripts[100020]['duration']
-
-
-# import threading
-
-# t = threading.Thread(target=queue.monitor_script, args=[salindex])
-# t.start()
-# print('\n\n\nprint print')
-# # loop = asyncio.get_event_loop()
-# # loop.run_until_complete(printstuff(salindex))
-
-# print(dir(remote))
-
-
-
-
-# salindex = 100005
-# self.queue.state.update_script_info(self.queue.queue.evt_script.get())
-# info = {**sqp.queue.state.scripts[salindex]}
-# info['script_state'] = info['script_state'].name
-# info['process_state'] = info['process_state'].name
-
-# from lsst.ts.scriptqueue import ScriptProcessState
-# from lsst.ts.scriptqueue.base_script import ScriptState
-
-# statesDict = { getattr(ScriptState, state).name: getattr(ScriptState, state).value for state in dir(ScriptState) if not state.startswith('__')}
-
-
-# sqp.queue.get_script_remote(salindex)
-# remote = queue.state.scripts[salindex]['remote']
-
-
-# salindex = 100013
-# sqp.monitor_script(100015)
-# import asyncio
-
-# async def runit():
-#     await sqp.queue.evt_loop.run_until_complete(sqp.monitor_script(100018))
-
-# sqp.monitor_script(100019)
-# sqp.queue.evt_loop.run_until_complete(runit())
+# salindex = 100011
 # sqp.queue.state.scripts[salindex]['remote'] = salobj.Remote(SALPY_Script, salindex)
 # remote = salobj.Remote(SALPY_Script, salindex)
 
-# >>> remote.evt_metadata.get_oldest() da none por algun motivo
+# salindex = 100005
 
+import numpy as np
+import traceback
+
+# def get_scripts_re
+
+# cada dos segundos:
+#-----------------------
+
+# ejemplo para actualizar el listado de scripts
+# y despues sacarlos reomtes e info de sus valores
+
+# while True:
+#     break
+#     # obtener los salindex de todos los scripts
+#     queue_state = sqp.queue.get_queue_state()
+#     indices = list(queue_state['queue_scripts'].keys())
+#     # print('\n\n\n scripts indices in the csc: ', sqp.queue.state.scripts.keys())
+#     if len(indices) == 0 : 
+#         print('empty queue')
+#         time.sleep(1)
+#         continue
+
+#     salindex = np.max(indices)
+#     for salindex in indices:
+#         try:
+#             if not sqp.queue.state.scripts[salindex]['remote'] == None: continue
+
+#             print('state of the latest script:', salindex,  queue_state['queue_scripts'][salindex]['script_state'])
+
+#             sqp.queue.get_script_remote(salindex)
+#             print(sqp.queue.state.scripts[salindex]['remote'] )
+#             print('remote update succeeded')
+#         except Exception as e:
+#             traceback.print_exc()
+#             print('err',e)
+        
+#     for salindex in indices:
+#         if sqp.queue.state.scripts[salindex]['remote'] == None: continue
+        
+#         remote = queue_state['queue_script'][salindex]['remote']
+
+#         import pdb;pdb.set_trace()
+
+        
+#     time.sleep(1)
+#-----------------------
+
+# catch new indices from events
+
+# then get the remote of that script
+
+# then listen to its events and catch when "duration" is available
+# this should be the expected duration
+# (tiago said this is after a script is configured)
+
+
+def get_queue_new_script_indices(values):
+    """
+        Takes the output of get_remote_event_values
+        and returns a list with the indices of the scripts
+        that were added to the queue since last event check
+    """
+    new_indices = []
+    for key in values.keys():
+        if key == 'queue':
+            waiting_length = values['queue'][0]['length']['value']
+            waiting_indices = values['queue'][0]['salIndices']['value'][:waiting_length]
+            finished_length = values['queue'][0]['pastLength']['value']
+            finished_indices = values['queue'][0]['pastSalIndices']['value'][:finished_length]
+            current_index = values['queue'][0]['currentSalIndex']['value']
+
+            indices = np.hstack([waiting_indices, finished_indices])
+            if current_index > 0 : indices = np.hstack([indices, [current_index]])
+            if 0 in indices:
+                print('waiting:', waiting_indices)
+                print('finished:', finished_indices)
+                print('current', current_index)
+            new_indices = set(indices).difference(set(sqp.queue.state.scripts.keys()))
+    return list(filter(lambda i: i>0, new_indices))
+
+while True: 
+    values = get_remote_event_values(sqp.queue.queue)
+    new_indices = get_queue_new_script_indices(values)
+    print(new_indices)
+    time.sleep(1.0)
