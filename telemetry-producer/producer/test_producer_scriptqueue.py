@@ -124,39 +124,31 @@ scripts_remotes = {}
 scripts_durations = {}
 
 
-while True:
-    queue_state = sqp.queue.get_queue_state()
-    qscripts = list(queue_state['queue_scripts'].keys())
-    pscripts = list(queue_state['past_scripts'].keys())
+def update_scripts_remotes(queue_state):
+    for queue_name in ['queue_scripts', 'past_scripts']:    
+        for salindex in queue_state[queue_name]:
+            if salindex not in scripts_remotes:
+                scripts_remotes[salindex] = salobj.Remote(SALPY_Script, salindex)    
 
-
-    message = sqp.parse_queue_state()
-    
-    current_list = list(sqp.queue.state.scripts.keys())
-
-    for script in message['waiting_scripts']:
-        if script['index'] not in scripts_remotes:
-            scripts_remotes[script['index']] = salobj.Remote(SALPY_Script, script['index'])
-
+def update_scripts_durations():
     for salindex in scripts_remotes:
         remote = scripts_remotes[salindex]
         while True:
             info = remote.evt_metadata.get_oldest()
             if info is None:
-                # print('info is none: ', salindex)
                 break
             scripts_durations[salindex] = info.duration
-    print('durations:':, scripts_durations)            
 
-    indices = []
-    for queue in ['waiting_scripts', 'finished_scripts']:
-        for script in message[queue]:
-            indices.append( script['index'])
-    # print(sorted(indices, reverse=True)[:5])
-    # print(sorted(current_list, reverse=True)[:5])
-    # print('q',sorted(qscripts, reverse=True)[:5])
-    # print('p',sorted(pscripts, reverse=True)[:5])
-    # print(set(indices).issubset(current_list))
+while True:
+    queue_state = sqp.queue.get_queue_state()
+    update_scripts_remotes(queue_state)
+    update_scripts_durations()
+    message = sqp.parse_queue_state()
+
     
+    
+    print('durations:', scripts_durations)            
+
+   
     time.sleep(1)
 
