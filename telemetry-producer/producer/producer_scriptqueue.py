@@ -1,42 +1,18 @@
 import asyncio
 import time
 import threading
-async def printstuff(salindex):
-    info = await queue.queue.evt_script.next(flush=False)
-    queue.state.update_script_info(info)
-    if info.salIndex == salindex:
-        print('salindex=salindex')
-        print(queue.parse_info(queue.state.scripts[salindex]))
-    else:
-        print('else: log debug')
-        queue.log.debug(queue.parse_info(queue.state.scripts[salindex]))
-
-def get_remote_event_values(remote):
-    evt_names = remote.salinfo.manager.getEventNames()
-    values = {}
-    for evt in evt_names:
-        evt_remote = getattr(remote, "evt_" + evt)
-        evt_results = []
-        while True:
-            data = evt_remote.get_oldest()
-            if data is None:
-                break
-            evt_parameters = [x for x in dir(data) if not x.startswith('__')]
-            evt_result = {p:{'value': getattr(data, p) } for p in evt_parameters}
-            evt_results.append(evt_result)
-        if len(evt_results) == 0:
-            continue
-        values[evt] = evt_results
-    return values
-
-
-#--- setup --
 from lsst.ts.scriptqueue import ui, ScriptProcessState
+from lsst.ts import salobj
+import SALPY_Script
+
 
 class ScriptQueueProducer:
     def __init__(self):
         self.queue = ui.RequestModel(1)
         queue_state = self.queue.get_queue_state()
+        self.scripts_remotes = {}
+        self.scripts_durations = {}
+
         # run script1 from standard
         #TODO: donde se ven los parametros del config?
 
@@ -65,11 +41,41 @@ class ScriptQueueProducer:
         self.queue.update_queue_state()
         self.queue.update_scripts_info()
 
+        
+    def update_scripts_remotes(self, queue_state):
+        """
+            Stores the salobj.Remote object of each script
+            on the queue
+        """
+        for queue_name in ['queue_scripts', 'past_scripts']:   
+            for salindex in queue_state[queue_name]:
+                if salindex not in self.scripts_remotes:
+                    self.scripts_remotes[salindex] = salobj.Remote(SALPY_Script, salindex)    
+        #TODO: handle current script
+
+    def update_scripts_durations(self):
+        """
+            Updates the expected duration of each script
+            by checking the latest event data.
+            This info is available after a script is configured in the
+            Script_logevent_metadata.
+        """
+        for salindex in self.scripts_remotes:
+            remote = self.scripts_remotes[salindex]
+            if not salindex in self.scripts_durations:
+                self.scripts_durations[salindex] = 'UNKNOWN'
+            # TODO: if durations exists then continue
+            while True:
+                info = remote.evt_metadata.get_oldest()
+                if info is None:
+                    break
+                self.scripts_durations[salindex] = info.duration
     def parse_script(self, script):
         new_script = {**script}
         new_script['script_state'] = new_script['script_state'].name
         new_script['process_state'] = new_script['process_state'].name
         new_script['elapsed_time'] = new_script['duration']; 
+        new_script['expected_duration'] = self.scripts_durations[new_script['index']]
         discard = ['duration', 'remote', 'updated']
         for name in discard:
             del new_script[name]
@@ -77,11 +83,17 @@ class ScriptQueueProducer:
 
     def parse_queue_state(self):
         """
-            Gets the updated state and returns it in a LOVE-friendly format
+            Gets the updated state and returns it in a LOVE-friendly format.
         """
 
         # "get_queue_state" makes the update before parsing the state
         queue_state = self.queue.get_queue_state() 
+
+        # update scripts duration from remote.evt_metadata (this is not in RequestModel)
+        self.update_scripts_remotes(queue_state)
+        self.update_scripts_durations()
+
+        
         queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
         queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
         del queue_state['past_scripts']
