@@ -74,32 +74,89 @@ import traceback
 # (tiago said this is after a script is configured)
 
 
-def get_queue_new_script_indices(values):
-    """
-        Takes the output of get_remote_event_values
-        and returns a list with the indices of the scripts
-        that were added to the queue since last event check
-    """
-    new_indices = []
-    for key in values.keys():
-        if key == 'queue':
-            waiting_length = values['queue'][0]['length']['value']
-            waiting_indices = values['queue'][0]['salIndices']['value'][:waiting_length]
-            finished_length = values['queue'][0]['pastLength']['value']
-            finished_indices = values['queue'][0]['pastSalIndices']['value'][:finished_length]
-            current_index = values['queue'][0]['currentSalIndex']['value']
 
-            indices = np.hstack([waiting_indices, finished_indices])
-            if current_index > 0 : indices = np.hstack([indices, [current_index]])
-            if 0 in indices:
-                print('waiting:', waiting_indices)
-                print('finished:', finished_indices)
-                print('current', current_index)
-            new_indices = set(indices).difference(set(sqp.queue.state.scripts.keys()))
-    return list(filter(lambda i: i>0, new_indices))
+#---------------------
+# otro ejemplo, sacando directo del stack de eventos
 
-while True: 
-    values = get_remote_event_values(sqp.queue.queue)
-    new_indices = get_queue_new_script_indices(values)
-    print(new_indices)
-    time.sleep(1.0)
+# def get_queue_new_scripts_indices(queue_values):
+#     """
+#         Takes the output of get_remote_event_values
+#         and returns a list with the indices of the scripts
+#         that were added to the queue since last event check
+#     """
+#     #TODO: revisar los [0] qué significan
+#     all_new_indices = []
+#     # pprint.pprint(values['queue'], width=200)
+#     # import pdb; pdb.set_trace()
+#     for queue_past_event_values in queue_values:
+#         waiting_length = queue_past_event_values['length']['value']
+#         waiting_indices = queue_past_event_values['salIndices']['value'][:waiting_length]
+#         finished_length = queue_past_event_values['pastLength']['value']
+#         finished_indices = queue_past_event_values['pastSalIndices']['value'][:finished_length]
+#         current_index = queue_past_event_values['currentSalIndex']['value']
+
+#         indices = np.hstack([waiting_indices, finished_indices])
+#         if current_index > 0 : indices = np.hstack([indices, [current_index]])
+#         if 0 in indices:
+#             print('waiting:', waiting_indices)
+#             print('finished:', finished_indices)
+#             print('current', current_index)
+#         new_indices = set(indices).difference(set(sqp.queue.state.scripts.keys()))
+#         all_new_indices.append( list(filter(lambda i: i>0, new_indices)))
+#     return all_new_indices
+
+# while True: 
+#     # import pdb; pdb.set_trace()
+
+#     values = get_remote_event_values(sqp.queue.queue)
+#     if 'queue' in values:
+#         new_indices = get_queue_new_scripts_indices(values['queue'])
+    
+
+#         print(new_indices)
+#     time.sleep(1.0)
+
+#---------------------
+
+
+scripts_remotes = {}
+
+scripts_durations = {}
+
+
+while True:
+    queue_state = sqp.queue.get_queue_state()
+    qscripts = list(queue_state['queue_scripts'].keys())
+    pscripts = list(queue_state['past_scripts'].keys())
+
+
+    message = sqp.parse_queue_state()
+    
+    current_list = list(sqp.queue.state.scripts.keys())
+
+    for script in message['waiting_scripts']:
+        if script['index'] not in scripts_remotes:
+            scripts_remotes[script['index']] = salobj.Remote(SALPY_Script, script['index'])
+
+    for salindex in scripts_remotes:
+        remote = scripts_remotes[salindex]
+        while True:
+            info = remote.evt_metadata.get_oldest()
+            if info is None:
+                # print('info is none: ', salindex)
+                break
+            scripts_durations[salindex] = info.duration
+    print('durations:':, scripts_durations)            
+
+    indices = []
+    for queue in ['waiting_scripts', 'finished_scripts']:
+        for script in message[queue]:
+            indices.append( script['index'])
+    # print(sorted(indices, reverse=True)[:5])
+    # print(sorted(current_list, reverse=True)[:5])
+    # print('q',sorted(qscripts, reverse=True)[:5])
+    # print('p',sorted(pscripts, reverse=True)[:5])
+    # print(set(indices).issubset(current_list))
+    
+    time.sleep(1)
+
