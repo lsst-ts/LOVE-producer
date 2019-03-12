@@ -9,7 +9,6 @@ COPY producer/requirements.txt .
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
 RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
 
-COPY start-daemon.sh .
 COPY producer .
 
 WORKDIR /home/saluser
