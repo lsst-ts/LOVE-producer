@@ -30,7 +30,10 @@ RUN pwd
 # ENTRYPOINT [ "/home/saluser/inria/producer/start-daemon.sh" ]
 # ENTRYPOINT [ "bash" ]
 
-CMD ["/home/saluser/.setup.sh"]
 WORKDIR /home/saluser
+# ENTRYPOINT ["/home/saluser/.setup.sh"]
+# CMD ["/usr/src/love/start-daemon.sh"]
 
-# ENTRYPOINT ["/bin/bash", "--", "/usr/src/love/main.py"]
+ENTRYPOINT ["/usr/src/love/start-daemon.sh"]
+# CMD ["/home/saluser/.setup.sh"]
+
