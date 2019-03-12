@@ -7,9 +7,9 @@ ENV AUTH_LDAP_SERVER_URI "ldap://45.79.13.50:389"
 WORKDIR /usr/src/love
 COPY producer/requirements.txt .
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
-RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
 
 COPY producer .
+RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
 
 WORKDIR /home/saluser
 ENTRYPOINT ["/usr/src/love/start-daemon.sh"]
