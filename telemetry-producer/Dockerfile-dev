@@ -1,29 +1,6 @@
-# FROM oboberg/opsim4_fbs_py3:latest
 FROM lsst/queue:latest
-# RUN cp /home/opsim/sal_libs/* dds/lib/
 
-# ENV PYTHONPATH "${PYTHONPATH}:/home/opsim/tsrepos/ts_salobj/python"
-# ENV LD_LIBRARY_PATH "/root/tsrepos/lib:/opt/rh/devtoolset-6/root/usr/lib64:/opt/rh/devtoolset-6/root/usr/lib:/opt/rh/devtoolset-6/root/usr/lib64:/opt/rh/devtoolset-6/root/usr/lib:${LD_LIBRARY_PATH}"
-ENV WEBSOCKET_HOST "localhost:8000/ws/subscription"
-ENV REDIS_HOST "127.0.0.1"
-ENV AUTH_LDAP_SERVER_URI "ldap://45.79.13.50:389"
-# ENV PATH="/home/opsim/stack/python/miniconda3-4.5.4/bin:${PATH}"
-# ENV LSST_CONDA_ENV_NAME="${LSST_CONDA_ENV_NAME:-lsst-scipipe-fcd27eb}"
+RUN echo $PYTHONPATH
 
-WORKDIR /usr/src/love
-COPY producer/requirements.txt .
-# TODO: refactor this with env variables, etc: /home/saluser/.setup.sh
-RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
-
-RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
-
-COPY start-daemon.sh .
-COPY producer .
-# COPY --chown=opsim ./producer /home/opsim/inria/producer
-RUN ls
-RUN ls
-RUN pwd
-ENTRYPOINT ["./start-daemon.sh"]
-
-# ENTRYPOINT [ "/home/saluser/inria/producer/start-daemon.sh" ]
-# ENTRYPOINT [ "bash" ]
+ENTRYPOINT ["/bin/bash", "--"]
+CMD ["/home/saluser/.setup.sh"]
