@@ -8,8 +8,12 @@ import SALPY_Script
 
 class ScriptQueueProducer:
     def __init__(self):
+        print('creating request model')
         self.queue = ui.RequestModel(1)
+        self.queue.enable_queue()
+        print('request model created')
         queue_state = self.queue.get_queue_state()
+        print('got state')
         self.scripts_remotes = {}
         self.scripts_durations = {}
 
