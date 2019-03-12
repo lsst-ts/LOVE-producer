@@ -31,7 +31,6 @@
 # source /home/saluser/.setup.sh
 
 # Source this file when starting the container to set it up
-sleep 100000000000000000000000000
 echo "#"
 echo "# Loading LSST Stack"
 . /opt/lsst/software/stack/loadLSST.bash

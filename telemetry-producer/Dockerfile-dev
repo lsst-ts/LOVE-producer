@@ -10,17 +10,15 @@ ENV AUTH_LDAP_SERVER_URI "ldap://45.79.13.50:389"
 # ENV PATH="/home/opsim/stack/python/miniconda3-4.5.4/bin:${PATH}"
 # ENV LSST_CONDA_ENV_NAME="${LSST_CONDA_ENV_NAME:-lsst-scipipe-fcd27eb}"
 
-WORKDIR /home/saluser/inria/producer
-RUN mkdir -p /home/saluser/inria/producer
-COPY ./start-daemon.sh .
-COPY ./producer/requirements.txt .
-
-
-
-
+WORKDIR /usr/src/love
+COPY producer/requirements.txt .
 # TODO: refactor this with env variables, etc: /home/saluser/.setup.sh
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
 
+RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
+
+COPY start-daemon.sh .
+COPY producer .
 # COPY --chown=opsim ./producer /home/opsim/inria/producer
 RUN ls
 RUN ls
