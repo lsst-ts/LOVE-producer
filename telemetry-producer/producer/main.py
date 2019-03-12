@@ -48,8 +48,10 @@ if __name__=='__main__':
     producer_scriptqueue = ScriptQueueProducer()
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
+    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("ws://%s/" % WS_HOST,
+    url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+    ws = websocket.WebSocketApp(url,
                             on_message = on_ws_message,
                             on_error = on_ws_error,
                             on_close = on_ws_close)
