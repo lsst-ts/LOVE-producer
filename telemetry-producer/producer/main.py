@@ -9,22 +9,31 @@ import os
 from producer import Producer
 from producer_scriptqueue import ScriptQueueProducer
 import json
-def on_ws_open(ws,get_message):
+def on_ws_open(ws, message_getters):
+    """
+        Starts sending messages through a websocket connection
+        every through seconds, from a list of messages
+        when the on_open event callback is called.
+
+        parameters:
+            
+        ws: websocket.WebSocket object
+        message_getters: list of functions such that each one returns a dict 
+        with this structure:
+            {
+                'category': 'event',
+                'data' : { .... }
+            }
+    """
     print('ws started to open')
     def run(*args):
         print('start message loop')
         while True:
-            print('will send message')
-            time.sleep(2)
-            print(200*'\n'+'hola hola')
-            message_dict = get_message()
-            print('message:', message_dict)
-            ws.send(json.dumps({
-                "category": "event",
-                "data": message_dict
-            }))
-            # send_ws_data(ws)
-            
+            for get_message in message_getters:
+                message = get_message()
+                print('message:', message)
+                ws.send(json.dumps(message))
+            time.sleep(2)            
         time.sleep(1)
         ws.close()
         print("thread terminating...")
@@ -58,24 +67,13 @@ if __name__=='__main__':
 
     print('ws will open')
 
-    ws.on_open = lambda ws: on_ws_open(ws, producer_scriptqueue.parse_queue_state)
+    message_getters = [
+        producer_scriptqueue.get_state_message
+    ]
+
+    ws.on_open = lambda ws: on_ws_open(ws, message_getters)
 
     #Emitter
     while True:
         time.sleep(3)
         ws.run_forever()
-
-
-# from lsst.ts.scriptqueue import ui, ScriptProcessState
-
-# queue = ui.RequestModel(1)
-
-# queue.enable_queue()
-
-# script = 'script1'
-# is_standard = True
-# config = "{wait_time: '10'}"
-# salindex = queue.add(script, is_standard, config)
-
-# queue_state = queue.get_queue_state()
-# print(queue_state)
