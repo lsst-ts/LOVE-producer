@@ -78,6 +78,7 @@ class ScriptQueueProducer:
                 self.scripts_durations[salindex] = info.duration
     def parse_script(self, script):
         new_script = {**script}
+        new_script['index'] = int(new_script['index'])
         new_script['script_state'] = new_script['script_state'].name
         new_script['process_state'] = new_script['process_state'].name
         new_script['elapsed_time'] = new_script['duration']; 
@@ -115,6 +116,8 @@ class ScriptQueueProducer:
         else:
             queue_state['current'] = self.parse_script(queue_state['current'])
 
+        import pprint
+        pprint.pprint(queue_state)
         return queue_state
     
     def get_state_message(self):
