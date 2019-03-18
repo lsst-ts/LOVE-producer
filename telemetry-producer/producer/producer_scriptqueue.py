@@ -88,6 +88,11 @@ class ScriptQueueProducer:
             del new_script[name]
         return new_script
 
+    def parse_available_script(self, script_path, script_type):
+        return {
+            'path': script_path,
+            'type': script_type
+        }
     def parse_queue_state(self):
         """
             Gets the updated state and returns it in a LOVE-friendly format.
@@ -102,7 +107,12 @@ class ScriptQueueProducer:
 
         queue_state['available_scripts'] = [] 
         if queue_state['state'] == 'Running':
-            queue_state['available_scripts'] = self.queue.get_scripts()
+            available_scripts = self.queue.get_scripts()
+
+            queue_state['available_scripts'] = map(lambda s: self.parse_available_script(s,'external'), available_scripts['external'])
+            queue_state['available_scripts'] = list(queue_state['available_scripts'])
+            queue_state['available_scripts'].extend( list(map(lambda s: self.parse_available_script(s,'standard'), available_scripts['standard'])))
+            queue_state['available_scripts'] = list(queue_state['available_scripts'])
 
         queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
         queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
@@ -128,7 +138,7 @@ class ScriptQueueProducer:
         message = {
             'category': 'event',
             'data': {
-                'scriptQueueState': json.dumps(queue_state)
+                'ScriptQueueState': json.dumps({'stream': queue_state})
             }
         }
         
