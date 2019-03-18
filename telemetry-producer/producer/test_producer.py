@@ -1,4 +1,4 @@
-from scheduler import create_remote_and_controller, get_remote_values, launch_emitter_once
+from producer import create_remote_and_controller, get_remote_values, launch_emitter_once
 
 import SALPY_scheduler
 
