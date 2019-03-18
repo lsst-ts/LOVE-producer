@@ -53,8 +53,8 @@ def on_ws_close(ws):
 
 if __name__=='__main__':
     print('--main--')
-    # producer = Producer()
     producer_scriptqueue = ScriptQueueProducer()
+    producer = Producer()
 
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
@@ -68,7 +68,8 @@ if __name__=='__main__':
     print('ws will open')
 
     message_getters = [
-        producer_scriptqueue.get_state_message
+        producer_scriptqueue.get_state_message,
+        producer.get_telemetry_message
     ]
 
     ws.on_open = lambda ws: on_ws_open(ws, message_getters)
