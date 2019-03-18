@@ -15,7 +15,7 @@ class Producer:
     """
     def __init__(self):
 
-        sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('sallibs.config')]
+        sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('/usr/src/love/sallibs.config')]
         self.remote_list = []
         self.controller_list = []
         for i in range(len(sal_lib_list)):
@@ -108,6 +108,21 @@ class Producer:
         freq = 0.5
         eventlet.spawn(emit_forever, controller, freq)
         eventlet.spawn(emit_event_forever, controller, freq)
+
+    def get_telemetry_message(self):
+        output_dict = {}
+        for i in range(len(self.remote_list)):
+            remote = self.remote_list[i]
+            values = self.get_remote_tel_values(remote)
+            output = json.dumps(values, cls=NumpyEncoder)
+
+            output_dict[remote.salinfo.name] = output      
+        message = {
+            "category": "telemetry",
+            "data": output_dict
+        }
+
+        return message
 
     def send_ws_data(self, ws):
         #Send telemetry stream
