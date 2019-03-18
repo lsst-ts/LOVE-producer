@@ -8,8 +8,8 @@ import json
 
 class ScriptQueueProducer:
     def __init__(self):
-        print('enabling the queue')
-        print('queue enabled')
+        # print('enabling the queue')
+        # print('queue enabled')
         print('creating request model')
         self.queue = ui.RequestModel(1)
         # self.queue.enable_queue()
@@ -100,7 +100,10 @@ class ScriptQueueProducer:
         self.update_scripts_remotes(queue_state)
         self.update_scripts_durations()
 
-        
+        queue_state['available_scripts'] = [] 
+        if queue_state['state'] == 'Running':
+            queue_state['available_scripts'] = self.queue.get_scripts()
+
         queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
         queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
         del queue_state['past_scripts']
@@ -116,8 +119,6 @@ class ScriptQueueProducer:
         else:
             queue_state['current'] = self.parse_script(queue_state['current'])
 
-        import pprint
-        pprint.pprint(queue_state)
         return queue_state
     
     def get_state_message(self):
