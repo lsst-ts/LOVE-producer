@@ -1,5 +1,4 @@
 # LOVE-producer
-(Pending update)
 
 ## Basic usage - Running locally
 Follow these instructions to run the parts of the producer locally
