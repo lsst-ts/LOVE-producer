@@ -4,7 +4,7 @@ import threading
 from lsst.ts.scriptqueue import ui, ScriptProcessState
 from lsst.ts import salobj
 import SALPY_Script
-
+import json
 
 class ScriptQueueProducer:
     def __init__(self):
@@ -126,7 +126,9 @@ class ScriptQueueProducer:
 
         message = {
             'category': 'event',
-            'data': queue_state
+            'data': {
+                'scriptQueueState': json.dumps(queue_state)
+            }
         }
         
         return message
