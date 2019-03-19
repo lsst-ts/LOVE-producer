@@ -69,7 +69,8 @@ if __name__=='__main__':
 
     message_getters = [
         producer_scriptqueue.get_state_message,
-        producer.get_telemetry_message
+        producer.get_telemetry_message,
+        producer.get_events_message
     ]
 
     ws.on_open = lambda ws: on_ws_open(ws, message_getters)

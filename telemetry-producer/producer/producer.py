@@ -124,21 +124,7 @@ class Producer:
 
         return message
 
-    def send_ws_data(self, ws):
-        #Send telemetry stream
-        output_dict = {}
-        for i in range(len(self.remote_list)):
-            remote = self.remote_list[i]
-            values = self.get_remote_tel_values(remote)
-            output = json.dumps(values, cls=NumpyEncoder)
-
-            output_dict[remote.salinfo.name] = output
-        ws.send(json.dumps({
-            "category": "telemetry",
-            "data": output_dict
-        }))
-
-        #Send event stream
+    def get_events_message(self):
         output_dict = {}
         for i in range(len(self.remote_list)):
             remote = self.remote_list[i]
@@ -146,7 +132,10 @@ class Producer:
             output = json.dumps(values, cls=NumpyEncoder)
 
             output_dict[remote.salinfo.name] = output
-        ws.send(json.dumps({
+
+        message = {
             "category": "event",
             "data": output_dict
-        }))
+        }
+
+        return message
