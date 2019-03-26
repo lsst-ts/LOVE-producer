@@ -1,5 +1,5 @@
 #!/bin/bash
 
-source /home/saluser/.setup.sh
+source .setup.sh
 
 python -u /usr/src/love/main.py
