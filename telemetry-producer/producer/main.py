@@ -65,7 +65,7 @@ if __name__=='__main__':
                             on_error = on_ws_error,
                             on_close = on_ws_close)
 
-    print('ws will open')
+    print('ws will open', url)
 
     message_getters = [
         producer_scriptqueue.get_state_message,
