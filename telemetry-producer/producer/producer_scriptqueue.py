@@ -82,7 +82,9 @@ class ScriptQueueProducer:
         new_script['script_state'] = new_script['script_state'].name
         new_script['process_state'] = new_script['process_state'].name
         new_script['elapsed_time'] = new_script['duration']; 
-        new_script['expected_duration'] = self.scripts_durations[new_script['index']]
+        new_script['expected_duration'] = 'UNKNOWN'
+        if(new_script['index'] in self.scripts_durations):
+            new_script['expected_duration'] = self.scripts_durations[new_script['index']]
         discard = ['duration', 'remote', 'updated']
         for name in discard:
             del new_script[name]
