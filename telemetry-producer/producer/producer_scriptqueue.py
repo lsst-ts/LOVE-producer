@@ -8,46 +8,18 @@ import json
 
 class ScriptQueueProducer:
     def __init__(self):
-        # print('enabling the queue')
-        # print('queue enabled')
         print('creating request model')
         self.queue = ui.RequestModel(1)
-        # self.queue.enable_queue()
         print('request model created')
-        queue_state = self.queue.get_queue_state()
-        print('got state')
         self.scripts_remotes = {}
         self.scripts_durations = {}
-
-        # run script1 from standard
-        #TODO: donde se ven los parametros del config?
 
     def get_available_scripts(self):
         # get available scripts
         return self.queue.get_scripts()  
     
-    def do_run(self):
-        script = 'script1'
-        is_standard = True
-        config = "{wait_time: '10'}"
-        self.salindex = self.queue.add(script, is_standard, config)
-        print(10*'\n','duration',self.queue.state.scripts[self.salindex]['duration'])
-
         self.monitor_script(self.salindex)
-    
-    def monitor_script(self, salindex):
-        self.queue.get_script_remote(salindex)
-
-        # print('salindex:', salindex, 'remote:', self.queue.state.scripts[self.salindex]['remote'])
-
-        # t = threading.Thread(target=self.queue.monitor_script(salindex), args=[salindex])
-        # t.start()
-    
-    def update(self):
-        self.queue.update_queue_state()
-        self.queue.update_scripts_info()
-
-        
+            
     def update_scripts_remotes(self, queue_state):
         """
             Stores the salobj.Remote object of each script
@@ -76,6 +48,7 @@ class ScriptQueueProducer:
                 if info is None:
                     break
                 self.scripts_durations[salindex] = info.duration
+    
     def parse_script(self, script):
         new_script = {**script}
         new_script['index'] = int(new_script['index'])
@@ -95,6 +68,7 @@ class ScriptQueueProducer:
             'path': script_path,
             'type': script_type
         }
+
     def parse_queue_state(self):
         """
             Gets the updated state and returns it in a LOVE-friendly format.
