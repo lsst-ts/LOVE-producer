@@ -10,16 +10,24 @@ from lsst.ts import salobj
 import SALPY_ScriptQueue
 import SALPY_Script
 import asyncio
-
+import pprint
 class ScriptQueueProducer:
-    def __init__(self, loop):
+    def __init__(self, loop, send_state):
         print('creating request model')
         # self.queue = ui.RequestModel(1)
         print('request model created')
+        self.send_state = send_state
         self.loop = loop
         self.scripts_remotes = {}
         self.scripts_durations = {}
-        self.state = {}
+        self.state = {
+            "running": 0,
+            "waitingIndices": [],
+            "currentIndex": -1,
+            "finishedIndex": [],
+            "enabled": False
+
+        }
 
         self.setup()
 
@@ -31,8 +39,8 @@ class ScriptQueueProducer:
         self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
         self.queue.evt_queue.callback = self.queue_callback
         # self.queue.evt_heartbeat.callback = lambda x : print('callback called heartbeat')
-        self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
-        self.set_callback(self.queue.evt_queue, lambda x: print('callback called queue'))
+        # self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
+        self.set_callback(self.queue.evt_queue, self.queue_callback)
 
         # set queue callbacks
         
@@ -50,9 +58,15 @@ class ScriptQueueProducer:
         # get oldest per script in the queue
         pass
 
-    def queue_callback(self, p):
-        import pdb; pdb.set_trace()
+    def queue_callback(self, parameters):
+        # import pdb; pdb.set_trace()
+        self.state["running"] =  parameters.running == 1
+        self.state["finished"] =  list(parameters.pastSalIndices[:parameters.pastLength])
+        self.state["waitingIndices"] =  list(parameters.salIndices[:parameters.length])
+        self.state["currentIndex"] = parameters.currentSalIndex
+        self.state["enabled"] = parameters.enabled == 1
 
+        self.send_state(self.state)
     # def get_available_scripts(self):
     #     # get available scripts
     #     return self.queue.get_scripts()  
@@ -148,13 +162,13 @@ class ScriptQueueProducer:
     
     # def get_state_message(self):
 
-        queue_state = self.parse_queue_state()
+    #     queue_state = self.parse_queue_state()
 
-        message = {
-            'category': 'event',
-            'data': {
-                'ScriptQueueState': json.dumps({'stream': queue_state})
-            }
-        }
+    #     message = {
+    #         'category': 'event',
+    #         'data': {
+    #             'ScriptQueueState': json.dumps({'stream': queue_state})
+    #         }
+    #     }
         
-        return message
+    #     return message

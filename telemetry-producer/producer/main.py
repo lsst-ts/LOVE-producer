@@ -12,6 +12,7 @@ from producer import Producer
 from producer_scriptqueue import ScriptQueueProducer
 import json
 import asyncio
+import pprint
 def on_ws_open(ws, message_getters):
     """
         Starts sending messages through a websocket connection
@@ -60,7 +61,7 @@ if __name__=='__main__':
     t = threading.Thread(
         target = lambda : loop.run_forever())
     t.start()
-    producer_scriptqueue = ScriptQueueProducer(loop)
+    producer_scriptqueue = ScriptQueueProducer(loop, lambda s: pprint.pprint(s))
     # producer = Producer()
 
     # WS_HOST = os.environ["WEBSOCKET_HOST"]
@@ -84,6 +85,6 @@ if __name__=='__main__':
 
     #Emitter
     while True:
-        print('loop')
+        # print('loop')
         time.sleep(3)
         # ws.run_forever()
