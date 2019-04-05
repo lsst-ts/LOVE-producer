@@ -6,108 +6,147 @@ from lsst.ts import salobj
 import SALPY_Script
 import json
 
+from lsst.ts import salobj
+import SALPY_ScriptQueue
+import SALPY_Script
+import asyncio
+
 class ScriptQueueProducer:
-    def __init__(self):
+    def __init__(self, loop):
         print('creating request model')
-        self.queue = ui.RequestModel(1)
+        # self.queue = ui.RequestModel(1)
         print('request model created')
+        self.loop = loop
         self.scripts_remotes = {}
         self.scripts_durations = {}
+        self.state = {}
 
-    def get_available_scripts(self):
-        # get available scripts
-        return self.queue.get_scripts()  
+        self.setup()
+
+        self.update()
+
+    def setup(self):
+        # create queue remote
+
+        self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
+        self.queue.evt_queue.callback = self.queue_callback
+        # self.queue.evt_heartbeat.callback = lambda x : print('callback called heartbeat')
+        self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
+        self.set_callback(self.queue.evt_queue, lambda x: print('callback called queue'))
+
+        # set queue callbacks
+        
+
+    def set_callback(self, evt, callback):
+        def setter():
+            evt.callback = callback
+        self.loop.call_soon_threadsafe( setter)
+        
+    def update(self):
+        # get oldest available
+
+        # get oldest queue
+
+        # get oldest per script in the queue
+        pass
+
+    def queue_callback(self, p):
+        import pdb; pdb.set_trace()
+
+    # def get_available_scripts(self):
+    #     # get available scripts
+    #     return self.queue.get_scripts()  
     
-        self.monitor_script(self.salindex)
+    #     self.monitor_script(self.salindex)
             
-    def update_scripts_remotes(self, queue_state):
-        """
-            Stores the salobj.Remote object of each script
-            on the queue
-        """
-        for queue_name in ['queue_scripts', 'past_scripts']:   
-            for salindex in queue_state[queue_name]:
-                if salindex not in self.scripts_remotes:
-                    self.scripts_remotes[salindex] = salobj.Remote(SALPY_Script, salindex)    
-        #TODO: handle current script
+    # def update_scripts_remotes(self, queue_state):
+    #     """
+    #         Stores the salobj.Remote object of each script
+    #         on the queue
+    #     """
+    #     for queue_name in ['queue_scripts', 'past_scripts']:   
+    #         for salindex in queue_state[queue_name]:
+    #             if salindex not in self.scripts_remotes:
+    #                 self.scripts_remotes[salindex] = salobj.Remote(SALPY_Script, salindex)    
+    #     #TODO: handle current script
 
-    def update_scripts_durations(self):
-        """
-            Updates the expected duration of each script
-            by checking the latest event data.
-            This info is available after a script is configured in the
-            Script_logevent_metadata.
-        """
-        for salindex in self.scripts_remotes:
-            remote = self.scripts_remotes[salindex]
-            if not salindex in self.scripts_durations:
-                self.scripts_durations[salindex] = 'UNKNOWN'
-            # TODO: if durations exists then continue
-            while True:
-                info = remote.evt_metadata.get_oldest()
-                if info is None:
-                    break
-                self.scripts_durations[salindex] = info.duration
+    # def update_scripts_durations(self):
+    #     """
+    #         Updates the expected duration of each script
+    #         by checking the latest event data.
+    #         This info is available after a script is configured in the
+    #         Script_logevent_metadata.
+    #     """
+    #     for salindex in self.scripts_remotes:
+    #         remote = self.scripts_remotes[salindex]
+    #         if not salindex in self.scripts_durations:
+    #             self.scripts_durations[salindex] = 'UNKNOWN'
+    #         # TODO: if durations exists then continue
+    #         while True:
+    #             info = remote.evt_metadata.get_oldest()
+    #             if info is None:
+    #                 break
+    #             self.scripts_durations[salindex] = info.duration
     
-    def parse_script(self, script):
-        new_script = {**script}
-        new_script['index'] = int(new_script['index'])
-        new_script['script_state'] = new_script['script_state'].name
-        new_script['process_state'] = new_script['process_state'].name
-        new_script['elapsed_time'] = new_script['duration']; 
-        new_script['expected_duration'] = 'UNKNOWN'
-        if(new_script['index'] in self.scripts_durations):
-            new_script['expected_duration'] = self.scripts_durations[new_script['index']]
-        discard = ['duration', 'remote', 'updated']
-        for name in discard:
-            del new_script[name]
-        return new_script
+    # def parse_script(self, script):
+    #     new_script = {**script}
+    #     new_script['index'] = int(new_script['index'])
+    #     new_script['script_state'] = new_script['script_state'].name
+    #     new_script['process_state'] = new_script['process_state'].name
+    #     new_script['elapsed_time'] = new_script['duration']; 
+    #     new_script['expected_duration'] = 'UNKNOWN'
+    #     if(new_script['index'] in self.scripts_durations):
+    #         new_script['expected_duration'] = self.scripts_durations[new_script['index']]
+    #     discard = ['duration', 'remote', 'updated']
+    #     for name in discard:
+    #         del new_script[name]
+    #     return new_script
 
-    def parse_available_script(self, script_path, script_type):
-        return {
-            'path': script_path,
-            'type': script_type
-        }
+    # def parse_available_script(self, script_path, script_type):
+    #     return {
+    #         'path': script_path,
+    #         'type': script_type
+    #     }
 
-    def parse_queue_state(self):
-        """
-            Gets the updated state and returns it in a LOVE-friendly format.
-        """
+    # def parse_queue_state(self):
+    #     """
+    #         Gets the updated state and returns it in a LOVE-friendly format.
+    #     """
 
-        # "get_queue_state" makes the update before parsing the state
-        queue_state = self.queue.get_queue_state() 
+    #     # "get_queue_state" makes the update before parsing the state
+    #     queue_state = self.queue.get_queue_state() 
 
-        # update scripts duration from remote.evt_metadata (this is not in RequestModel)
-        self.update_scripts_remotes(queue_state)
-        self.update_scripts_durations()
+    #     # update scripts duration from remote.evt_metadata (this is not in RequestModel)
+    #     self.update_scripts_remotes(queue_state)
+    #     self.update_scripts_durations()
 
-        queue_state['available_scripts'] = [] 
-        if queue_state['state'] == 'Running':
-            available_scripts = self.queue.get_scripts()
+    #     queue_state['available_scripts'] = [] 
+    #     if queue_state['state'] == 'Running':
+    #         available_scripts = self.queue.get_scripts()
 
-            queue_state['available_scripts'] = map(lambda s: self.parse_available_script(s,'external'), available_scripts['external'])
-            queue_state['available_scripts'] = list(queue_state['available_scripts'])
-            queue_state['available_scripts'].extend( list(map(lambda s: self.parse_available_script(s,'standard'), available_scripts['standard'])))
-            queue_state['available_scripts'] = list(queue_state['available_scripts'])
+    #         queue_state['available_scripts'] = map(lambda s: self.parse_available_script(s,'external'), available_scripts['external'])
+    #         queue_state['available_scripts'] = list(queue_state['available_scripts'])
+    #         queue_state['available_scripts'].extend( list(map(lambda s: self.parse_available_script(s,'standard'), available_scripts['standard'])))
+    #         queue_state['available_scripts'] = list(queue_state['available_scripts'])
 
-        queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
-        queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
-        del queue_state['past_scripts']
-        del queue_state['queue_scripts']
+    #     queue_state['finished_scripts'] = list(queue_state['past_scripts'].values())
+    #     queue_state['waiting_scripts'] = list(queue_state['queue_scripts'].values())
+    #     del queue_state['past_scripts']
+    #     del queue_state['queue_scripts']
 
-        for queue_name in ['waiting_scripts', 'finished_scripts']:
-            queue = queue_state[queue_name]
-            for i, script in enumerate(queue):
-                queue[i] = self.parse_script(queue[i])
+    #     for queue_name in ['waiting_scripts', 'finished_scripts']:
+    #         queue = queue_state[queue_name]
+    #         for i, script in enumerate(queue):
+    #             queue[i] = self.parse_script(queue[i])
 
-        if queue_state['current'] == None:
-            queue_state['current'] = 'None'
-        else:
-            queue_state['current'] = self.parse_script(queue_state['current'])
+    #     if queue_state['current'] == None:
+    #         queue_state['current'] = 'None'
+    #     else:
+    #         queue_state['current'] = self.parse_script(queue_state['current'])
 
-        return queue_state
+    #     return queue_state
     
-    def get_state_message(self):
+    # def get_state_message(self):
 
         queue_state = self.parse_queue_state()
 
