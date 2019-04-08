@@ -22,6 +22,10 @@ class ScriptQueueProducer:
         self.scripts_remotes = {}
         self.scripts_durations = {}
         self.state = {
+            "available": {
+                "standard": [],
+                "external": []
+            },
             "running": 0,
             "waitingIndices": [],
             "currentIndex": -1,
@@ -38,17 +42,22 @@ class ScriptQueueProducer:
     def setup(self):
         # create queue remote
 
-        self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
-        self.queue.evt_queue.callback = self.queue_callback
+        self.queue = salobj.Remote(SALPY_ScriptQueue, 1)        
+
+        self.set_callback(self.queue.evt_queue, self.queue_callback)
+        self.set_callback(self.queue.evt_availableScripts, self.available_scripts_callback)
+        self.set_callback(self.queue.evt_script, self.queue_script_callback)
 
         # self.queue.evt_heartbeat.callback = lambda x : print('callback called heartbeat')
         # self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
-        self.set_callback(self.queue.evt_queue, self.queue_callback)
 
         # set queue callbacks
         
 
     def set_callback(self, evt, callback):
+        """
+            Adds an event callback using the asyncio event loop
+        """
         def setter():
             evt.callback = callback
         self.loop.call_soon_threadsafe( setter)
@@ -60,6 +69,42 @@ class ScriptQueueProducer:
 
         # get oldest per script in the queue
         pass
+
+    def available_scripts_callback(self, event):
+        print('\n\n\navailable scripts')
+        
+        self.state["available"] = {
+            "standard": event.standard.split(':'),
+            "external": event.external.split(':')
+        }
+        print('updated available scripts')
+        print(self.state["available"])    
+    
+    def queue_script_callback(self, event):
+        print('\n\nqueue script event')
+        print(dir(event))
+        
+
+        if(not event.salIndex in self.scripts):
+            self.scripts[event.salIndex] = self.new_empty_script()
+
+        self.scripts[event.salIndex]["elapsed_time"] = event.duration
+        self.scripts[event.salIndex]["type"] = "standard" if event.isStandard else "external"
+        self.scripts[event.salIndex]["path"] = event.path
+        self.scripts[event.salIndex]["process_state"] = ScriptProcessState(event.processState).name
+        self.scripts[event.salIndex]["script_state"] = ScriptState(event.scriptState).name
+        pprint.pprint(self.scripts[event.salIndex])
+    
+    def setup_script(self, salindex):
+        remote = salobj.Remote(SALPY_Script, salindex)
+
+        self.scripts[salindex] = self.new_empty_script()
+        self.scripts[salindex]["index"] = salindex
+        self.scripts[salindex]["remote"] = remote
+
+        self.set_callback(remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
+        self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
+        self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
 
     def queue_callback(self, event):
         # import pdb; pdb.set_trace()
@@ -77,16 +122,6 @@ class ScriptQueueProducer:
 
         self.send_state(self.state)
 
-    def setup_script(self, salindex):
-        remote = salobj.Remote(SALPY_Script, salindex)
-
-        self.scripts[salindex] = self.new_empty_script()
-        self.scripts[salindex]["remote"] = remote
-
-        self.set_callback(remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
-        self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
-        self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
-        
     def new_empty_script(sef):
         default = "UNKNOWN"
         return {
