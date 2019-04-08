@@ -1,12 +1,13 @@
 import asyncio
 import time
 import threading
-from lsst.ts.scriptqueue import ui, ScriptProcessState
+from lsst.ts.scriptqueue import ui
 from lsst.ts import salobj
 import SALPY_Script
 import json
 
 from lsst.ts import salobj
+from lsst.ts.scriptqueue import ScriptProcessState ,ScriptState
 import SALPY_ScriptQueue
 import SALPY_Script
 import asyncio
@@ -26,8 +27,9 @@ class ScriptQueueProducer:
             "currentIndex": -1,
             "finishedIndex": [],
             "enabled": False
-
         }
+
+        self.scripts = {}
 
         self.setup()
 
@@ -38,6 +40,7 @@ class ScriptQueueProducer:
 
         self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
         self.queue.evt_queue.callback = self.queue_callback
+
         # self.queue.evt_heartbeat.callback = lambda x : print('callback called heartbeat')
         # self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
         self.set_callback(self.queue.evt_queue, self.queue_callback)
@@ -58,15 +61,72 @@ class ScriptQueueProducer:
         # get oldest per script in the queue
         pass
 
-    def queue_callback(self, parameters):
+    def queue_callback(self, event):
         # import pdb; pdb.set_trace()
-        self.state["running"] =  parameters.running == 1
-        self.state["finished"] =  list(parameters.pastSalIndices[:parameters.pastLength])
-        self.state["waitingIndices"] =  list(parameters.salIndices[:parameters.length])
-        self.state["currentIndex"] = parameters.currentSalIndex
-        self.state["enabled"] = parameters.enabled == 1
+        self.state["running"] =  event.running == 1
+        self.state["finished"] =  list(event.pastSalIndices[:event.pastLength])
+        self.state["waitingIndices"] =  list(event.salIndices[:event.length])
+        self.state["currentIndex"] = event.currentSalIndex
+        self.state["enabled"] = event.enabled == 1
+
+        scripts = [*self.state["waitingIndices"], self.state["currentIndex"], *self.state["finished"]]
+        
+        for salindex in scripts:
+            if not salindex in self.scripts: 
+                self.setup_script(salindex)
 
         self.send_state(self.state)
+
+    def setup_script(self, salindex):
+        remote = salobj.Remote(SALPY_Script, salindex)
+
+        self.scripts[salindex] = self.new_empty_script()
+        self.scripts[salindex]["remote"] = remote
+
+        self.set_callback(remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
+        self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
+        self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
+        
+    def new_empty_script(sef):
+        default = "UNKNOWN"
+        return {
+            "remote": None,
+            "index": default,
+            "script_state": default,
+            "process_state": default,
+            "elapsed_time": default,
+            "expected_duration": default,
+            "type": default,
+            "path": default
+        }        
+
+    def script_metadata_callback(self, salindex, event):
+        """
+            Callback for the logevent_metadata. Used to extract 
+            the expected duration of the script.
+            
+            event : SALPY_Script.Script_logevent_metadataC 
+        """
+
+        self.scripts[salindex]["expected_duration"] = event.duration
+        print('\n\n\n expected duration updtaed')
+        pprint.pprint(self.scripts[salindex])
+    
+    def script_state_callback(self, salindex, event):
+        """
+            Callback for the Script_logevet_state event. Used to update 
+            the state of the script.
+            
+            event : SALPY_Script.Script_logevent_stateC
+        """
+
+        self.scripts[salindex]["script_state"] = ScriptState(event.state).name
+        print('\n\n\nScript state updated ${salindex}')
+        pprint.pprint(self.scripts[salindex])
+
+    def script_description_callback(self, salindex, event):
+        print('\n\ndescription:', event, '\n ', event.description)
+
     # def get_available_scripts(self):
     #     # get available scripts
     #     return self.queue.get_scripts()  
