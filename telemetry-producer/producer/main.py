@@ -13,6 +13,29 @@ from producer_scriptqueue import ScriptQueueProducer
 import json
 import asyncio
 import pprint
+
+
+def on_ws_message(ws, message):
+    print("### message ###")
+    print(message)
+
+def on_ws_error(ws, error):
+    print("### error ###")
+    print(error)
+
+def on_ws_close(ws):
+    print("### closed ###")
+
+def send_message_callback(ws, message):
+    """
+        Callback that parses a dictionary (message)
+        into a JSON string and sends it through websockets
+        
+        message : dict
+    """
+    ws.send(json.dumps(message))
+
+
 def on_ws_open(ws, message_getters):
     """
         Starts sending messages through a websocket connection
@@ -29,6 +52,9 @@ def on_ws_open(ws, message_getters):
                 'data' : { .... }
             }
     """
+
+    producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws,m))
+
     print('ws started to open')
     def run(*args):
         print('start message loop')
@@ -43,48 +69,37 @@ def on_ws_open(ws, message_getters):
         print("thread terminating...")
     thread.start_new_thread(run, ())
     print("open")
-
-def on_ws_message(ws, message):
-    print("### message ###")
-    print(message)
-
-def on_ws_error(ws, error):
-    print("### error ###")
-    print(error)
-
-def on_ws_close(ws):
-    print("### closed ###")
-
+    
 if __name__=='__main__':
     print('--main--')
     loop = asyncio.get_event_loop()
     t = threading.Thread(
         target = lambda : loop.run_forever())
     t.start()
-    producer_scriptqueue = ScriptQueueProducer(loop, lambda s: print(s))
+    WS_HOST = os.environ["WEBSOCKET_HOST"]
+    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+    # websocket.enableTrace(True)
+    url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+    ws = websocket.WebSocketApp(url,
+                            on_message = on_ws_message,
+                            on_error = on_ws_error,
+                            on_close = on_ws_close)
+    
     # producer = Producer()
 
-    # WS_HOST = os.environ["WEBSOCKET_HOST"]
-    # WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-    # websocket.enableTrace(True)
-    # url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
-    # ws = websocket.WebSocketApp(url,
-    #                         on_message = on_ws_message,
-    #                         on_error = on_ws_error,
-    #                         on_close = on_ws_close)
 
     # print('ws will open', url)
 
-    # message_getters = [
+    message_getters = [
     #     producer_scriptqueue.get_state_message,
     #     producer.get_telemetry_message,
     #     producer.get_events_message
-    # ]
+    ]
 
-    # ws.on_open = lambda ws: on_ws_open(ws, message_getters)
+    ws.on_open = lambda ws: on_ws_open(ws, message_getters)
 
     #Emitter
     while True:
         # print('loop')
         time.sleep(3)
-        # ws.run_forever()
+        ws.run_forever()
