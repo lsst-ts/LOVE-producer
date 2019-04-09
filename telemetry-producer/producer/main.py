@@ -54,12 +54,12 @@ def on_ws_open(ws, message_getters):
     """
 
     producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws,m))
+    producer_scriptqueue.update()
 
     print('ws started to open')
     def run(*args):
         print('start message loop')
         while True:
-            producer_scriptqueue.update()
             for get_message in message_getters:
                 message = get_message()
                 print('message:', message)
