@@ -31,10 +31,14 @@ class ScriptQueueProducer:
             "enabled": False
         }
 
+        self.cmd_timeout = 10
+
         self.scripts = {}
 
+        print('will setup')
         self.setup()
 
+        print('will update')
         self.update()
 
     def setup(self):
@@ -46,6 +50,7 @@ class ScriptQueueProducer:
         self.set_callback(self.queue.evt_availableScripts, self.available_scripts_callback)
         self.set_callback(self.queue.evt_script, self.queue_script_callback)
 
+
         # self.queue.evt_heartbeat.callback = lambda x : print('callback called heartbeat')
         # self.set_callback(self.queue.evt_heartbeat, lambda x: print('callback called heartbeat'))
 
@@ -54,7 +59,7 @@ class ScriptQueueProducer:
 
     def set_callback(self, evt, callback):
         """
-            Adds an event callback using the asyncio event loop
+            Adds an event callback to an event using the asyncio event loop
             and appends a send instruction
         """
         def do_callback_and_send(event):
@@ -73,7 +78,11 @@ class ScriptQueueProducer:
         # get oldest queue
 
         # get oldest per script in the queue
-        pass
+        print('updating')
+
+        if self.query_queue_state() < 0:
+            print('could not get sate of the queue')
+            return
 
     def available_scripts_callback(self, event):        
         self.state["available"] = {
@@ -107,6 +116,7 @@ class ScriptQueueProducer:
         self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
 
     def queue_callback(self, event):
+        print('\n\n\nqueue callback')
         self.state["running"] =  event.running == 1
         self.state["finishedIndices"] =  list(event.pastSalIndices[:event.pastLength])
         self.state["waitingIndices"] =  list(event.salIndices[:event.length])
@@ -149,8 +159,6 @@ class ScriptQueueProducer:
         """
 
         self.scripts[salindex]["expected_duration"] = event.duration
-        # print('\n\n\n expected duration updtaed')
-        # pprint.pprint(self.scripts[salindex])
     
     def script_state_callback(self, salindex, event):
         """
@@ -161,12 +169,9 @@ class ScriptQueueProducer:
         """
 
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
-        # print('\n\n\nScript state updated ${salindex}')
-        # pprint.pprint(self.scripts[salindex])
 
     def script_description_callback(self, salindex, event):
         pass
-        # print('\n\ndescription:', event, '\n ', event.description)
 
     def get_parsed_state(self):
         """
@@ -217,3 +222,26 @@ class ScriptQueueProducer:
         }
         
         return message
+
+    def run(self, task):
+        
+        if(asyncio.iscoroutine(task)):
+            asyncio.run_coroutine_threadsafe(task, self.loop)
+        elif asyncio.isfuture(task):
+            asyncio.ensure_future(task, loop=self.loop)
+        else:
+            print('Unknown task type: ', task)
+
+    def query_queue_state(self):
+        """
+            Triggers the queue event by sending a command.
+            Returns 0 if everything is fine; -1 otherwise.
+        """
+        try:
+            self.run(self.queue.cmd_showQueue.start(timeout=30))
+
+        except Exception as e:
+            print('Could not get state of the queue',e)
+            return -1
+        
+        return 0
