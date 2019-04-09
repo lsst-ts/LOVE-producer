@@ -8,18 +8,24 @@ from producer_scriptqueue import ScriptQueueProducer
 import pprint
 import json
 
+
+
+
+from lsst.ts.scriptqueue.base_script import HEARTBEAT_INTERVAL
+
+
+
+
+
 loop = asyncio.get_event_loop()
 t = threading.Thread(
     target = lambda : loop.run_forever())
 t.start()
 
-def send(x):
-    print(10*'\ns')
-    pprint.pprint(json.loads(x['data']['ScriptQueueState']))
-sqp = ScriptQueueProducer(
-    loop, 
-    send
-)
+sqp = ScriptQueueProducer(loop, lambda x:x)
 
-while True:
-    time.sleep(2)
+
+
+print('will start running')
+
+sqp.run(sqp.monitor_script_heartbeat(100017))

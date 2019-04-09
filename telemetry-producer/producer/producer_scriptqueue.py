@@ -281,3 +281,21 @@ class ScriptQueueProducer:
         """
 
         self.run(self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout))
+
+
+
+    async def monitor_script_heartbeat(self, salindex):
+        nlost_subsequent = 0
+        while True:
+            print(salindex,self.scripts[salindex]['process_state'])
+            if self.scripts[salindex]['process_state']  in ['DONE', 'STOPPED', 'FAILED']:
+                print(salindex,'done/stopped/failed')
+                break
+            try:
+                print(salindex,'trying to get heartbeat')
+                await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=False, timeout=1)
+                print('beat beat')
+                nlost_subsequent = 0
+            except asyncio.TimeoutError:
+                print(salindex,'lost heartbeat')
+                nlost_subsequent += 1
