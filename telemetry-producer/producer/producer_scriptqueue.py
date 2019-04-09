@@ -83,14 +83,27 @@ class ScriptQueueProducer:
         if self.query_queue_state() < 0:
             print('could not get sate of the queue')
             return
+
+        self.query_available_scripts()
         
 
-    def available_scripts_callback(self, event):        
-        self.state["available"] = {
-            "standard": event.standard.split(':'),
-            "external": event.external.split(':')
-        }
-    
+    def available_scripts_callback(self, event):       
+        self.state["available_scripts"] = []
+
+        for script_path in event.standard.split(':'):
+            self.state["available_scripts"].append(
+                {
+                    "type": "standard",
+                    "path": script_path
+                }
+            )
+        for script_path in event.external.split(':'):
+            self.state["available_scripts"].append(
+                {
+                    "type": "standard",
+                    "path": script_path
+                }
+            )    
     def queue_script_callback(self, event):
         if(not event.salIndex in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
@@ -245,7 +258,7 @@ class ScriptQueueProducer:
             self.run(self.queue.cmd_showQueue.start(timeout=self.cmd_timeout))
 
         except Exception as e:
-            print('Could not get state of the queue',e)
+            print(e)
             return -1
         
         return 0
@@ -261,3 +274,10 @@ class ScriptQueueProducer:
             except salobj.AckError as ack_err:
                 print(f"Could not get info on script {salindex}. "
                                f"Failed with ack.result={ack_err.ack.result}")
+
+    def query_available_scripts(self):
+        """
+            Sends commands to the queue to trigger the queue.evt_availableScripts 
+        """
+
+        self.run(self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout))
