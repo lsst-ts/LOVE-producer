@@ -73,16 +73,17 @@ class ScriptQueueProducer:
         self.loop.call_soon_threadsafe( setter)
     
     def update(self):
-        # get oldest available
-
-        # get oldest queue
-
-        # get oldest per script in the queue
+        """
+            Tries to trigger the queue event which will
+            update all the info in the queue and its scripts
+            if succeeds.
+        """
         print('updating')
 
         if self.query_queue_state() < 0:
             print('could not get sate of the queue')
             return
+        
 
     def available_scripts_callback(self, event):        
         self.state["available"] = {
@@ -91,9 +92,6 @@ class ScriptQueueProducer:
         }
     
     def queue_script_callback(self, event):
-
-        
-
         if(not event.salIndex in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
 
@@ -102,7 +100,6 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["path"] = event.path
         self.scripts[event.salIndex]["process_state"] = ScriptProcessState(event.processState).name
         self.scripts[event.salIndex]["script_state"] = ScriptState(event.scriptState).name
-        # pprint.pprint(self.scripts[event.salIndex])
     
     def setup_script(self, salindex):
         remote = salobj.Remote(SALPY_Script, salindex)
@@ -116,18 +113,25 @@ class ScriptQueueProducer:
         self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
 
     def queue_callback(self, event):
-        print('\n\n\nqueue callback')
         self.state["running"] =  event.running == 1
         self.state["finishedIndices"] =  list(event.pastSalIndices[:event.pastLength])
         self.state["waitingIndices"] =  list(event.salIndices[:event.length])
         self.state["currentIndex"] = event.currentSalIndex
         self.state["enabled"] = event.enabled == 1
 
-        scripts = [*self.state["waitingIndices"], self.state["currentIndex"], *self.state["finishedIndices"]]
+        scripts = [
+            *self.state["waitingIndices"], 
+            *self.state["finishedIndices"]
+        ]
+
+        if self.state["currentIndex"] > 0:
+            scripts.append(self.state["currentIndex"] )
         
         for salindex in scripts:
             if not salindex in self.scripts: 
                 self.setup_script(salindex)
+
+        self.query_scripts_info()        
 
     def new_empty_script(sef):
         default = "UNKNOWN"
@@ -245,3 +249,15 @@ class ScriptQueueProducer:
             return -1
         
         return 0
+
+    def query_scripts_info(self):
+        """
+            Send commands to the queue to trigger the script events of each script
+        """
+        for salindex in self.scripts:
+            self.queue.cmd_showScript.set(salIndex=salindex)
+            try:
+                self.run(self.queue.cmd_showScript.start(timeout=30))
+            except salobj.AckError as ack_err:
+                print(f"Could not get info on script {salindex}. "
+                               f"Failed with ack.result={ack_err.ack.result}")

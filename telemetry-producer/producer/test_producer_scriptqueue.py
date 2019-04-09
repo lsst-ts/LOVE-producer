@@ -1,19 +1,25 @@
-from producer_scriptqueue import ScriptQueueProducer
 import time
-sqp = ScriptQueueProducer()
+import threading
+from lsst.ts import salobj
+import asyncio
+import SALPY_ScriptQueue
 
+from producer_scriptqueue import ScriptQueueProducer
+import pprint
+import json
+
+loop = asyncio.get_event_loop()
+t = threading.Thread(
+    target = lambda : loop.run_forever())
+t.start()
+
+def send(x):
+    print(10*'\ns')
+    pprint.pprint(json.loads(x['data']['ScriptQueueState']))
+sqp = ScriptQueueProducer(
+    loop, 
+    send
+)
 
 while True:
-    message = sqp.parse_queue_state()
-
-
-    print('finished',{
-        script['index']: script['expected_duration'] for script in message['finished_scripts'] if script['expected_duration'] != 'UNKNOWN'
-    })
-
-    print('waiting',{
-        script['index']: script['expected_duration'] for script in message['waiting_scripts'] if script['expected_duration'] != 'UNKNOWN'
-    })
-   
-    time.sleep(1)
-
+    time.sleep(2)
