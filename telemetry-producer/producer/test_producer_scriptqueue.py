@@ -26,6 +26,7 @@ sqp = ScriptQueueProducer(loop, lambda x:x)
 
 
 
-print('will start running')
+print('will start loop')
 
-sqp.run(sqp.monitor_script_heartbeat(100017))
+while True:
+    time.sleep(2)
