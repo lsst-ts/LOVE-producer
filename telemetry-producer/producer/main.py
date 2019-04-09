@@ -59,6 +59,7 @@ def on_ws_open(ws, message_getters):
     def run(*args):
         print('start message loop')
         while True:
+            producer_scriptqueue.update()
             for get_message in message_getters:
                 message = get_message()
                 print('message:', message)
