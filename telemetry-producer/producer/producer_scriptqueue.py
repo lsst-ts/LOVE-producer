@@ -31,7 +31,7 @@ class ScriptQueueProducer:
             "enabled": False
         }
 
-        self.cmd_timeout = 10
+        self.cmd_timeout = 120
 
         self.scripts = {}
 
@@ -242,7 +242,7 @@ class ScriptQueueProducer:
             Returns 0 if everything is fine; -1 otherwise.
         """
         try:
-            self.run(self.queue.cmd_showQueue.start(timeout=30))
+            self.run(self.queue.cmd_showQueue.start(timeout=self.cmd_timeout))
 
         except Exception as e:
             print('Could not get state of the queue',e)
@@ -257,7 +257,7 @@ class ScriptQueueProducer:
         for salindex in self.scripts:
             self.queue.cmd_showScript.set(salIndex=salindex)
             try:
-                self.run(self.queue.cmd_showScript.start(timeout=30))
+                self.run(self.queue.cmd_showScript.start(timeout=self.cmd_timeout))
             except salobj.AckError as ack_err:
                 print(f"Could not get info on script {salindex}. "
                                f"Failed with ack.result={ack_err.ack.result}")
