@@ -86,7 +86,6 @@ class ScriptQueueProducer:
 
         self.query_available_scripts()
         
-
     def available_scripts_callback(self, event):       
         self.state["available_scripts"] = []
 
@@ -100,7 +99,7 @@ class ScriptQueueProducer:
         for script_path in event.external.split(':'):
             self.state["available_scripts"].append(
                 {
-                    "type": "standard",
+                    "type": "external",
                     "path": script_path
                 }
             )    
@@ -124,6 +123,9 @@ class ScriptQueueProducer:
         self.set_callback(remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
         self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
         self.set_callback(remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
+
+        if not salindex in self.state["finishedIndices"]:
+            self.run(self.monitor_script_heartbeat(salindex))
 
     def queue_callback(self, event):
         self.state["running"] =  event.running == 1
@@ -156,7 +158,8 @@ class ScriptQueueProducer:
             "elapsed_time": 0,
             "expected_duration": 0,
             "type": default,
-            "path": default
+            "path": default,
+            "lost_heartbeats": 0
         }        
 
     def parse_script(self, script):
@@ -165,7 +168,6 @@ class ScriptQueueProducer:
         for name in discard:
             del new_script[name]
         return new_script
-
 
     def script_metadata_callback(self, salindex, event):
         """
@@ -283,19 +285,18 @@ class ScriptQueueProducer:
         self.run(self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout))
 
 
-
     async def monitor_script_heartbeat(self, salindex):
         nlost_subsequent = 0
         while True:
-            print(salindex,self.scripts[salindex]['process_state'])
             if self.scripts[salindex]['process_state']  in ['DONE', 'STOPPED', 'FAILED']:
-                print(salindex,'done/stopped/failed')
                 break
             try:
-                print(salindex,'trying to get heartbeat')
                 await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=False, timeout=1)
-                print('beat beat')
+                print(salindex, 'beat beat')
                 nlost_subsequent = 0
             except asyncio.TimeoutError:
-                print(salindex,'lost heartbeat')
                 nlost_subsequent += 1
+                print(salindex, 'nlost', nlost_subsequent)
+            self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
+            self.send_state(self.get_state_message())
+            
