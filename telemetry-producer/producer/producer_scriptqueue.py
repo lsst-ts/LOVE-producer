@@ -41,10 +41,8 @@ class ScriptQueueProducer:
 
         self.scripts = {}
 
-        print('will setup')
         self.setup()
 
-        print('will update')
         self.update()
 
     def setup(self):
@@ -84,7 +82,6 @@ class ScriptQueueProducer:
             update all the info in the queue and its scripts
             if succeeds.
         """
-        print('updating')
 
         if self.query_queue_state() < 0:
             self.log.warning('could not get sate of the queue')
