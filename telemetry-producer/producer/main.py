@@ -36,7 +36,7 @@ def send_message_callback(ws, message):
     ws.send(json.dumps(message))
 
 
-def on_ws_open(ws, message_getters):
+def on_ws_open(ws, message_getters, loop):
     """
         Starts sending messages through a websocket connection
         every through seconds, from a list of messages
@@ -57,9 +57,9 @@ def on_ws_open(ws, message_getters):
 
     print('ws started to open')
     def run(*args):
-        print('start message loop')
-        producer_scriptqueue.update()
+        asyncio.set_event_loop(args[0])
         while True:
+            producer_scriptqueue.update()
             for get_message in message_getters:
                 message = get_message()
                 print('message:', message)
@@ -68,7 +68,7 @@ def on_ws_open(ws, message_getters):
         time.sleep(1)
         ws.close()
         print("thread terminating...")
-    thread.start_new_thread(run, ())
+    thread.start_new_thread(run, (loop,))
     print("open")
     
 def run_evt_loop(loop):
@@ -99,7 +99,7 @@ if __name__=='__main__':
     #     producer.get_events_message
     ]
 
-    ws.on_open = lambda ws: on_ws_open(ws, message_getters)
+    ws.on_open = lambda ws: on_ws_open(ws, message_getters, loop)
 
     #Emitter
     while True:
