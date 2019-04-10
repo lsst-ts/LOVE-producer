@@ -8,12 +8,14 @@ import json
 
 from lsst.ts import salobj
 from lsst.ts.scriptqueue import ScriptProcessState ,ScriptState
+from lsst.ts.scriptqueue.base_script import HEARTBEAT_INTERVAL
 import SALPY_ScriptQueue
 import SALPY_Script
 import asyncio
 import pprint
 from utils import NumpyEncoder
 import logging
+import datetime
 
 
 class ScriptQueueProducer:
@@ -24,13 +26,15 @@ class ScriptQueueProducer:
         self.loop = loop
         self.scripts_remotes = {}
         self.scripts_durations = {}
+        self.max_lost_heartbeats = 5
+        self.heartbeat_timeout = 3*HEARTBEAT_INTERVAL
         self.state = {
             "available_scripts": [],
             "running": False,
             "waitingIndices": [],
             "currentIndex": 0,
             "finishedIndices": [],
-            "enabled": False
+            "enabled": False,
         }
 
         self.cmd_timeout = 120
@@ -167,7 +171,8 @@ class ScriptQueueProducer:
             "type": default,
             "path": default,
             "lost_heartbeats": 0,
-            "setup": False # flag to trigger show_script only once
+            "setup": False, # flag to trigger show_script only once,
+            "last_heartbeat_timestamp": 0
         }        
 
     def parse_script(self, script):
@@ -206,6 +211,9 @@ class ScriptQueueProducer:
         """
         state = {}
 
+        state['max_lost_heartbeats'] = self.max_lost_heartbeats
+        state['heartbeat_timeout'] = self.heartbeat_timeout
+
         state["available_scripts"] = self.state["available_scripts"].copy()
 
         state["state"] = "Running" if self.state["running"] else "Stopped"
@@ -225,15 +233,12 @@ class ScriptQueueProducer:
                 key: self.scripts[index][key] for key in self.scripts[index] if key != "remote"
             })
 
-        
-
-        
-
         state["current"] = "None"
         if self.state["currentIndex"] > 0:
             state["current"] = {
                 key: self.scripts[self.state["currentIndex"]][key] for key in self.scripts[self.state["currentIndex"]] if key != "remote"
             }
+            
 
         return state
 
@@ -253,7 +258,8 @@ class ScriptQueueProducer:
         heartbeat = {
             'script_heartbeat':{
                 'salindex': salindex,
-                'lost': self.scripts[salindex]["lost_heartbeats"]
+                'lost': self.scripts[salindex]["lost_heartbeats"],
+                "last_heartbeat_timestamp": self.scripts[salindex]["last_heartbeat_timestamp"]
             }
         }        
 
@@ -314,12 +320,11 @@ class ScriptQueueProducer:
             if self.scripts[salindex]['process_state']  in ['DONE', 'STOPPED', 'FAILED']:
                 break
             try:
-                await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=False, timeout=1)
-                print(salindex, 'beat beat')
+                await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=False, timeout=self.heartbeat_timeout)
                 nlost_subsequent = 0
+                self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
             except asyncio.TimeoutError:
                 nlost_subsequent += 1
-                print(salindex, 'nlost', nlost_subsequent)
             self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
             self.send_state(self.get_heartbeat_message(salindex))
             
