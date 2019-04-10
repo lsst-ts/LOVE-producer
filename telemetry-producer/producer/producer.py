@@ -7,26 +7,33 @@ import json
 from utils import NumpyEncoder
 import importlib
 
-
+import threading
+import asyncio
+import datetime
 class Producer:
     """
         Class that creates remote and controller objects using the salobj library
         emitting fake telemetry and event data which is then sent over with websockets
     """
-    def __init__(self):
-
-        sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('/usr/src/love/sallibs.config')]
+    def __init__(self, loop):
+        self.loop = loop
         self.remote_list = []
         self.controller_list = []
+
+        sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('/usr/src/love/sallibs.config')]
         for i in range(len(sal_lib_list)):
             sal_lib = sal_lib_list[i]
-            remote, controller = self.create_remote_and_controller(sal_lib)
-            self.remote_list.append(remote)
-            self.controller_list.append(controller)
+            t = threading.Thread(target=self.add_remote_in_thread, args=[sal_lib, loop])
+            t.start()
 
-        for i in range(len(self.controller_list)):
-            controller = self.controller_list[i]
-            self.launch_emitter_forever(controller)
+
+    def add_remote_in_thread(self, sal_lib, loop):
+        asyncio.set_event_loop(loop)
+        remote, controller = self.create_remote_and_controller(sal_lib)
+        self.remote_list.append(remote)        
+        self.controller_list.append(controller)
+        self.launch_emitter_forever(controller)
+
 
     def getDataType(self, value):
         if isinstance(value, (list, tuple, np.ndarray)):
@@ -75,10 +82,10 @@ class Producer:
         """
         
         """
-        print("\n make remote")
+        print("\n make remote", sallib)
         remote = salobj.Remote(sallib, 0)
         
-        print("make controller")
+        print("make controller", sallib)
         controller = salobj.Controller(sallib, 0)
 
         return remote, controller
