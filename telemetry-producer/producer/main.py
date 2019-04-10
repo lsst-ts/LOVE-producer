@@ -62,7 +62,6 @@ def on_ws_open(ws, message_getters, loop):
             producer_scriptqueue.update()
             for get_message in message_getters:
                 message = get_message()
-                print('message:', message)
                 ws.send(json.dumps(message))
             time.sleep(2)            
         time.sleep(1)
@@ -88,15 +87,12 @@ if __name__=='__main__':
                             on_error = on_ws_error,
                             on_close = on_ws_close)
     
-    # producer = Producer()
+    producer = Producer(loop)
 
-
-    # print('ws will open', url)
 
     message_getters = [
-    #     producer_scriptqueue.get_state_message,
-    #     producer.get_telemetry_message,
-    #     producer.get_events_message
+        producer.get_telemetry_message,
+        producer.get_events_message
     ]
 
     ws.on_open = lambda ws: on_ws_open(ws, message_getters, loop)
