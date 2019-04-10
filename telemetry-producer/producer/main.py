@@ -72,12 +72,11 @@ def on_ws_open(ws, message_getters):
     print("open")
     
 def run_evt_loop(loop):
-    asyncio.set_event_loop(loop)
     loop.run_forever()
 
 if __name__=='__main__':
     print('--main--')
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
     t = threading.Thread(target=run_evt_loop, args=(loop,))
     t.start()
     WS_HOST = os.environ["WEBSOCKET_HOST"]
