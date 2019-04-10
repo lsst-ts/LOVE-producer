@@ -16,7 +16,7 @@ pipeline {
       }
       steps {
         script {
-          dockerImage = docker.build(dockerImageName, "./telemetry-producer")
+          dockerImage = docker.build(dockerImageName, "./")
         }
       }
     }
