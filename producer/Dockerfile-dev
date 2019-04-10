@@ -1,0 +1,8 @@
+FROM lsst/queue:latest
+
+WORKDIR /usr/src/love
+COPY producer/requirements.txt .
+RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
+
+WORKDIR /home/saluser
+ENTRYPOINT ["/usr/src/love/start-daemon.sh"]
