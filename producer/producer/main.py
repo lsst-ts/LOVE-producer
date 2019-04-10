@@ -8,8 +8,8 @@ import os
 
 import threading
 
-from producer import Producer
-from producer_scriptqueue import ScriptQueueProducer
+from telemetries_events.producer import Producer
+from scriptqueue.producer import ScriptQueueProducer
 import json
 import asyncio
 import pprint
