@@ -54,11 +54,11 @@ def on_ws_open(ws, message_getters):
     """
 
     producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws,m))
-    producer_scriptqueue.update()
 
     print('ws started to open')
     def run(*args):
         print('start message loop')
+        producer_scriptqueue.update()
         while True:
             for get_message in message_getters:
                 message = get_message()
@@ -71,11 +71,14 @@ def on_ws_open(ws, message_getters):
     thread.start_new_thread(run, ())
     print("open")
     
+def run_evt_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
 if __name__=='__main__':
     print('--main--')
-    loop = asyncio.get_event_loop()
-    t = threading.Thread(
-        target = lambda : loop.run_forever())
+    loop = asyncio.new_event_loop()
+    t = threading.Thread(target=run_evt_loop, args=(loop,))
     t.start()
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
