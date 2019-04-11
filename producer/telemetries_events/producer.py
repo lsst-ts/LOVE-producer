@@ -20,16 +20,23 @@ class Producer:
         self.remote_list = []
         self.controller_list = []
 
-        sal_lib_list = [importlib.import_module(line.rstrip('\n')) for line in open('/usr/src/love/sallibs.config')]
-        for i in range(len(sal_lib_list)):
-            sal_lib = sal_lib_list[i]
-            t = threading.Thread(target=self.add_remote_in_thread, args=[sal_lib, loop])
+        sal_lib_param_list = [line.rstrip('\n') for line in open('/usr/src/love/sallibs.config')]
+        for i in range(len(sal_lib_param_list)):
+            sal_lib_params = sal_lib_param_list[i].split(' ')
+            sal_lib_name = sal_lib_params[0]
+            index = 0
+            print(sal_lib_params)
+            if len(sal_lib_params) > 1:
+                [sal_lib_name, index] = sal_lib_params
+            index = int(index)
+            sal_lib = importlib.import_module(sal_lib_name)
+            t = threading.Thread(target=self.add_remote_in_thread, args=[sal_lib, self.loop, index])
             t.start()
 
 
-    def add_remote_in_thread(self, sal_lib, loop):
+    def add_remote_in_thread(self, sal_lib, loop, index):
         asyncio.set_event_loop(loop)
-        remote, controller = self.create_remote_and_controller(sal_lib)
+        remote, controller = self.create_remote_and_controller(sal_lib, index)
         self.remote_list.append(remote)        
         self.controller_list.append(controller)
         self.launch_emitter_forever(controller)
@@ -78,15 +85,15 @@ class Producer:
             values[evt] = evt_results
         return values
 
-    def create_remote_and_controller(self, sallib):
+    def create_remote_and_controller(self, sallib, index):
         """
         
         """
         print("\n make remote", sallib)
-        remote = salobj.Remote(sallib, 0)
+        remote = salobj.Remote(sallib, index)
         
         print("make controller", sallib)
-        controller = salobj.Controller(sallib, 0)
+        controller = salobj.Controller(sallib, index)
 
         return remote, controller
 
