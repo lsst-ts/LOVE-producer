@@ -10,6 +10,7 @@ import threading
 
 from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
+from heartbeats.producer import HeartbeatProducer
 import json
 import asyncio
 import pprint
@@ -54,10 +55,12 @@ def on_ws_open(ws, message_getters, loop):
     """
 
     producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws,m))
+    producer_heartbeat = HeartbeatProducer(loop, lambda m: send_message_callback(ws,m))
 
     print('ws started to open')
     def run(*args):
         asyncio.set_event_loop(args[0])
+        producer_heartbeat.start()
         while True:
             producer_scriptqueue.update()
             for get_message in message_getters:
