@@ -274,7 +274,7 @@ class ScriptQueueProducer:
         if(asyncio.iscoroutine(task)):
             asyncio.run_coroutine_threadsafe(task, self.loop)
         elif asyncio.isfuture(task):
-            asyncio.gather(task, loop=self.loop)
+            asyncio.gather(task, loop=self.loop, return_exceptions=True)
         else:
             print('Unknown task type: ', task)
 

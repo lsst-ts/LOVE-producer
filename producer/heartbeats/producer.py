@@ -15,6 +15,7 @@ from utils import NumpyEncoder
 import logging
 import datetime
 import importlib
+import random
 
 
 class HeartbeatProducer:
@@ -47,7 +48,7 @@ class HeartbeatProducer:
         if(asyncio.iscoroutine(task)):
             asyncio.run_coroutine_threadsafe(task, self.loop)
         elif asyncio.isfuture(task):
-            asyncio.gather(task, loop=self.loop)
+            asyncio.gather(task, loop=self.loop, return_exceptions=True)
         else:
             print('Unknown task type: ', task)
         
@@ -73,6 +74,9 @@ class HeartbeatProducer:
         timestamp = -1
         while True:
             try:
+                # if random.random() > 0.2:
+                #     await asyncio.sleep(2)
+                #     raise asyncio.TimeoutError('sadsa')
                 await remote.evt_heartbeat.next(flush=False, timeout=self.heartbeat_timeout)
                 nlost_subsequent = 0
                 timestamp = datetime.datetime.now().timestamp()

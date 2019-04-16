@@ -1,6 +1,7 @@
 import random
 import time
 import numpy as np
+import asyncio
 
 def randomize_single_value(value):
     if isinstance(value, (int, np.integer)):
@@ -34,9 +35,9 @@ def emit(controller, test_seed=None):
         randomize_params(data_output)
         evt_controller.put(data_output)
 
-def emit_forever(controller, frequency):
+def emit_forever(controller, frequency, loop):
+    asyncio.set_event_loop(loop)
     period = 1/frequency
     while True:
         time.sleep(period)
-        print('not emitting events')
-        # emit(controller)
+        emit(controller)

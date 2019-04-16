@@ -39,7 +39,6 @@ class Producer:
         remote, controller = self.create_remote_and_controller(sal_lib, index)
         self.remote_list.append(remote)        
         self.controller_list.append(controller)
-        self.launch_emitter_forever(controller)
 
 
     def getDataType(self, value):
@@ -96,32 +95,6 @@ class Producer:
         controller = salobj.Controller(sallib, index)
 
         return remote, controller
-
-    def launch_emitter_once(self, controller, test_seed=None):
-        """
-            Launches an emitter that fills the data to be read
-            later in the salobj remote
-        """
-        import eventlet
-        eventlet.monkey_patch()
-        from emitter import emit
-        from event_emitter import emit as emit_event
-        freq = 0.5
-        eventlet.spawn(emit, controller, test_seed)
-        eventlet.spawn(emit_event, controller, freq)
-
-    def launch_emitter_forever(self, controller):
-        """
-            Launches an emitter that fills the data to be read
-            later in the salobj remote
-        """
-        import eventlet
-        eventlet.monkey_patch()
-        from emitter import emit_forever
-        from event_emitter import emit_forever as emit_event_forever
-        freq = 0.5
-        eventlet.spawn(emit_forever, controller, freq)
-        eventlet.spawn(emit_event_forever, controller, freq)
 
     def get_telemetry_message(self):
         output_dict = {}
