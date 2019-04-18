@@ -108,6 +108,12 @@ class ScriptQueueProducer:
             if not salindex in self.scripts or not self.scripts[salindex]["setup"]: 
                 self.setup_script(salindex)
                 self.query_script_info(salindex)        
+
+        # a script in the producer that is not in the queue
+        # is a sign of a queue restart
+        for salindex in self.scripts:
+            if salindex not in scripts:
+                del self.scripts[salindex]
        
     def available_scripts_callback(self, event):       
         self.state["available_scripts"] = []
