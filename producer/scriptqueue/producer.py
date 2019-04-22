@@ -140,11 +140,16 @@ class ScriptQueueProducer:
         if(not event.salIndex in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
 
-        self.scripts[event.salIndex]["elapsed_time"] = event.duration
+        # self.scripts[event.salIndex]["elapsed_time"] = event.duration
         self.scripts[event.salIndex]["type"] = "standard" if event.isStandard else "external"
         self.scripts[event.salIndex]["path"] = event.path
         self.scripts[event.salIndex]["process_state"] = ScriptProcessState(event.processState).name
         self.scripts[event.salIndex]["script_state"] = ScriptState(event.scriptState).name
+        self.scripts[event.salIndex]["timestampConfigureEnd"] = event.timestampConfigureEnd
+        self.scripts[event.salIndex]["timestampConfigureStart"] = event.timestampConfigureStart
+        self.scripts[event.salIndex]["timestampProcessEnd"] = event.timestampProcessEnd
+        self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
+        self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
     
     def setup_script(self, salindex):
         remote = salobj.Remote(SALPY_Script, salindex)
@@ -175,7 +180,12 @@ class ScriptQueueProducer:
             "path": default,
             "lost_heartbeats": 0,
             "setup": False, # flag to trigger show_script only once,
-            "last_heartbeat_timestamp": 0
+            "last_heartbeat_timestamp": 0,
+            "timestampConfigureEnd" : 0,
+            "timestampConfigureStart" : 0,
+            "timestampProcessEnd" : 0,
+            "timestampProcessStart" : 0,
+            "timestampRunStart" : 0
         }        
 
     def parse_script(self, script):

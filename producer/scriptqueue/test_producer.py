@@ -4,8 +4,18 @@ import asyncio
 from lsst.ts.scriptqueue import ScriptProcessState ,ScriptState
 import time
 
-rq = salobj.Remote(SALPY_ScriptQueue, 1)
+from scriptqueue.producer import ScriptQueueProducer
+import threading
+import pprint
+import json
 loop = asyncio.get_event_loop()
+t = threading.Thread(target = lambda : loop.run_forever())
+t.start()
+
+def send(x):
+    pprint.pprint(json.loads(x["data"]["ScriptQueueState"]))
+
+sqp = ScriptQueueProducer(loop, send)
 
 async def coro():
     result = await rq.evt_script.next(flush=True)
@@ -26,10 +36,6 @@ async def coro():
 while True:
     loop.run_until_complete(coro())
     time.sleep(1)
-# loop = asyncio.get_event_loop()
-# t = threading.Thread(
-#     target = lambda : loop.run_forever())
-# t.start()
 
 # sqp = ScriptQueueProducer(loop, lambda x:x)
 
