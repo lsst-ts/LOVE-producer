@@ -1,4 +1,4 @@
-FROM lsst/queue:latest
+FROM lsstts/develop-env:latest
 
 WORKDIR /usr/src/love
 COPY producer/requirements.txt .
