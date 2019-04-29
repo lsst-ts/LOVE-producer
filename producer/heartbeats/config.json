@@ -1,0 +1,50 @@
+{
+  "ATArchiver": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "ATCamera": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "ATHeaderService": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "ATMonochromator": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "ATPtg": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "Electrometer": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "Environment": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "FiberSpectrograph": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "LinearStage": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "ScriptQueue 1": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "Test": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  },
+  "TunableLaser": {
+    "max_lost_heartbeats": 5,
+    "heartbeat_timeout": 15
+  }
+}

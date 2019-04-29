@@ -8,7 +8,6 @@ import json
 
 from lsst.ts import salobj
 from lsst.ts.scriptqueue import ScriptProcessState ,ScriptState
-from lsst.ts.scriptqueue.base_script import HEARTBEAT_INTERVAL
 import asyncio
 import pprint
 from utils import NumpyEncoder
@@ -23,7 +22,7 @@ class HeartbeatProducer:
     def __init__(self, loop, send_heartbeat):
         self.loop = loop
         self.send_heartbeat = send_heartbeat
-        self.heartbeat_timeout = 3*HEARTBEAT_INTERVAL
+        self.heartbeat_params = json.loads(open('/usr/src/love/heartbeats/config.json').read())
 
     def start(self):
         sal_lib_param_list = [line.rstrip('\n') for line in open('/usr/src/love/sallibs.config')]
@@ -56,7 +55,8 @@ class HeartbeatProducer:
         heartbeat = {
             remote_name: {
                 'lost': nlost_subsequent,
-                'last_heartbeat_timestamp': timestamp
+                'last_heartbeat_timestamp': timestamp,
+                'max_lost_heartbeats': self.heartbeat_params[remote_name]
             }
         }        
 
@@ -71,13 +71,15 @@ class HeartbeatProducer:
     async def monitor_remote_heartbeat(self, remote):
         nlost_subsequent = 0
         remote_name = remote.salinfo.name
+        timeout = self.heartbeat_params[remote_name]
+
         timestamp = -1
         while True:
             try:
                 # if random.random() > 0.2:
                 #     await asyncio.sleep(2)
-                #     raise asyncio.TimeoutError('sadsa')
-                await remote.evt_heartbeat.next(flush=False, timeout=self.heartbeat_timeout)
+                #     raise asyncio.TimeoutError('sadsa')                
+                await remote.evt_heartbeat.next(flush=False, timeout=timeout)
                 nlost_subsequent = 0
                 timestamp = datetime.datetime.now().timestamp()
             except asyncio.TimeoutError:
