@@ -7,13 +7,6 @@ RUN source /opt/lsst/software/stack/loadLSST.bash && setup lsst_distrib && \
     scons && \
     make_salpy_libs.py ATDome ATMCS
 
-RUN source /opt/lsst/software/stack/loadLSST.bash && setup lsst_distrib && \
-    source /home/saluser/repos/ts_sal/setup.env && \
-    eups declare -r . ts_sal -t current && \
-    setup ts_sal -t current && \
-    scons && \
-    make_salpy_libs.py ATDome ATMCS
-
 WORKDIR /usr/src/love
 COPY producer/requirements.txt .
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
