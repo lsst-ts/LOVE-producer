@@ -31,7 +31,7 @@ def send_message_callback(ws, message):
     """
         Callback that parses a dictionary (message)
         into a JSON string and sends it through websockets
-        
+
         message : dict
     """
     ws.send(json.dumps(message))
@@ -44,9 +44,9 @@ def on_ws_open(ws, message_getters, loop):
         when the on_open event callback is called.
 
         parameters:
-            
+
         ws: websocket.WebSocket object
-        message_getters: list of functions such that each one returns a dict 
+        message_getters: list of functions such that each one returns a dict
         with this structure:
             {
                 'category': 'event',
@@ -66,13 +66,13 @@ def on_ws_open(ws, message_getters, loop):
             for get_message in message_getters:
                 message = get_message()
                 ws.send(json.dumps(message))
-            time.sleep(2)            
+            time.sleep(2)
         time.sleep(1)
         ws.close()
         print("thread terminating...")
     thread.start_new_thread(run, (loop,))
     print("open")
-    
+
 def run_evt_loop(loop):
     loop.run_forever()
 
@@ -89,7 +89,7 @@ if __name__=='__main__':
                             on_message = on_ws_message,
                             on_error = on_ws_error,
                             on_close = on_ws_close)
-    
+
     producer = Producer(loop)
 
 
