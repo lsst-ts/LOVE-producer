@@ -1,4 +1,4 @@
-FROM lsstts/develop-env:latest
+FROM lsstts/develop-env:develop
 WORKDIR /home/saluser/repos/ts_sal
 RUN source /opt/lsst/software/stack/loadLSST.bash && setup lsst_distrib && \
     source /home/saluser/repos/ts_sal/setup.env && \
