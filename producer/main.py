@@ -37,7 +37,9 @@ def send_message_callback(ws, message):
     ws.send(json.dumps(message))
 
 
+running = False
 def on_ws_open(ws, message_getters, loop):
+    global running
     """
         Starts sending messages through a websocket connection
         every through seconds, from a list of messages
@@ -66,11 +68,14 @@ def on_ws_open(ws, message_getters, loop):
             for get_message in message_getters:
                 message = get_message()
                 ws.send(json.dumps(message))
-            time.sleep(2)            
+            time.sleep(2)
         time.sleep(1)
         ws.close()
         print("thread terminating...")
-    thread.start_new_thread(run, (loop,))
+
+    if not running: 
+        thread.start_new_thread(run, (loop,))
+        running = True
     print("open")
     
 def run_evt_loop(loop):
