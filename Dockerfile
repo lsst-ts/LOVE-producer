@@ -1,4 +1,4 @@
-FROM lsstts/develop-env:latest
+FROM lsstts/develop-env:develop
 WORKDIR /home/saluser/repos/ts_sal
 RUN source /opt/lsst/software/stack/loadLSST.bash && setup lsst_distrib && \
     source /home/saluser/repos/ts_sal/setup.env && \
@@ -12,7 +12,5 @@ COPY producer/requirements.txt .
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
 
 COPY producer .
-RUN find . | grep -E "(_pycache_|\.pyc|\.pyo$)" | xargs rm -rf
-
 WORKDIR /home/saluser
 ENTRYPOINT ["/usr/src/love/start-daemon.sh"]
