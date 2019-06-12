@@ -111,7 +111,7 @@ class ScriptQueueProducer:
 
         # a script in the producer that is not in the queue
         # is a sign of a queue restart
-        for salindex in self.scripts:
+        for salindex in list(self.scripts):
             if salindex not in scripts:
                 del self.scripts[salindex]
        
