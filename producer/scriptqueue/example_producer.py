@@ -1,24 +1,27 @@
-from lsst.ts import salobj
-import SALPY_ScriptQueue
 import asyncio
-from lsst.ts.scriptqueue import ScriptProcessState ,ScriptState
-import time
-
-from scriptqueue.producer import ScriptQueueProducer
-import threading
-import pprint
 import json
+import pprint
+import time
+import threading
+from lsst.ts.scriptqueue import ScriptProcessState, ScriptState
+from scriptqueue.producer import ScriptQueueProducer
+# from lsst.ts import salobj
+# import SALPY_ScriptQueue
+
 loop = asyncio.get_event_loop()
-t = threading.Thread(target = lambda : loop.run_forever())
+t = threading.Thread(target=lambda: loop.run_forever())
 t.start()
+
 
 def send(x):
     pprint.pprint(json.loads(x["data"]["ScriptQueueState"]))
 
+
 sqp = ScriptQueueProducer(loop, send)
 
+
 async def coro():
-    result = await rq.evt_script.next(flush=True)
+    result = await sqp.queue.evt_script.next(flush=True)
     print('\n\n\n')
     print('salIndex', result.salIndex)
     print('cmdId', result.cmdId)
@@ -55,8 +58,3 @@ while True:
 
 # while True:
 #     time.sleep(2)
-
-
-
-# from lsst.ts import salobj
-# import SALPY_ScriptQueue
