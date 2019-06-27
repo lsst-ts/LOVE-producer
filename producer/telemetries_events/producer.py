@@ -13,24 +13,22 @@ class Producer:
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
-    def __init__(self, loop):
+    def __init__(self, loop, csc_list):
         self.loop = loop
         self.remote_list = []
         self.controller_list = []
 
-        sal_lib_param_list = [line.rstrip('\n') for line in open(
-            '/usr/src/love/sallibs.config')]
-        for i in range(len(sal_lib_param_list)):
-            sal_lib_params = sal_lib_param_list[i].split(' ')
+        for i in range(len(csc_list)):
+            sal_lib_params = csc_list[i]
             sal_lib_name = sal_lib_params[0]
             index = 0
-            print(sal_lib_params)
+            print('- Listening to telemetries from CSC: ', sal_lib_params)
             if len(sal_lib_params) > 1:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
+            sal_lib_name = 'SALPY_' + sal_lib_name
             sal_lib = importlib.import_module(sal_lib_name)
-            t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 sal_lib, self.loop, index])
+            t = threading.Thread(target=self.add_remote_in_thread, args=[sal_lib, self.loop, index])
             t.start()
 
     def add_remote_in_thread(self, sal_lib, loop, index):
