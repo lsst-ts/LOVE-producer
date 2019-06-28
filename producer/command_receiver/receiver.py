@@ -9,15 +9,13 @@ class Receiver:
         Class that creates remote objects using the salobj library
     """
 
-    def __init__(self, loop, domain):
+    def __init__(self, loop, domain, csc_list):
         self.loop = loop
         self.remote_list = []
         self.remote_dict = {}
 
-        sal_lib_param_list = [line.rstrip('\n') for line in open(
-            '/usr/src/love/sallibs.config')]
-        for i in range(len(sal_lib_param_list)):
-            sal_lib_params = sal_lib_param_list[i].split(' ')
+        for i in range(len(csc_list)):
+            sal_lib_params = csc_list[i]
             sal_lib_name = sal_lib_params[0]
             index = 0
             if len(sal_lib_params) > 1:
@@ -37,7 +35,7 @@ class Receiver:
 
     def add_remote_in_thread(self, loop, index, sal_lib_name, domain):
         asyncio.set_event_loop(loop)
-        remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
+        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
 
         self.remote_list.append(remote)
         self.remote_dict[sal_lib_name] = remote
@@ -48,7 +46,7 @@ class Receiver:
             cmd_name = data['cmd']
             component_name = data['component']
             params = data['params']
-            remote = self.remote_dict['SALPY_'+component_name]
+            remote = self.remote_dict[component_name]
             t = threading.Thread(target=lambda remote, cmd_name, params, loop:
                                  self.run(self.execute_command(remote, cmd_name, params, loop)), args=[
                                      remote, cmd_name, params, self.loop])
@@ -58,7 +56,7 @@ class Receiver:
             print(e)
 
     async def execute_command(self, remote, cmd_name, params, loop):
-        print('\Executing command')
+        print('\nExecuting command')
         asyncio.set_event_loop(loop)
         try:
             cmd = getattr(remote, cmd_name)

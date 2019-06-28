@@ -8,10 +8,11 @@ from utils import NumpyEncoder
 
 class HeartbeatProducer:
 
-    def __init__(self, loop, domain, send_heartbeat):
+    def __init__(self, loop, domain, send_heartbeat, csc_list):
         self.loop = loop
         self.send_heartbeat = send_heartbeat
         self.domain = domain
+        self.csc_list = csc_list
         self.heartbeat_params = json.loads(
             open('/usr/src/love/heartbeats/config.json').read())
 

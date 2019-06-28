@@ -45,7 +45,7 @@ def send_message_callback(ws, message):
 running = False
 
 
-def on_ws_open(ws, message_getters, loop, csc_list, sq_list):
+def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     global running
     """ Starts sending messages through a websocket connection every through seconds,
     from a list of messages when the on_open event callback is called.
@@ -61,15 +61,15 @@ def on_ws_open(ws, message_getters, loop, csc_list, sq_list):
             'data' : { .... }
         }
     """
+    print('ws started to open')
 
     producer_heartbeat = HeartbeatProducer(loop, domain, lambda m: send_message_callback(ws, m), csc_list)
-    # producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws, m))
+    print('Heartbeat producer created')
 
     producer_scriptqueues = [
         ScriptQueueProducer(loop, domain, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
     ]
-
-    print('ws started to open')
+    print('ScriptQueue producers created')
 
     # Accept commands
     ws.send(json.dumps({'option': 'cmd_subscribe'}))
@@ -78,7 +78,6 @@ def on_ws_open(ws, message_getters, loop, csc_list, sq_list):
         asyncio.set_event_loop(args[0])
         producer_heartbeat.start()
         while True:
-            # producer_scriptqueue.update()
             for producer_scriptqueue in producer_scriptqueues:
                 producer_scriptqueue.update()
             for get_message in message_getters:
@@ -146,7 +145,7 @@ if __name__ == '__main__':
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
-    receiver = Receiver(loop, domain)
+    receiver = Receiver(loop, domain, csc_list)
 
     ws = websocket.WebSocketApp(
         url,
@@ -160,7 +159,7 @@ if __name__ == '__main__':
         producer.get_events_message
     ]
 
-    ws.on_open = lambda ws: on_ws_open(ws, message_getters, loop, csc_list, sq_list)
+    ws.on_open = lambda ws: on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list)
     ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver)
 
     # Emitter

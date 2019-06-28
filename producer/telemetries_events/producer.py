@@ -82,7 +82,7 @@ class Producer:
 
         """
         print("\n make remote", sal_lib_name)
-        remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
+        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
         return remote
 
     def get_telemetry_message(self):
