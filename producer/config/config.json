@@ -8,11 +8,7 @@
   "ScriptQueue": [
     {
       "index": 1,
-      "source": "emitter"
-    },
-    {
-      "index": 2,
-      "source": "emitter"
+      "source": "command_sim"
     }
   ]
 }
