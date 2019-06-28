@@ -2,11 +2,10 @@ import asyncio
 import datetime
 import json
 import logging
-import SALPY_Script
-import SALPY_ScriptQueue
 from lsst.ts import salobj
-from lsst.ts.scriptqueue import ScriptProcessState, ScriptState
 from lsst.ts.scriptqueue.base_script import HEARTBEAT_INTERVAL
+from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
+from lsst.ts.idl.enums.Script import ScriptState
 from utils import NumpyEncoder
 
 
@@ -34,7 +33,10 @@ class ScriptQueueProducer:
 
     def setup(self):
         # create queue remote
-        self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
+        # self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
+        domain = salobj.Domain()
+        self.queue = salobj.Remote(domain=domain, name="ScriptQueue", index=1)
+        
         self.set_callback(self.queue.evt_queue, self.queue_callback)
         self.set_callback(self.queue.evt_availableScripts, self.available_scripts_callback)
         self.set_callback(self.queue.evt_script, self.queue_script_callback)
@@ -126,8 +128,9 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
     def setup_script(self, salindex):
-        remote = salobj.Remote(SALPY_Script, salindex)
-
+        domain = salobj.Domain()
+        remote = salobj.Remote(domain=domain, name="Script", index=salindex)
+        
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["remote"] = remote

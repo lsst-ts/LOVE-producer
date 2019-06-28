@@ -1,5 +1,4 @@
 import asyncio
-import importlib
 import json
 import numpy as np
 import threading
@@ -9,14 +8,13 @@ from lsst.ts import salobj
 
 class Producer:
     """
-        Class that creates remote and controller objects using the salobj library
+        Class that creates remote objects using the salobj library
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
     def __init__(self, loop):
         self.loop = loop
         self.remote_list = []
-        self.controller_list = []
 
         sal_lib_param_list = [line.rstrip('\n') for line in open(
             '/usr/src/love/sallibs.config')]
@@ -28,16 +26,14 @@ class Producer:
             if len(sal_lib_params) > 1:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
-            sal_lib = importlib.import_module(sal_lib_name)
             t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 sal_lib, self.loop, index])
+                                 self.loop, index, sal_lib_name])
             t.start()
 
-    def add_remote_in_thread(self, sal_lib, loop, index):
+    def add_remote_in_thread(self, loop, index, sal_lib_name):
         asyncio.set_event_loop(loop)
-        remote, controller = self.create_remote_and_controller(sal_lib, index)
+        remote = self.create_remote(index, sal_lib_name)
         self.remote_list.append(remote)
-        self.controller_list.append(controller)
 
     def getDataType(self, value):
         if isinstance(value, (list, tuple, np.ndarray)):
@@ -51,21 +47,21 @@ class Producer:
         return 'None'
 
     def get_remote_tel_values(self, remote):
-        tel_names = remote.salinfo.manager.getTelemetryNames()
+        tel_names = remote.salinfo.telemetry_names
         values = {}
         for tel in tel_names:
             tel_remote = getattr(remote, "tel_" + tel)
             data = tel_remote.get()
             if data is None:
                 continue
-            tel_parameters = [x for x in dir(data) if not x.startswith('__')]
+            tel_parameters = list(data._member_attributes)
             tel_result = {p: {'value': getattr(data, p), 'dataType': self.getDataType(
                 getattr(data, p))} for p in tel_parameters}
             values[tel] = tel_result
         return values
 
     def get_remote_event_values(self, remote):
-        evt_names = remote.salinfo.manager.getEventNames()
+        evt_names = remote.salinfo.event_names
         values = {}
         for evt in evt_names:
             evt_remote = getattr(remote, "evt_" + evt)
@@ -74,8 +70,7 @@ class Producer:
                 data = evt_remote.get_oldest()
                 if data is None:
                     break
-                evt_parameters = [x for x in dir(
-                    data) if not x.startswith('__')]
+                evt_parameters = list(data._member_attributes)
                 evt_result = {p: {'value': getattr(data, p), 'dataType': self.getDataType(
                     getattr(data, p))} for p in evt_parameters}
                 evt_results.append(evt_result)
@@ -84,15 +79,14 @@ class Producer:
             values[evt] = evt_results
         return values
 
-    def create_remote_and_controller(self, sallib, index):
+    def create_remote(self, index, sal_lib_name):
         """
 
         """
-        print("\n make remote", sallib)
-        remote = salobj.Remote(sallib, index)
-        print("make controller", sallib)
-        controller = salobj.Controller(sallib, index)
-        return remote, controller
+        print("\n make remote", sal_lib_name)
+        domain = salobj.Domain()
+        remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
+        return remote
 
     def get_telemetry_message(self):
         output_dict = {}

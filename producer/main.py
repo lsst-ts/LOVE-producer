@@ -11,11 +11,12 @@ except ImportError:
 from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
+from command_receiver.receiver import Receiver
 
 
-def on_ws_message(ws, message):
+def on_ws_message(ws, message, receiver):
     print("### message ###")
-    print(message)
+    receiver.process_message(message, ws)
 
 
 def on_ws_error(ws, error):
@@ -65,6 +66,9 @@ def on_ws_open(ws, message_getters, loop):
 
     print('ws started to open')
 
+    # Accept commands
+    ws.send(json.dumps({'option': 'cmd_subscribe'}))
+
     def run(*args):
         asyncio.set_event_loop(args[0])
         producer_heartbeat.start()
@@ -97,9 +101,10 @@ if __name__ == '__main__':
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     # websocket.enableTrace(True)
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+    receiver = Receiver(loop)
+
     ws = websocket.WebSocketApp(
         url,
-        on_message=on_ws_message,
         on_error=on_ws_error,
         on_close=on_ws_close)
 
@@ -111,7 +116,7 @@ if __name__ == '__main__':
     ]
 
     ws.on_open = lambda ws: on_ws_open(ws, message_getters, loop)
-
+    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver)
     # Emitter
     while True:
         # print('loop')
