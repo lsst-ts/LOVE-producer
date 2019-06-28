@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import importlib
 import json
 import threading
 from lsst.ts import salobj
@@ -9,10 +8,10 @@ from utils import NumpyEncoder
 
 class HeartbeatProducer:
 
-    def __init__(self, loop, send_heartbeat, csc_list):
+    def __init__(self, loop, domain, send_heartbeat):
         self.loop = loop
         self.send_heartbeat = send_heartbeat
-        self.csc_list = csc_list
+        self.domain = domain
         self.heartbeat_params = json.loads(
             open('/usr/src/love/heartbeats/config.json').read())
 
@@ -25,15 +24,15 @@ class HeartbeatProducer:
             if len(sal_lib_params) > 1:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
-            sal_lib_name = 'SALPY_' + sal_lib_name
-            sal_lib = importlib.import_module(sal_lib_name)
             t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 sal_lib, self.loop, index])
+                                 self.loop, index, sal_lib_name])
             t.start()
 
-    def add_remote_in_thread(self, sal_lib, loop, index):
+    def add_remote_in_thread(self, loop, index, sal_lib_name):
         asyncio.set_event_loop(loop)
-        remote = salobj.Remote(sal_lib, index)
+
+        domain = self.domain
+        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
         self.run(self.monitor_remote_heartbeat(remote))
 
     def run(self, task):

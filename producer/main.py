@@ -8,14 +8,16 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+from lsst.ts import salobj
 from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
+from command_receiver.receiver import Receiver
 
 
-def on_ws_message(ws, message):
+def on_ws_message(ws, message, receiver):
     print("### message ###")
-    print(message)
+    receiver.process_message(message, ws)
 
 
 def on_ws_error(ws, error):
@@ -60,14 +62,17 @@ def on_ws_open(ws, message_getters, loop, csc_list, sq_list):
         }
     """
 
-    producer_heartbeat = HeartbeatProducer(loop, lambda m: send_message_callback(ws, m), csc_list)
+    producer_heartbeat = HeartbeatProducer(loop, domain, lambda m: send_message_callback(ws, m), csc_list)
     # producer_scriptqueue = ScriptQueueProducer(loop, lambda m: send_message_callback(ws, m))
 
     producer_scriptqueues = [
-        ScriptQueueProducer(loop, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
+        ScriptQueueProducer(loop, domain, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
     ]
 
     print('ws started to open')
+
+    # Accept commands
+    ws.send(json.dumps({'option': 'cmd_subscribe'}))
 
     def run(*args):
         asyncio.set_event_loop(args[0])
@@ -135,17 +140,20 @@ if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     t = threading.Thread(target=run_evt_loop, args=(loop,))
     t.start()
+    print('Creating domain')
+    domain = salobj.Domain()
+
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-    # websocket.enableTrace(True)
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+    receiver = Receiver(loop, domain)
+
     ws = websocket.WebSocketApp(
         url,
-        on_message=on_ws_message,
         on_error=on_ws_error,
         on_close=on_ws_close)
 
-    producer = Producer(loop, csc_list)
+    producer = Producer(loop, domain, csc_list)
 
     message_getters = [
         producer.get_telemetry_message,
@@ -153,6 +161,7 @@ if __name__ == '__main__':
     ]
 
     ws.on_open = lambda ws: on_ws_open(ws, message_getters, loop, csc_list, sq_list)
+    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver)
 
     # Emitter
     while True:
