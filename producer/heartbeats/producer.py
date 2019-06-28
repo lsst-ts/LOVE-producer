@@ -8,9 +8,10 @@ from utils import NumpyEncoder
 
 class HeartbeatProducer:
 
-    def __init__(self, loop, send_heartbeat):
+    def __init__(self, loop, domain, send_heartbeat):
         self.loop = loop
         self.send_heartbeat = send_heartbeat
+        self.domain = domain
         self.heartbeat_params = json.loads(
             open('/usr/src/love/heartbeats/config.json').read())
 
@@ -32,7 +33,7 @@ class HeartbeatProducer:
     def add_remote_in_thread(self, loop, index, sal_lib_name):
         asyncio.set_event_loop(loop)
 
-        domain = salobj.Domain()
+        domain = self.domain
         remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
         self.run(self.monitor_remote_heartbeat(remote))
 

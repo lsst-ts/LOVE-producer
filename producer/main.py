@@ -8,6 +8,7 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+from lsst.ts import salobj
 from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
@@ -60,9 +61,9 @@ def on_ws_open(ws, message_getters, loop):
     """
 
     producer_scriptqueue = ScriptQueueProducer(
-        loop, lambda m: send_message_callback(ws, m))
+        loop, domain, lambda m: send_message_callback(ws, m))
     producer_heartbeat = HeartbeatProducer(
-        loop, lambda m: send_message_callback(ws, m))
+        loop, domain, lambda m: send_message_callback(ws, m))
 
     print('ws started to open')
 
@@ -92,23 +93,25 @@ def run_evt_loop(loop):
     loop.run_forever()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     print('--main--')
     loop = asyncio.get_event_loop()
     t = threading.Thread(target=run_evt_loop, args=(loop,))
     t.start()
+    print('Creating domain')
+    domain = salobj.Domain()
+
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-    # websocket.enableTrace(True)
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
-    receiver = Receiver(loop)
+    receiver = Receiver(loop, domain)
 
     ws = websocket.WebSocketApp(
         url,
         on_error=on_ws_error,
         on_close=on_ws_close)
 
-    producer = Producer(loop)
+    producer = Producer(loop, domain)
 
     message_getters = [
         producer.get_telemetry_message,

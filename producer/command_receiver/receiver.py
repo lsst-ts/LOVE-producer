@@ -9,7 +9,7 @@ class Receiver:
         Class that creates remote objects using the salobj library
     """
 
-    def __init__(self, loop):
+    def __init__(self, loop, domain):
         self.loop = loop
         self.remote_list = []
         self.remote_dict = {}
@@ -24,7 +24,7 @@ class Receiver:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
             t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 self.loop, index, sal_lib_name])
+                                 self.loop, index, sal_lib_name, domain])
             t.start()
 
     def run(self, task):
@@ -35,9 +35,8 @@ class Receiver:
         else:
             print('Unknown task type: ', task)
 
-    def add_remote_in_thread(self, loop, index, sal_lib_name):
+    def add_remote_in_thread(self, loop, index, sal_lib_name, domain):
         asyncio.set_event_loop(loop)
-        domain = salobj.Domain()
         remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
 
         self.remote_list.append(remote)

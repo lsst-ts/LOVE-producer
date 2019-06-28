@@ -12,7 +12,7 @@ class Producer:
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
-    def __init__(self, loop):
+    def __init__(self, loop, domain):
         self.loop = loop
         self.remote_list = []
 
@@ -27,12 +27,12 @@ class Producer:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
             t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 self.loop, index, sal_lib_name])
+                                 self.loop, index, sal_lib_name, domain])
             t.start()
 
-    def add_remote_in_thread(self, loop, index, sal_lib_name):
+    def add_remote_in_thread(self, loop, index, sal_lib_name, domain):
         asyncio.set_event_loop(loop)
-        remote = self.create_remote(index, sal_lib_name)
+        remote = self.create_remote(index, sal_lib_name, domain)
         self.remote_list.append(remote)
 
     def getDataType(self, value):
@@ -79,12 +79,11 @@ class Producer:
             values[evt] = evt_results
         return values
 
-    def create_remote(self, index, sal_lib_name):
+    def create_remote(self, index, sal_lib_name, domain):
         """
 
         """
         print("\n make remote", sal_lib_name)
-        domain = salobj.Domain()
         remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
         return remote
 

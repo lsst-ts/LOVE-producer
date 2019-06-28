@@ -10,10 +10,11 @@ from utils import NumpyEncoder
 
 
 class ScriptQueueProducer:
-    def __init__(self, loop, send_state):
+    def __init__(self, loop, domain, send_state):
         self.log = logging.getLogger(__name__)
         self.send_state = send_state
         self.loop = loop
+        self.domain = domain
         self.scripts_remotes = {}
         self.scripts_durations = {}
         self.max_lost_heartbeats = 5
@@ -34,7 +35,7 @@ class ScriptQueueProducer:
     def setup(self):
         # create queue remote
         # self.queue = salobj.Remote(SALPY_ScriptQueue, 1)
-        domain = salobj.Domain()
+        domain = self.domain
         self.queue = salobj.Remote(domain=domain, name="ScriptQueue", index=1)
         
         self.set_callback(self.queue.evt_queue, self.queue_callback)
@@ -128,7 +129,7 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
     def setup_script(self, salindex):
-        domain = salobj.Domain()
+        domain = self.domain
         remote = salobj.Remote(domain=domain, name="Script", index=salindex)
         
         self.scripts[salindex] = self.new_empty_script()
