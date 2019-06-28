@@ -1,0 +1,14 @@
+{
+  "ATDome": [
+    {
+      "index": 1,
+      "source": "command_sim"
+    }
+  ],
+  "ScriptQueue": [
+    {
+      "index": 1,
+      "source": "command_sim"
+    }
+  ]
+}

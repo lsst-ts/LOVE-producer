@@ -12,17 +12,15 @@ class Producer:
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
-    def __init__(self, loop, domain):
+    def __init__(self, loop, domain, csc_list):
         self.loop = loop
         self.remote_list = []
 
-        sal_lib_param_list = [line.rstrip('\n') for line in open(
-            '/usr/src/love/sallibs.config')]
-        for i in range(len(sal_lib_param_list)):
-            sal_lib_params = sal_lib_param_list[i].split(' ')
+        for i in range(len(csc_list)):
+            sal_lib_params = csc_list[i]
             sal_lib_name = sal_lib_params[0]
             index = 0
-            print(sal_lib_params)
+            print('- Listening to telemetries from CSC: ', sal_lib_params)
             if len(sal_lib_params) > 1:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
@@ -84,7 +82,7 @@ class Producer:
 
         """
         print("\n make remote", sal_lib_name)
-        remote = salobj.Remote(domain=domain, name=sal_lib_name.split("_")[1], index=index)
+        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
         return remote
 
     def get_telemetry_message(self):
