@@ -237,7 +237,7 @@ class ScriptQueueProducer:
         message = {
             'category': 'event',
             'data': {
-                'ScriptQueueState': json.dumps({'stream': heartbeat}, cls=NumpyEncoder)
+                'ScriptHeartbeats': json.dumps({'stream': heartbeat}, cls=NumpyEncoder)
             }
         }
         return message
