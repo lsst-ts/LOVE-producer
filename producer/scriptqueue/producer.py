@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 from lsst.ts import salobj
-from lsst.ts.scriptqueue.base_script import HEARTBEAT_INTERVAL
+from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from utils import NumpyEncoder
@@ -145,7 +145,7 @@ class ScriptQueueProducer:
         if salindex not in self.state["finishedIndices"]:
             self.run(self.monitor_script_heartbeat(salindex))
 
-    def new_empty_script(sef):
+    def new_empty_script(self):
         default = "UNKNOWN"
         return {
             "remote": None,
