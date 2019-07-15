@@ -44,26 +44,27 @@ class HeartbeatProducer:
         else:
             print('Unknown task type: ', task)
 
-    def get_heartbeat_message(self, remote_name, nlost_subsequent, timestamp):
+    def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
         heartbeat = {
-            remote_name: {
-                'lost': nlost_subsequent,
-                'last_heartbeat_timestamp': timestamp,
-                'max_lost_heartbeats': self.heartbeat_params[remote_name]
-            }
+            'csc': remote_name,
+            'salindex': salindex
+            'lost': nlost_subsequent,
+            'last_heartbeat_timestamp': timestamp,
+            'max_lost_heartbeats': self.heartbeat_params[remote_name]
         }
 
         message = {
             'category': 'event',
-            'data': {
-                'Heartbeat': json.dumps(heartbeat, cls=NumpyEncoder)
-            }
+            'csc': 'Heartbeat',
+            'salindex': -1,            
+            'data': json.dumps(heartbeat, cls=NumpyEncoder)
         }
         return message
 
     async def monitor_remote_heartbeat(self, remote):
         nlost_subsequent = 0
         remote_name = remote.salinfo.name
+        salindex = remote.salinfo.index
         timeout = self.heartbeat_params[remote_name]
 
         timestamp = -1
@@ -78,5 +79,5 @@ class HeartbeatProducer:
             except asyncio.TimeoutError:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
-                remote_name, nlost_subsequent, timestamp)
+                remote_name, salindex, nlost_subsequent, timestamp)
             self.send_heartbeat(msg)
