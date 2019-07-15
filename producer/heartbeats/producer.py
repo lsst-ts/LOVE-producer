@@ -47,7 +47,7 @@ class HeartbeatProducer:
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
         heartbeat = {
             'csc': remote_name,
-            'salindex': salindex
+            'salindex': salindex,
             'lost': nlost_subsequent,
             'last_heartbeat_timestamp': timestamp,
             'max_lost_heartbeats': self.heartbeat_params[remote_name]
