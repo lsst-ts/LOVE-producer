@@ -73,7 +73,14 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     print('ScriptQueue producers created')
 
     # Accept commands
-    ws.send(json.dumps({'option': 'cmd_subscribe'}))
+    cmd_subscribe_msg = {
+      'option': 'subscribe',
+      'category': 'cmd',
+      'csc': 'all',
+      'salindex': 'all',
+      'stream': 'all'
+    }
+    ws.send(json.dumps(cmd_subscribe_msg))
 
     def run(*args):
         asyncio.set_event_loop(args[0])
