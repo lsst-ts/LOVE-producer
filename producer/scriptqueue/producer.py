@@ -224,7 +224,7 @@ class ScriptQueueProducer:
                 {
                     'csc': 'ScriptQueueState',
                     'salindex': self.index,
-                    'data': json.dumps({'stream': queue_state}, cls=NumpyEncoder)
+                    'data': json.loads(json.dumps({'stream': queue_state}, cls=NumpyEncoder))
                 }
             ]
         }
@@ -244,7 +244,7 @@ class ScriptQueueProducer:
                 {
                     'csc': 'ScriptHeartbeats',
                     'salindex': self.index,
-                    'data': json.dumps({'stream': heartbeat}, cls=NumpyEncoder)
+                    'data': json.loads(json.dumps({'stream': heartbeat}, cls=NumpyEncoder))
                 }
             ]
         }

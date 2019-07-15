@@ -56,8 +56,8 @@ class HeartbeatProducer:
         message = {
             'category': 'event',
             'csc': 'Heartbeat',
-            'salindex': -1,            
-            'data': json.dumps(heartbeat, cls=NumpyEncoder)
+            'salindex': -1,
+            'data': json.loads(json.dumps(heartbeat, cls=NumpyEncoder))
         }
         return message
 

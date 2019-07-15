@@ -90,7 +90,7 @@ class Producer:
         for i in range(len(self.remote_list)):
             remote = self.remote_list[i]
             values = self.get_remote_tel_values(remote)
-            output = json.dumps(values, cls=NumpyEncoder)
+            output = json.loads(json.dumps(values, cls=NumpyEncoder))
 
             output_list.append({
                 'csc': remote.salinfo.name,
@@ -109,7 +109,7 @@ class Producer:
         for i in range(len(self.remote_list)):
             remote = self.remote_list[i]
             values = self.get_remote_event_values(remote)
-            output = json.dumps(values, cls=NumpyEncoder)
+            output = json.loads(json.dumps(values, cls=NumpyEncoder))
             output_list.append({
                 'csc': remote.salinfo.name,
                 'salindex': remote.salinfo.index,
