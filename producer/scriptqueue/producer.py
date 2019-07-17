@@ -141,6 +141,8 @@ class ScriptQueueProducer:
         self.set_callback(
             remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
         self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
+        self.set_callback(
+            remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
 
         if salindex not in self.state["finishedIndices"]:
             self.run(self.monitor_script_heartbeat(salindex))
@@ -163,7 +165,10 @@ class ScriptQueueProducer:
             "timestampConfigureStart": 0,
             "timestampProcessEnd": 0,
             "timestampProcessStart": 0,
-            "timestampRunStart": 0
+            "timestampRunStart": 0,
+            "description": "",
+            "classname": "",
+            "remotes": ""
         }
 
     def script_metadata_callback(self, salindex, event):
@@ -184,6 +189,17 @@ class ScriptQueueProducer:
             event : SALPY_Script.Script_logevent_stateC
         """
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
+
+    def script_description_callback(self, salindex, event):
+        """
+            Callback for the logevent_description. Used to extract
+            the expected duration of the script.
+
+            event : SALPY_Script.Script_logevent_descriptionC
+        """
+        self.scripts[salindex]["description"] = event.description
+        self.scripts[salindex]["classname"] = event.classname
+        self.scripts[salindex]["remotes"] = event.remotes
 
     def get_parsed_state(self):
         """
