@@ -42,14 +42,22 @@ class Receiver:
 
     def process_message(self, message, ws):
         data = json.loads(message)
+        print('\n**** data: ', data)
         try:
-            cmd_name = data['cmd']
-            component_name = data['component']
-            params = data['params']
-            remote = self.remote_dict[component_name]
+            if data['category'] != 'cmd':
+                return
+            csc_data = data['data'][0]
+            csc = csc_data['csc']
+            salindex = csc_data['salindex']
+            stream_data = csc_data['data']
+            stream = list(stream_data.keys())[0]
+            cmd_data = stream_data[stream]
+            cmd_name = cmd_data['cmd']
+            params = cmd_data['params']
+            remote = self.remote_dict[csc]
             t = threading.Thread(target=lambda remote, cmd_name, params, loop:
-                                 self.run(self.execute_command(remote, cmd_name, params, loop)), args=[
-                                     remote, cmd_name, params, self.loop])
+                                 self.run(self.execute_command(remote, cmd_name, params, loop)),
+                                 args=[remote, cmd_name, params, self.loop])
             t.start()
         except Exception as e:
             print('Exception')

@@ -86,30 +86,38 @@ class Producer:
         return remote
 
     def get_telemetry_message(self):
-        output_dict = {}
+        output_list = []
         for i in range(len(self.remote_list)):
             remote = self.remote_list[i]
             values = self.get_remote_tel_values(remote)
-            output = json.dumps(values, cls=NumpyEncoder)
+            output = json.loads(json.dumps(values, cls=NumpyEncoder))
 
-            output_dict[remote.salinfo.name] = output
+            output_list.append({
+                'csc': remote.salinfo.name,
+                'salindex': remote.salinfo.index,
+                'data': output
+            })
         message = {
             "category": "telemetry",
-            "data": output_dict
+            "data": output_list
         }
+
         return message
 
     def get_events_message(self):
-        output_dict = {}
+        output_list = []
         for i in range(len(self.remote_list)):
             remote = self.remote_list[i]
             values = self.get_remote_event_values(remote)
-            output = json.dumps(values, cls=NumpyEncoder)
-
-            output_dict[remote.salinfo.name] = output
+            output = json.loads(json.dumps(values, cls=NumpyEncoder))
+            output_list.append({
+                'csc': remote.salinfo.name,
+                'salindex': remote.salinfo.index,
+                'data': output
+            })
 
         message = {
             "category": "event",
-            "data": output_dict
+            "data": output_list
         }
         return message

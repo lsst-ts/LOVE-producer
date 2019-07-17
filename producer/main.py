@@ -30,7 +30,7 @@ def on_ws_close(ws):
 
 
 def send_message_callback(ws, message):
-    """ Callback that parses a dictionary (message) into a JSON string and sends it through websockets
+    """Define a callback that parses a dictionary (message) into a JSON string and sends it through websockets.
 
     Parameters
     ----------
@@ -46,8 +46,7 @@ running = False
 
 
 def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
-    global running
-    """ Starts sending messages through a websocket connection every through seconds,
+    """Starts sending messages through a websocket connection every through seconds,
     from a list of messages when the on_open event callback is called.
 
     Parameters
@@ -61,9 +60,11 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
             'data' : { .... }
         }
     """
+    global running
     print('ws started to open')
 
-    producer_heartbeat = HeartbeatProducer(loop, domain, lambda m: send_message_callback(ws, m), csc_list)
+    producer_heartbeat = HeartbeatProducer(
+        loop, domain, lambda m: send_message_callback(ws, m), csc_list)
     print('Heartbeat producer created')
 
     producer_scriptqueues = [
@@ -72,7 +73,14 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     print('ScriptQueue producers created')
 
     # Accept commands
-    ws.send(json.dumps({'option': 'cmd_subscribe'}))
+    cmd_subscribe_msg = {
+      'option': 'subscribe',
+      'category': 'cmd',
+      'csc': 'all',
+      'salindex': 'all',
+      'stream': 'all'
+    }
+    ws.send(json.dumps(cmd_subscribe_msg))
 
     def run(*args):
         asyncio.set_event_loop(args[0])
@@ -159,7 +167,8 @@ if __name__ == '__main__':
         producer.get_events_message
     ]
 
-    ws.on_open = lambda ws: on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list)
+    ws.on_open = lambda ws: on_ws_open(
+        ws, domain, message_getters, loop, csc_list, sq_list)
     ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver)
 
     # Emitter
