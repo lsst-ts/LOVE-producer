@@ -11,7 +11,6 @@ class Receiver:
 
     def __init__(self, loop, domain, csc_list):
         self.loop = loop
-        self.remote_list = []
         self.remote_dict = {}
 
         for i in range(len(csc_list)):
@@ -37,8 +36,7 @@ class Receiver:
         asyncio.set_event_loop(loop)
         remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
 
-        self.remote_list.append(remote)
-        self.remote_dict[sal_lib_name] = remote
+        self.remote_dict[(sal_lib_name, index)] = remote
 
     def process_message(self, message, ws):
         data = json.loads(message)
@@ -54,7 +52,7 @@ class Receiver:
             cmd_data = stream_data[stream]
             cmd_name = cmd_data['cmd']
             params = cmd_data['params']
-            remote = self.remote_dict[csc]
+            remote = self.remote_dict[(csc, salindex)]
             t = threading.Thread(target=lambda remote, cmd_name, params, loop:
                                  self.run(self.execute_command(remote, cmd_name, params, loop)),
                                  args=[remote, cmd_name, params, self.loop])
