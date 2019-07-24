@@ -42,6 +42,7 @@ class ScriptQueueProducer:
         self.set_callback(self.queue.evt_queue, self.queue_callback)
         self.set_callback(self.queue.evt_availableScripts, self.available_scripts_callback)
         self.set_callback(self.queue.evt_script, self.queue_script_callback)
+        self.set_callback(self.queue.evt_configSchema, self.config_schema_callback)
 
     def set_callback(self, evt, callback):
         """
@@ -96,21 +97,24 @@ class ScriptQueueProducer:
 
     def available_scripts_callback(self, event):
         self.state["available_scripts"] = []
-
         for script_path in event.standard.split(':'):
             self.state["available_scripts"].append(
                 {
                     "type": "standard",
-                    "path": script_path
+                    "path": script_path,
+                    "configSchema": ""
                 }
             )
+            self.query_script_config(True, script_path)
         for script_path in event.external.split(':'):
             self.state["available_scripts"].append(
                 {
                     "type": "external",
-                    "path": script_path
+                    "path": script_path,
+                    "configSchema": ""
                 }
             )
+            self.query_script_config(False, script_path)
 
     def queue_script_callback(self, event):
         """
@@ -129,6 +133,15 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
+    def config_schema_callback(self, event):
+        # print('config_schema_callback\n\n\n\n\n')
+        # print(event.configSchema)
+        for script in self.state["available_scripts"]:
+            if (script.type == "standard") == event.isStandard:
+                if script.path == event.path:
+                    script.configSchema = event.configSchema
+                    break
+
     def setup_script(self, salindex):
         domain = self.domain
         remote = salobj.Remote(domain=domain, name="Script", index=salindex)
@@ -141,6 +154,7 @@ class ScriptQueueProducer:
         self.set_callback(
             remote.evt_metadata, lambda ev: self.script_metadata_callback(salindex, ev))
         self.set_callback(remote.evt_state, lambda ev: self.script_state_callback(salindex, ev))
+        self.set_callback(remote.evt_checkpoints, lambda ev: self.script_checkpoints_callback(salindex, ev))
         self.set_callback(
             remote.evt_description, lambda ev: self.script_description_callback(salindex, ev))
 
@@ -153,6 +167,9 @@ class ScriptQueueProducer:
             "remote": None,
             "index": -1,
             "script_state": default,
+            "last_checkpoint": "",
+            "pause_checkpoints": "",
+            "stop_checkpoints": "",
             "process_state": default,
             "elapsed_time": 0,
             "expected_duration": 0,
@@ -178,7 +195,6 @@ class ScriptQueueProducer:
 
             event : SALPY_Script.Script_logevent_metadataC
         """
-
         self.scripts[salindex]["expected_duration"] = event.duration
 
     def script_state_callback(self, salindex, event):
@@ -189,6 +205,17 @@ class ScriptQueueProducer:
             event : SALPY_Script.Script_logevent_stateC
         """
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
+        self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
+
+    def script_checkpoints_callback(self, salindex, event):
+        """
+            Callback for the Script_logevet_state event. Used to update
+            the state of the script.
+
+            event : SALPY_Script.Script_logevent_stateC
+        """
+        self.scripts[salindex]["pause_checkpoints"] = event.pause
+        self.scripts[salindex]["stop_checkpoints"] = event.stop
 
     def script_description_callback(self, salindex, event):
         """
@@ -297,6 +324,17 @@ class ScriptQueueProducer:
             self.run(self.queue.cmd_showScript.start(timeout=self.cmd_timeout))
         except salobj.AckError as ack_err:
             print(f"Could not get info on script {salindex}. "
+                  f"Failed with ack.result={ack_err.ack.result}")
+
+    def query_script_config(self, isStandard, script_path):
+        """
+            Send command to the queue to trigger the script config event
+        """
+        self.queue.cmd_showSchema.set(isStandard=isStandard, path=script_path)
+        try:
+            self.run(self.queue.cmd_showSchema.start(timeout=self.cmd_timeout))
+        except salobj.AckError as ack_err:
+            print(f"Could not get info on script {script_path}. "
                   f"Failed with ack.result={ack_err.ack.result}")
 
     def query_available_scripts(self):
