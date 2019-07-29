@@ -5,7 +5,6 @@ import threading
 from lsst.ts import salobj
 from utils import NumpyEncoder
 
-
 class HeartbeatProducer:
 
     def __init__(self, loop, domain, send_heartbeat, csc_list):
@@ -45,27 +44,53 @@ class HeartbeatProducer:
             print('Unknown task type: ', task)
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
-        heartbeat = {
-            'csc': remote_name,
-            'salindex': salindex,
-            'lost': nlost_subsequent,
-            'last_heartbeat_timestamp': timestamp,
-            'max_lost_heartbeats': self.heartbeat_params[remote_name]
-        }
+        """Generates a message with the heartbeat info of a CSC in dictionary format.
 
+        Parameters
+        ----------
+        remote_name: str
+            Name of the CSC
+        salindex: int
+            Salindex of the CSC
+        nlost_subsequent:
+            Number of subsequent or consecutive lost heartbeats since last observed heartbeat
+        timestamp: float
+            Timestamp of the last observed heartbeat.
+
+        Returns
+        -------
+        dict
+            Dictionary that, converted to string, is compatible with the LOVE-manager message format.
+
+        """
+    
+        heartbeat = {
+                'csc': remote_name,
+                'salindex': salindex,
+                'lost': nlost_subsequent,
+                'last_heartbeat_timestamp': timestamp,
+                'max_lost_heartbeats': self.heartbeat_params[remote_name]['max_lost_heartbeats']
+        }
         message = {
             'category': 'event',
-            'csc': 'Heartbeat',
-            'salindex': -1,
-            'data': json.loads(json.dumps(heartbeat, cls=NumpyEncoder))
+            'data': [{
+                'csc': 'Heartbeat',
+                'salindex': 0,
+                'data': {
+                    'stream': heartbeat
+                }
+
+            }]
         }
+
+
         return message
 
     async def monitor_remote_heartbeat(self, remote):
         nlost_subsequent = 0
         remote_name = remote.salinfo.name
         salindex = remote.salinfo.index
-        timeout = self.heartbeat_params[remote_name]
+        timeout = self.heartbeat_params[remote_name]['heartbeat_timeout']
 
         timestamp = -1
         while True:
