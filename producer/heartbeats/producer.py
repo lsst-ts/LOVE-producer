@@ -97,7 +97,8 @@ class HeartbeatProducer:
             'salindex': salindex,
             'lost': nlost_subsequent,
             'last_heartbeat_timestamp': timestamp,
-            'max_lost_heartbeats': self.heartbeat_params[remote_name]['max_lost_heartbeats']
+            'max_lost_heartbeats': next((el["max_lost_heartbeats"]
+                                         for el in self.heartbeat_params[remote_name] if el["index"] == salindex), False)
         }
         message = {
             'category': 'event',
@@ -117,7 +118,8 @@ class HeartbeatProducer:
         domain = self.domain
         remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
         nlost_subsequent = 0
-        timeout = self.heartbeat_params[remote_name]['heartbeat_timeout']
+        timeout = next((el["heartbeat_timeout"]
+                        for el in self.heartbeat_params[remote_name] if el["index"] == salindex), False)
         timestamp = -1
         while True:
             try:
@@ -131,5 +133,4 @@ class HeartbeatProducer:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp)
-            print(remote_name, salindex, '|', msg['data'][0]['data']['stream'])
             self.send_heartbeat(msg)
