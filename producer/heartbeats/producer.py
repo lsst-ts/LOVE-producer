@@ -5,15 +5,51 @@ import threading
 from lsst.ts import salobj
 from utils import NumpyEncoder
 
-class HeartbeatProducer:
+MAX_LOST_HEARTBEATS_DEFAULT = 5
+HEARTBEAT_TIMEOUT_DEFAULT = 15
 
+
+class HeartbeatProducer:
     def __init__(self, loop, domain, send_heartbeat, csc_list):
+        """Monitors CSC heartbeats and produces messages for the LOVE manager
+
+        It has a default configuration for the monitoring parameters which are overriden by
+        a specific config.json file.
+
+        Parameters
+        ----------
+        loop: asyncio event loop being used
+        domain: salobj Domain object to create salobj Remotes
+        send_heartbeat: callback that receives one argument, the message dictionary to be sent later to the LOVE-manager
+        csc_list: List of  (csc, salindex) pairs
+        """
         self.loop = loop
         self.send_heartbeat = send_heartbeat
         self.domain = domain
         self.csc_list = csc_list
         self.heartbeat_params = json.loads(
             open('/usr/src/love/heartbeats/config.json').read())
+
+        for csc, salindex in csc_list:
+            if not csc in self.heartbeat_params:
+                self.heartbeat_params[csc] = [{
+                    {
+                        "index": salindex,
+                        "max_lost_heartbeats": MAX_LOST_HEARTBEATS_DEFAULT,
+                        "heartbeat_timeout": HEARTBEAT_TIMEOUT_DEFAULT
+                    }
+                }]
+                continue
+
+            has_salindex = next((True for el in self.heartbeat_params[csc] if el["index"] == salindex), False)
+            if not has_salindex:
+                self.heartbeat_params[csc].append({
+                    {
+                        "index": salindex,
+                        "max_lost_heartbeats": MAX_LOST_HEARTBEATS_DEFAULT,
+                        "heartbeat_timeout": HEARTBEAT_TIMEOUT_DEFAULT
+                    }
+                })
 
     def start(self):
         for i in range(len(self.csc_list)):
