@@ -24,16 +24,8 @@ class HeartbeatProducer:
             if len(sal_lib_params) > 1:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
-            t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 self.loop, index, sal_lib_name])
-            t.start()
 
-    def add_remote_in_thread(self, loop, index, sal_lib_name):
-        asyncio.set_event_loop(loop)
-
-        domain = self.domain
-        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
-        self.run(self.monitor_remote_heartbeat(remote))
+            self.loop.create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
 
     def run(self, task):
         if(asyncio.iscoroutine(task)):
@@ -63,13 +55,13 @@ class HeartbeatProducer:
             Dictionary that, converted to string, is compatible with the LOVE-manager message format.
 
         """
-    
+
         heartbeat = {
-                'csc': remote_name,
-                'salindex': salindex,
-                'lost': nlost_subsequent,
-                'last_heartbeat_timestamp': timestamp,
-                'max_lost_heartbeats': self.heartbeat_params[remote_name]['max_lost_heartbeats']
+            'csc': remote_name,
+            'salindex': salindex,
+            'lost': nlost_subsequent,
+            'last_heartbeat_timestamp': timestamp,
+            'max_lost_heartbeats': self.heartbeat_params[remote_name]['max_lost_heartbeats']
         }
         message = {
             'category': 'event',
@@ -83,15 +75,13 @@ class HeartbeatProducer:
             }]
         }
 
-
         return message
 
-    async def monitor_remote_heartbeat(self, remote):
+    async def monitor_remote_heartbeat(self, remote_name, salindex):
+        domain = self.domain
+        remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
         nlost_subsequent = 0
-        remote_name = remote.salinfo.name
-        salindex = remote.salinfo.index
         timeout = self.heartbeat_params[remote_name]['heartbeat_timeout']
-
         timestamp = -1
         while True:
             try:
@@ -105,4 +95,5 @@ class HeartbeatProducer:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp)
+            print(remote_name, salindex, '|', msg['data'][0]['data']['stream'])
             self.send_heartbeat(msg)
