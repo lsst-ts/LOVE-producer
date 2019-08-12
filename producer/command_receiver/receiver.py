@@ -53,22 +53,28 @@ class Receiver:
             cmd_name = cmd_data['cmd']
             params = cmd_data['params']
             remote = self.remote_dict[(csc, salindex)]
-            t = threading.Thread(target=lambda remote, cmd_name, params, loop:
-                                 self.run(self.execute_command(remote, cmd_name, params, loop)),
-                                 args=[remote, cmd_name, params, self.loop])
+            t = threading.Thread(target=lambda remote, cmd_name, params, loop, ws:
+                                 self.run(self.execute_command(remote, cmd_name, params, data, loop, ws)),
+                                 args=[remote, cmd_name, params, self.loop, ws])
             t.start()
         except Exception as e:
             print('Exception')
             print(e)
 
-    async def execute_command(self, remote, cmd_name, params, loop):
+    async def execute_command(self, remote, cmd_name, params, data, loop, ws):
         print('\nExecuting command')
         asyncio.set_event_loop(loop)
         try:
             cmd = getattr(remote, cmd_name)
-            print('cmd', cmd)
             cmd.set(**params)
-            await cmd.start(timeout=10)
+            cmd_result = await cmd.start(timeout=10)
+            csc_data = data['data'][0]
+            stream_data = csc_data['data']
+            stream = list(stream_data.keys())[0]
+            res = data
+            res['category'] = 'ack'
+            res['data'][0]['data'][stream]['result'] = cmd_result.result
+            ws.send(json.dumps(res))
         except Exception as e:
             print('Exception')
             print(e)
