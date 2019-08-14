@@ -2,7 +2,7 @@ pipeline {
   agent any
   environment {
     registryCredential = "dockerhub-inriachile"
-    dockerImageName = "inriachile/love-producer:${GIT_BRANCH}"
+    dockerImageName = "inriachile/love-producer:"
     dockerImage = ""
   }
 
@@ -12,11 +12,24 @@ pipeline {
         anyOf {
           branch "master"
           branch "develop"
+          branch "release/*"
         }
       }
       steps {
         script {
-          dockerImage = docker.build(dockerImageName, "./telemetry-producer")
+          def git_branch = "${GIT_BRANCH}"
+          def image_tag = git_branch
+          def slashPosition = git_branch.indexOf('/')
+          if (slashPosition > 0) {
+            git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
+            git_branch = git_branch.substring(0, slashPosition)
+            if (git_branch == "release") {
+              image_tag = git_tag
+            }
+          }
+          dockerImageName = dockerImageName + image_tag
+          echo "dockerImageName: ${dockerImageName}"
+          dockerImage = docker.build dockerImageName
         }
       }
     }
@@ -25,6 +38,7 @@ pipeline {
         anyOf {
           branch "master"
           branch "develop"
+          branch "release/*"
         }
       }
       steps {
@@ -41,7 +55,7 @@ pipeline {
         branch "develop"
       }
       steps {
-        build '../LOVE-integration-tools/develop'
+        build(job: '../LOVE-integration-tools/develop', wait: false)
       }
     }
     stage("Trigger master deployment") {
@@ -49,7 +63,7 @@ pipeline {
         branch "master"
       }
       steps {
-        build '../LOVE-integration-tools/master'
+        build(job: '../LOVE-integration-tools/master', wait: false)
       }
     }
   }
