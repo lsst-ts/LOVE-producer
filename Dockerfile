@@ -6,4 +6,4 @@ RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements
 
 COPY producer .
 WORKDIR /home/saluser
-ENTRYPOINT ["/usr/src/love/start-daemon.sh"]
+CMD ["/usr/src/love/start-daemon.sh"]
