@@ -3,7 +3,6 @@ import logging
 from .producer import Producer
 import asyncio
 from lsst.ts import salobj
-from pprint import pprint
 
 STD_TIMEOUT = 5  # timeout for command ack
 SHOW_LOG_MESSAGES = False
