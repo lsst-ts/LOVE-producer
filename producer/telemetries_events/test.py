@@ -76,6 +76,47 @@ class TestTelemetries(unittest.TestCase):
 
         asyncio.get_event_loop().run_until_complete(doit())
 
+    def test_produced_message_with_telemetry_arrays(self):
+        async def doit():
+            async with Harness(initial_state=salobj.State.ENABLED) as harness:
+                # Arrange
+                heartbeat_producer = Producer(loop=asyncio.get_event_loop(
+                ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
+                cmd_data_sent = harness.csc.make_random_cmd_arrays()
+
+                # Act
+                await harness.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
+
+                # Assert
+                tel_arrays = await harness.remote.tel_arrays.next(flush=False, timeout=STD_TIMEOUT)
+                tel_parameters = tel_arrays._member_attributes
+                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': heartbeat_producer.getDataType(
+                    getattr(tel_arrays, p))} for p in tel_parameters}
+                expected_message = {
+                    "category": "telemetry",
+                    "data": [
+                        {
+                            "csc": "Test",
+                            "salindex": harness.csc.salinfo.index,
+                            "data": {
+                                "arrays": expected_data
+                            }
+                        }
+                    ]
+                }
+
+                message = heartbeat_producer.get_telemetry_message()
+
+                # private_rcvStamp is generated on read and seems unpredictable now
+                del message["data"][0]["data"]["arrays"]["private_rcvStamp"]
+                del expected_message["data"][0]["data"]["arrays"]["private_rcvStamp"]
+                self.assertEqual(message, expected_message)
+
+                # clean up
+                for remote in heartbeat_producer.remote_list:
+                    await remote.close()
+
+        asyncio.get_event_loop().run_until_complete(doit())
 
 
 if __name__ == '__main__':
