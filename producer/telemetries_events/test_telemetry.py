@@ -37,7 +37,7 @@ class TestTelemetryMessages(unittest.TestCase):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
-                heartbeat_producer = Producer(loop=asyncio.get_event_loop(
+                generic_producer = Producer(loop=asyncio.get_event_loop(
                 ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
                 cmd_data_sent = harness.csc.make_random_cmd_scalars()
 
@@ -47,7 +47,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 # Assert
                 tel_scalars = await harness.remote.tel_scalars.next(flush=False, timeout=STD_TIMEOUT)
                 tel_parameters = tel_scalars._member_attributes
-                expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': heartbeat_producer.getDataType(
+                expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': generic_producer.getDataType(
                     getattr(tel_scalars, p))} for p in tel_parameters}
                 expected_message = {
                     "category": "telemetry",
@@ -62,7 +62,7 @@ class TestTelemetryMessages(unittest.TestCase):
                     ]
                 }
 
-                message = heartbeat_producer.get_telemetry_message()
+                message = generic_producer.get_telemetry_message()
 
                 # private_rcvStamp is generated on read and seems unpredictable now
                 del message["data"][0]["data"]["scalars"]["private_rcvStamp"]
@@ -70,7 +70,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 self.assertEqual(message, expected_message)
 
                 # clean up
-                for remote in heartbeat_producer.remote_list:
+                for remote in generic_producer.remote_list:
                     await remote.close()
 
         asyncio.get_event_loop().run_until_complete(doit())
@@ -79,7 +79,7 @@ class TestTelemetryMessages(unittest.TestCase):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
-                heartbeat_producer = Producer(loop=asyncio.get_event_loop(
+                generic_producer = Producer(loop=asyncio.get_event_loop(
                 ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
                 cmd_data_sent = harness.csc.make_random_cmd_arrays()
 
@@ -89,7 +89,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 # Assert
                 tel_arrays = await harness.remote.tel_arrays.next(flush=False, timeout=STD_TIMEOUT)
                 tel_parameters = tel_arrays._member_attributes
-                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': heartbeat_producer.getDataType(
+                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': generic_producer.getDataType(
                     getattr(tel_arrays, p))} for p in tel_parameters}
                 expected_message = {
                     "category": "telemetry",
@@ -104,7 +104,7 @@ class TestTelemetryMessages(unittest.TestCase):
                     ]
                 }
 
-                message = heartbeat_producer.get_telemetry_message()
+                message = generic_producer.get_telemetry_message()
 
                 # private_rcvStamp is generated on read and seems unpredictable now
                 del message["data"][0]["data"]["arrays"]["private_rcvStamp"]
@@ -112,7 +112,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 self.assertEqual(message, expected_message)
 
                 # clean up
-                for remote in heartbeat_producer.remote_list:
+                for remote in generic_producer.remote_list:
                     await remote.close()
 
         asyncio.get_event_loop().run_until_complete(doit())

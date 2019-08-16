@@ -38,7 +38,7 @@ class TestEventsMessages(unittest.TestCase):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
-                heartbeat_producer = Producer(loop=asyncio.get_event_loop(
+                generic_producer = Producer(loop=asyncio.get_event_loop(
                 ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
                 cmd_data_sent = harness.csc.make_random_cmd_scalars()
 
@@ -46,10 +46,10 @@ class TestEventsMessages(unittest.TestCase):
                 await harness.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
 
                 # Assert
-                tel_scalars = await harness.remote.tel_scalars.next(flush=False, timeout=STD_TIMEOUT)
-                tel_parameters = tel_scalars._member_attributes
-                expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': heartbeat_producer.getDataType(
-                    getattr(tel_scalars, p))} for p in tel_parameters}
+                evt_scalars = await harness.remote.evt_scalars.next(flush=False, timeout=STD_TIMEOUT)
+                evt_parameters = evt_scalars._member_attributes
+                expected_data = {p: {'value': getattr(evt_scalars, p), 'dataType': generic_producer.getDataType(
+                    getattr(evt_scalars, p))} for p in evt_parameters}
                 expected_message = {
                     "category": "event",
                     "data": [
@@ -63,7 +63,7 @@ class TestEventsMessages(unittest.TestCase):
                     ]
                 }
 
-                message = heartbeat_producer.get_events_message()
+                message = generic_producer.get_events_message()
 
                 # ignore other event streams
                 for stream in list(message["data"][0]["data"]):
@@ -71,17 +71,13 @@ class TestEventsMessages(unittest.TestCase):
                         del message["data"][0]["data"][stream]
 
                 # ignore all private_* parameters and "priority"
-                for parameter in list(message["data"][0]["data"]["scalars"][0]):
-                    if 'private_' in parameter:
-                        del message["data"][0]["data"]["scalars"][0][parameter]
-                        del expected_message["data"][0]["data"]["scalars"][0][parameter]
-                    if parameter == 'priority':
-                        del message["data"][0]["data"]["scalars"][0][parameter]
+                del message["data"][0]["data"]["scalars"][0]["private_rcvStamp"]
+                del expected_message["data"][0]["data"]["scalars"][0]["private_rcvStamp"]
 
                 self.assertEqual(message, expected_message)
 
                 # clean up
-                for remote in heartbeat_producer.remote_list:
+                for remote in generic_producer.remote_list:
                     await remote.close()
 
         asyncio.get_event_loop().run_until_complete(doit())
@@ -90,7 +86,7 @@ class TestEventsMessages(unittest.TestCase):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
-                heartbeat_producer = Producer(loop=asyncio.get_event_loop(
+                generic_producer = Producer(loop=asyncio.get_event_loop(
                 ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
                 cmd_data_sent = harness.csc.make_random_cmd_arrays()
 
@@ -98,10 +94,10 @@ class TestEventsMessages(unittest.TestCase):
                 await harness.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
 
                 # Assert
-                tel_arrays = await harness.remote.tel_arrays.next(flush=False, timeout=STD_TIMEOUT)
-                tel_parameters = tel_arrays._member_attributes
-                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': heartbeat_producer.getDataType(
-                    getattr(tel_arrays, p))} for p in tel_parameters}
+                evt_arrays = await harness.remote.evt_arrays.next(flush=False, timeout=STD_TIMEOUT)
+                evt_parameters = evt_arrays._member_attributes
+                expected_data = {p: {'value': getattr(evt_arrays, p), 'dataType': generic_producer.getDataType(
+                    getattr(evt_arrays, p))} for p in evt_parameters}
                 expected_message = {
                     "category": "event",
                     "data": [
@@ -115,7 +111,7 @@ class TestEventsMessages(unittest.TestCase):
                     ]
                 }
 
-                message = heartbeat_producer.get_events_message()
+                message = generic_producer.get_events_message()
 
                 # ignore other event streams
                 for stream in list(message["data"][0]["data"]):
@@ -123,17 +119,13 @@ class TestEventsMessages(unittest.TestCase):
                         del message["data"][0]["data"][stream]
 
                 # ignore all private_* parameters and "priority"
-                for parameter in list(message["data"][0]["data"]["arrays"][0]):
-                    if 'private_' in parameter:
-                        del message["data"][0]["data"]["arrays"][0][parameter]
-                        del expected_message["data"][0]["data"]["arrays"][0][parameter]
-                    if parameter == 'priority':
-                        del message["data"][0]["data"]["arrays"][0][parameter]
+                del message["data"][0]["data"]["arrays"][0]["private_rcvStamp"]
+                del expected_message["data"][0]["data"]["arrays"][0]["private_rcvStamp"]
 
                 self.assertEqual(message, expected_message)
 
                 # clean up
-                for remote in heartbeat_producer.remote_list:
+                for remote in generic_producer.remote_list:
                     await remote.close()
 
         asyncio.get_event_loop().run_until_complete(doit())
