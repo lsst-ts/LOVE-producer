@@ -29,11 +29,12 @@ class Harness:
         await self.csc.close()
 
 
-class TestTelemetryMessages(unittest.TestCase):
+class TestEventsMessages(unittest.TestCase):
     def setUp(self):
         salobj.set_random_lsst_dds_domain()
+        self.maxDiff = None
 
-    def test_produced_message_with_telemetry_scalar(self):
+    def test_produced_message_with_event_scalar(self):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
@@ -50,23 +51,33 @@ class TestTelemetryMessages(unittest.TestCase):
                 expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': heartbeat_producer.getDataType(
                     getattr(tel_scalars, p))} for p in tel_parameters}
                 expected_message = {
-                    "category": "telemetry",
+                    "category": "event",
                     "data": [
                         {
                             "csc": "Test",
                             "salindex": harness.csc.salinfo.index,
                             "data": {
-                                "scalars": expected_data
+                                "scalars": [expected_data]
                             }
                         }
                     ]
                 }
 
-                message = heartbeat_producer.get_telemetry_message()
+                message = heartbeat_producer.get_events_message()
 
-                # private_rcvStamp is generated on read and seems unpredictable now
-                del message["data"][0]["data"]["scalars"]["private_rcvStamp"]
-                del expected_message["data"][0]["data"]["scalars"]["private_rcvStamp"]
+                # ignore other event streams
+                for stream in list(message["data"][0]["data"]):
+                    if stream != "scalars":
+                        del message["data"][0]["data"][stream]
+
+                # ignore all private_* parameters and "priority"
+                for parameter in list(message["data"][0]["data"]["scalars"][0]):
+                    if 'private_' in parameter:
+                        del message["data"][0]["data"]["scalars"][0][parameter]
+                        del expected_message["data"][0]["data"]["scalars"][0][parameter]
+                    if parameter == 'priority':
+                        del message["data"][0]["data"]["scalars"][0][parameter]
+
                 self.assertEqual(message, expected_message)
 
                 # clean up
@@ -75,7 +86,7 @@ class TestTelemetryMessages(unittest.TestCase):
 
         asyncio.get_event_loop().run_until_complete(doit())
 
-    def test_produced_message_with_telemetry_arrays(self):
+    def test_produced_message_with_event_arrays(self):
         async def doit():
             async with Harness(initial_state=salobj.State.ENABLED) as harness:
                 # Arrange
@@ -92,23 +103,33 @@ class TestTelemetryMessages(unittest.TestCase):
                 expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': heartbeat_producer.getDataType(
                     getattr(tel_arrays, p))} for p in tel_parameters}
                 expected_message = {
-                    "category": "telemetry",
+                    "category": "event",
                     "data": [
                         {
                             "csc": "Test",
                             "salindex": harness.csc.salinfo.index,
                             "data": {
-                                "arrays": expected_data
+                                "arrays": [expected_data]
                             }
                         }
                     ]
                 }
 
-                message = heartbeat_producer.get_telemetry_message()
+                message = heartbeat_producer.get_events_message()
 
-                # private_rcvStamp is generated on read and seems unpredictable now
-                del message["data"][0]["data"]["arrays"]["private_rcvStamp"]
-                del expected_message["data"][0]["data"]["arrays"]["private_rcvStamp"]
+                # ignore other event streams
+                for stream in list(message["data"][0]["data"]):
+                    if stream != "arrays":
+                        del message["data"][0]["data"][stream]
+
+                # ignore all private_* parameters and "priority"
+                for parameter in list(message["data"][0]["data"]["arrays"][0]):
+                    if 'private_' in parameter:
+                        del message["data"][0]["data"]["arrays"][0][parameter]
+                        del expected_message["data"][0]["data"]["arrays"][0][parameter]
+                    if parameter == 'priority':
+                        del message["data"][0]["data"]["arrays"][0][parameter]
+
                 self.assertEqual(message, expected_message)
 
                 # clean up
