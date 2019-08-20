@@ -16,7 +16,7 @@ class Receiver:
             remote = salobj.Remote(domain=domain, name=name, index=salindex)
             self.remote_dict[(name, salindex)] = remote
 
-    def process_message(self, message):
+    async def process_message(self, message):
         data = json.loads(message)
         try:
             if data['category'] != 'cmd':
@@ -31,7 +31,9 @@ class Receiver:
             params = cmd_data['params']
             remote = self.remote_dict[(csc, salindex)]
 
-            return self.execute_command(remote, cmd_name, params, data)
+            answer = await self.execute_command(remote, cmd_name, params, data)
+
+            return answer
 
         except Exception as e:
             print('Exception')
