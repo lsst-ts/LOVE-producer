@@ -15,25 +15,14 @@ class Producer:
     def __init__(self, loop, domain, csc_list):
         self.loop = loop
         self.remote_list = []
-
-        for i in range(len(csc_list)):
-            sal_lib_params = csc_list[i]
-            sal_lib_name = sal_lib_params[0]
-            index = 0
-            print('- Listening to telemetries from CSC: ', sal_lib_params)
-            if len(sal_lib_params) > 1:
-                [sal_lib_name, index] = sal_lib_params
-            index = int(index)
-            t = threading.Thread(target=self.add_remote_in_thread, args=[
-                                 self.loop, index, sal_lib_name, domain])
-            t.start()
-
-    def add_remote_in_thread(self, loop, index, sal_lib_name, domain):
-        asyncio.set_event_loop(loop)
-        remote = self.create_remote(index, sal_lib_name, domain)
-        self.remote_list.append(remote)
+        for name, salindex in csc_list:
+            print('- Listening to telemetries and events from CSC: ', (name, salindex))
+            self.remote_list.append(salobj.Remote(domain=domain, name=name, index=salindex))
 
     def getDataType(self, value):
+        if isinstance(value, (np.ndarray)) and value.ndim == 0:
+            return 'Array<%s>' % self.getDataType(value.item())
+
         if isinstance(value, (list, tuple, np.ndarray)):
             return 'Array<%s>' % self.getDataType(value[0])
         if isinstance(value, (int, np.integer)):
@@ -77,18 +66,9 @@ class Producer:
             values[evt] = evt_results
         return values
 
-    def create_remote(self, index, sal_lib_name, domain):
-        """
-
-        """
-        print("\n make remote", sal_lib_name)
-        remote = salobj.Remote(domain=domain, name=sal_lib_name, index=index)
-        return remote
-
     def get_telemetry_message(self):
         output_list = []
-        for i in range(len(self.remote_list)):
-            remote = self.remote_list[i]
+        for remote in self.remote_list:
             values = self.get_remote_tel_values(remote)
             output = json.loads(json.dumps(values, cls=NumpyEncoder))
 
@@ -97,6 +77,7 @@ class Producer:
                 'salindex': remote.salinfo.index,
                 'data': output
             })
+
         message = {
             "category": "telemetry",
             "data": output_list
