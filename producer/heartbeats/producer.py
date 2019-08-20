@@ -27,9 +27,10 @@ class HeartbeatProducer:
         self.csc_list = csc_list
 
         # params to replace the defaults later
-        self.heartbeat_params = json.loads(
-            open('/usr/src/love/heartbeats/config.json').read())
-        self.remotes = [] # for cleanup
+        with open('/usr/src/love/heartbeats/config.json') as config_file:
+            self.heartbeat_params = json.loads(config_file.read())
+
+        self.remotes = []  # for cleanup
 
     def start(self):
         for i in range(len(self.csc_list)):
@@ -68,7 +69,7 @@ class HeartbeatProducer:
         max_lost_heartbeats = MAX_LOST_HEARTBEATS_DEFAULT
         if remote_name in self.heartbeat_params:
             max_lost_heartbeats = next((el["max_lost_heartbeats"]
-                                    for el in self.heartbeat_params[remote_name] if el["index"] == salindex), MAX_LOST_HEARTBEATS_DEFAULT)
+                                        for el in self.heartbeat_params[remote_name] if el["index"] == salindex), MAX_LOST_HEARTBEATS_DEFAULT)
 
         heartbeat = {
             'csc': remote_name,
@@ -101,7 +102,7 @@ class HeartbeatProducer:
         timeout = HEARTBEAT_TIMEOUT_DEFAULT
         if remote_name in self.heartbeat_params:
             timeout = next((el["heartbeat_timeout"]
-                                    for el in self.heartbeat_params[remote_name] if el["index"] == salindex), HEARTBEAT_TIMEOUT_DEFAULT)
+                            for el in self.heartbeat_params[remote_name] if el["index"] == salindex), HEARTBEAT_TIMEOUT_DEFAULT)
 
         timestamp = -1
         while True:
@@ -120,9 +121,9 @@ class HeartbeatProducer:
 
 
 if __name__ == '__main__':
-    csc_list=[('ATDome', 1), ('ScriptQueue', 1), ('ScriptQueue', 2)]
-    domain=salobj.Domain()
-    loop=asyncio.get_event_loop()
-    hb=HeartbeatProducer(domain, lambda m: print(m), csc_list)
+    csc_list = [('ATDome', 1), ('ScriptQueue', 1), ('ScriptQueue', 2)]
+    domain = salobj.Domain()
+    loop = asyncio.get_event_loop()
+    hb = HeartbeatProducer(domain, lambda m: print(m), csc_list)
     hb.start()
     loop.run_forever()
