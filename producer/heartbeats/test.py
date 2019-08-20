@@ -29,7 +29,7 @@ class Harness:
         await self.csc.close()
 
 
-class TestTelemetryMessages(unittest.TestCase):
+class TestHeartbeatsMessages(unittest.TestCase):
     def setUp(self):
         salobj.set_random_lsst_dds_domain()
 
