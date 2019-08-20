@@ -9,7 +9,7 @@ HEARTBEAT_TIMEOUT_DEFAULT = 15
 
 
 class HeartbeatProducer:
-    def __init__(self, loop, domain, send_heartbeat, csc_list):
+    def __init__(self, domain, send_heartbeat, csc_list):
         """Monitors CSC heartbeats and produces messages for the LOVE manager
 
         It has a default configuration for the monitoring parameters which are overriden by
@@ -22,7 +22,6 @@ class HeartbeatProducer:
         send_heartbeat: callback that receives one argument, the message dictionary to be sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
         """
-        self.loop = loop
         self.send_heartbeat = send_heartbeat
         self.domain = domain
         self.csc_list = csc_list
@@ -30,6 +29,7 @@ class HeartbeatProducer:
         # params to replace the defaults later
         self.heartbeat_params = json.loads(
             open('/usr/src/love/heartbeats/config.json').read())
+        self.remotes = [] # for cleanup
 
     def start(self):
         for i in range(len(self.csc_list)):
@@ -41,15 +41,7 @@ class HeartbeatProducer:
                 [sal_lib_name, index] = sal_lib_params
             index = int(index)
 
-            self.loop.create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
-
-    def run(self, task):
-        if(asyncio.iscoroutine(task)):
-            asyncio.run_coroutine_threadsafe(task, self.loop)
-        elif asyncio.isfuture(task):
-            asyncio.gather(task, loop=self.loop, return_exceptions=True)
-        else:
-            print('Unknown task type: ', task)
+            asyncio.get_event_loop().create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
         """Generates a message with the heartbeat info of a CSC in dictionary format.
@@ -102,6 +94,7 @@ class HeartbeatProducer:
     async def monitor_remote_heartbeat(self, remote_name, salindex):
         domain = self.domain
         remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
+        self.remotes.append(remote)
         nlost_subsequent = 0
 
         # find the first element that matches the csc/salindex and use it instead of the default value
@@ -130,7 +123,6 @@ if __name__ == '__main__':
     csc_list=[('ATDome', 1), ('ScriptQueue', 1), ('ScriptQueue', 2)]
     domain=salobj.Domain()
     loop=asyncio.get_event_loop()
-    hb=HeartbeatProducer(
-        loop, domain, lambda m: print(m), csc_list)
+    hb=HeartbeatProducer(domain, lambda m: print(m), csc_list)
     hb.start()
     loop.run_forever()
