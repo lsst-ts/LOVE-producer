@@ -79,6 +79,8 @@ class TestTelemetryMessages(unittest.TestCase):
                 for remote in heartbeat_producer.remotes:
                     await remote.close()
 
+        asyncio.get_event_loop().run_until_complete(doit())
+
     def test_heartbeat_not_received(self):
         """When monitoring the wrong (csc,salindex) it should report 1 lost heartbeat"""
 
