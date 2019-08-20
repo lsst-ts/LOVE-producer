@@ -10,10 +10,9 @@ from utils import NumpyEncoder
 
 
 class ScriptQueueProducer:
-    def __init__(self, loop, domain, send_state, index):
+    def __init__(self, domain, send_state, index):
         self.log = logging.getLogger(__name__)
         self.send_state = send_state
-        self.loop = loop
         self.domain = domain
         self.scripts_remotes = {}
         self.scripts_durations = {}
@@ -53,9 +52,7 @@ class ScriptQueueProducer:
             callback(event)
             self.send_state(self.get_state_message())
 
-        def setter():
-            evt.callback = do_callback_and_send
-        self.loop.call_soon_threadsafe(setter)
+        evt.callback = do_callback_and_send
 
     def update(self):
         """
@@ -294,12 +291,7 @@ class ScriptQueueProducer:
         return message
 
     def run(self, task):
-        if(asyncio.iscoroutine(task)):
-            asyncio.run_coroutine_threadsafe(task, self.loop)
-        elif asyncio.isfuture(task):
-            asyncio.gather(task, loop=self.loop, return_exceptions=True)
-        else:
-            print('Unknown task type: ', task)
+        asyncio.get_event_loop().create_task(task)
 
     def query_queue_state(self):
         """
