@@ -66,6 +66,8 @@ class ScriptQueueStateTestCase(unittest.TestCase):
                 # Clean up
                 await remote.close()
                 await scriptqueue_producer.queue.close()
+                for script in scriptqueue_producer.scripts:
+                    await script["remote"].close()
 
 
         asyncio.get_event_loop().run_until_complete(doit())
