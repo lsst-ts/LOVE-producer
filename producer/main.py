@@ -13,11 +13,17 @@ from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
 from command_receiver.receiver import Receiver
+from utils import NumpyEncoder
 
 
-def on_ws_message(ws, message, receiver):
-    print("### message ###")
-    receiver.process_message(message, ws)
+def on_ws_message(ws, message, receiver, loop):
+    async def receive_it():
+        print("### message ###")
+        answer = await receiver.process_message(message)
+        if not answer is None:
+            dumped_answer = json.dumps(answer, cls=NumpyEncoder)
+            ws.send(dumped_answer)
+    asyncio.run_coroutine_threadsafe(receive_it(), loop)
 
 
 def on_ws_error(ws, error):
@@ -63,8 +69,7 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     global running
     print('ws started to open')
 
-    producer_heartbeat = HeartbeatProducer(
-        loop, domain, lambda m: send_message_callback(ws, m), csc_list)
+    producer_heartbeat = HeartbeatProducer(domain, lambda m: send_message_callback(ws, m), csc_list)
     print('Heartbeat producer created')
 
     producer_scriptqueues = [
@@ -74,11 +79,11 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
 
     # Accept commands
     cmd_subscribe_msg = {
-      'option': 'subscribe',
-      'category': 'cmd',
-      'csc': 'all',
-      'salindex': 'all',
-      'stream': 'all'
+        'option': 'subscribe',
+        'category': 'cmd',
+        'csc': 'all',
+        'salindex': 'all',
+        'stream': 'all'
     }
     ws.send(json.dumps(cmd_subscribe_msg))
 
@@ -153,7 +158,7 @@ if __name__ == '__main__':
     WS_HOST = os.environ["WEBSOCKET_HOST"]
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
-    receiver = Receiver(loop, domain, csc_list)
+    receiver = Receiver(domain, csc_list)
 
     ws = websocket.WebSocketApp(
         url,
@@ -169,7 +174,7 @@ if __name__ == '__main__':
 
     ws.on_open = lambda ws: on_ws_open(
         ws, domain, message_getters, loop, csc_list, sq_list)
-    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver)
+    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver, loop)
 
     # Emitter
     while True:

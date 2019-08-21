@@ -2,7 +2,7 @@ pipeline {
   agent any
   environment {
     registryCredential = "dockerhub-inriachile"
-    dockerImageName = "inriachile/love-producer:"
+    dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
   }
 
