@@ -2,3 +2,5 @@
 **/*/ospl-info.log
 **/*/ospl-error.log
 **/*/venv
+**/__pycache__
+**/.DS_Store

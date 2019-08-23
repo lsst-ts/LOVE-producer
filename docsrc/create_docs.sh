@@ -1,6 +1,6 @@
 #!/bin/bash
 rm -rf source/apidoc
-sphinx-apidoc -o source/apidoc ../manager ../manager/*migrations*
+sphinx-apidoc -o source/apidoc ../producer
 python edit_apidoc_modules.py
 rm -rf ../docs/doctrees
 rm -rf ../docs/html
