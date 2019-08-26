@@ -114,7 +114,6 @@ class HeartbeatProducer:
                 #     await asyncio.sleep(2)
                 #     raise asyncio.TimeoutError('sadsa')
                 if not hasattr(remote, 'evt_heartbeat'):
-                    print('Remote does not have evt_heartbeat: ', remote.salinfo)
                     timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp)
