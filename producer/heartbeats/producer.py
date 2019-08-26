@@ -6,6 +6,8 @@ from lsst.ts import salobj
 
 MAX_LOST_HEARTBEATS_DEFAULT = 5
 HEARTBEAT_TIMEOUT_DEFAULT = 15
+NEVER_RECEIVED_TIMESTAMP = -1
+NO_HEARTBEAT_EVENT_TIMESTAMP = -2
 
 
 class HeartbeatProducer:
@@ -104,12 +106,21 @@ class HeartbeatProducer:
             timeout = next((el["heartbeat_timeout"]
                             for el in self.heartbeat_params[remote_name] if el["index"] == salindex), HEARTBEAT_TIMEOUT_DEFAULT)
 
-        timestamp = -1
+        timestamp = NEVER_RECEIVED_TIMESTAMP
+
         while True:
             try:
                 # if random.random() > 0.2:
                 #     await asyncio.sleep(2)
                 #     raise asyncio.TimeoutError('sadsa')
+                if not hasattr(remote, 'evt_heartbeat'):
+                    print('Remote does not have evt_heartbeat: ', remote.salinfo)
+                    timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
+                    msg = self.get_heartbeat_message(
+                        remote_name, salindex, nlost_subsequent, timestamp)
+                    self.send_heartbeat(msg)
+                    await asyncio.sleep(2)
+                    continue
                 await remote.evt_heartbeat.next(flush=False, timeout=timeout)
                 nlost_subsequent = 0
                 timestamp = datetime.datetime.now().timestamp()
