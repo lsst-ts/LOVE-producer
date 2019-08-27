@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>producer.telemetries_events package &mdash; LOVE-producer 0.2.1 documentation</title>
+  <title>producer.command_receiver package &mdash; LOVE-producer 0.2.1 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="producer.scriptqueue package" href="producer.scriptqueue.html" /> 
+    <link rel="next" title="producer.heartbeats package" href="producer.heartbeats.html" />
+    <link rel="prev" title="producer package" href="producer.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,10 +86,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.command_receiver package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.heartbeats.html">producer.heartbeats package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.telemetries_events package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.telemetries_events.html">producer.telemetries_events package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="producer.html#submodules">Submodules</a></li>
@@ -148,13 +149,13 @@
         
           <li><a href="producer.html">producer package</a> &raquo;</li>
         
-      <li>producer.telemetries_events package</li>
+      <li>producer.command_receiver package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/apidoc/producer.telemetries_events.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apidoc/producer.command_receiver.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -167,22 +168,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="producer-telemetries-events-package">
-<h1>producer.telemetries_events package<a class="headerlink" href="#producer-telemetries-events-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="producer-command-receiver-package">
+<h1>producer.command_receiver package<a class="headerlink" href="#producer-command-receiver-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="producer-telemetries-events-producer-module">
-<h2>producer.telemetries_events.producer module<a class="headerlink" href="#producer-telemetries-events-producer-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.command_receiver.receiver">
+<span id="producer-command-receiver-receiver-module"></span><h2>producer.command_receiver.receiver module<a class="headerlink" href="#module-producer.command_receiver.receiver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="producer.command_receiver.receiver.Receiver">
+<em class="property">class </em><code class="sig-prename descclassname">producer.command_receiver.receiver.</code><code class="sig-name descname">Receiver</code><span class="sig-paren">(</span><em class="sig-param">domain</em>, <em class="sig-param">csc_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.command_receiver.receiver.Receiver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that creates remote objects using the salobj library</p>
+<dl class="method">
+<dt id="producer.command_receiver.receiver.Receiver.execute_command">
+<em class="property">async </em><code class="sig-name descname">execute_command</code><span class="sig-paren">(</span><em class="sig-param">remote</em>, <em class="sig-param">cmd_name</em>, <em class="sig-param">params</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.command_receiver.receiver.Receiver.execute_command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="producer.command_receiver.receiver.Receiver.process_message">
+<em class="property">async </em><code class="sig-name descname">process_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.command_receiver.receiver.Receiver.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="producer-telemetries-events-test-events-module">
-<h2>producer.telemetries_events.test_events module<a class="headerlink" href="#producer-telemetries-events-test-events-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="producer-command-receiver-test-module">
+<h2>producer.command_receiver.test module<a class="headerlink" href="#producer-command-receiver-test-module" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="producer-telemetries-events-test-telemetry-module">
-<h2>producer.telemetries_events.test_telemetry module<a class="headerlink" href="#producer-telemetries-events-test-telemetry-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-producer.telemetries_events">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.telemetries_events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.command_receiver">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.command_receiver" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -194,8 +209,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="producer.heartbeats.html" class="btn btn-neutral float-right" title="producer.heartbeats package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="producer.scriptqueue.html" class="btn btn-neutral float-left" title="producer.scriptqueue package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="producer.html" class="btn btn-neutral float-left" title="producer package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

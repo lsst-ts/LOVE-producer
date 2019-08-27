@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+   producer.command_receiver
    producer.heartbeats
    producer.scriptqueue
    producer.telemetries_events
