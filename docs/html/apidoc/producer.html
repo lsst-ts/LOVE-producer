@@ -93,7 +93,7 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#producer-main-module">producer.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-producer.main">producer.main module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-producer.utils">producer.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-producer">Module contents</a></li>
 </ul>
@@ -175,7 +175,7 @@
 <li class="toctree-l1"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="producer.command_receiver.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.command_receiver.html#module-producer.command_receiver.receiver">producer.command_receiver.receiver module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.command_receiver.html#producer-command-receiver-test-module">producer.command_receiver.test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.command_receiver.html#module-producer.command_receiver.test">producer.command_receiver.test module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.command_receiver.html#module-producer.command_receiver">Module contents</a></li>
 </ul>
 </li>
@@ -189,15 +189,15 @@
 <li class="toctree-l1"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-example-producer-module">producer.scriptqueue.example_producer module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-producer-module">producer.scriptqueue.producer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.producer">producer.scriptqueue.producer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="producer.telemetries_events.html">producer.telemetries_events package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#producer-telemetries-events-producer-module">producer.telemetries_events.producer module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#producer-telemetries-events-test-events-module">producer.telemetries_events.test_events module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#producer-telemetries-events-test-telemetry-module">producer.telemetries_events.test_telemetry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#module-producer.telemetries_events.producer">producer.telemetries_events.producer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#module-producer.telemetries_events.test_events">producer.telemetries_events.test_events module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#module-producer.telemetries_events.test_telemetry">producer.telemetries_events.test_telemetry module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.telemetries_events.html#module-producer.telemetries_events">Module contents</a></li>
 </ul>
 </li>
@@ -207,8 +207,91 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="producer-main-module">
-<h2>producer.main module<a class="headerlink" href="#producer-main-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.main">
+<span id="producer-main-module"></span><h2>producer.main module<a class="headerlink" href="#module-producer.main" title="Permalink to this headline">¶</a></h2>
+<p>Main executable of the LOVE-producer.</p>
+<dl class="function">
+<dt id="producer.main.on_ws_close">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_close</code><span class="sig-paren">(</span><em class="sig-param">ws</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="producer.main.on_ws_error">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_error</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">error</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="producer.main.on_ws_message">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_message</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">message</em>, <em class="sig-param">receiver</em>, <em class="sig-param">loop</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="producer.main.on_ws_open">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_open</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">domain</em>, <em class="sig-param">message_getters</em>, <em class="sig-param">loop</em>, <em class="sig-param">csc_list</em>, <em class="sig-param">sq_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Starts sending messages through a websocket connection every through seconds,
+from a list of messages when the on_open event callback is called.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>ws: `websocket.WebSocket object`</strong></dt><dd><p>websocket object that handles the connection</p>
+</dd>
+<dt><strong>message_getters: `list`</strong></dt><dd><p>list of functions such that each one returns a dict with this structure:
+{</p>
+<blockquote>
+<div><p>‘category’: ‘event’,
+‘data’ : { …. }</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="producer.main.read_config">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">read_config</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">key=None</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.read_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a given config file and returns the lists of CSCs to listen to.
+It can read the full file (by default), or read only a specific key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>path: `string`</strong></dt><dd><p>The full path of the config file</p>
+</dd>
+<dt><strong>key: `string`</strong></dt><dd><p>optional key to read</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>csc_list: `[()]`</strong></dt><dd><p>The list of CSCs to run as a tuple with the CSC name and index</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="producer.main.run_evt_loop">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">run_evt_loop</code><span class="sig-paren">(</span><em class="sig-param">loop</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.run_evt_loop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="producer.main.send_message_callback">
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">send_message_callback</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.send_message_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define a callback that parses a dictionary (message) into a JSON string and sends it through websockets.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>ws: `websocket.WebSocket object`</strong></dt><dd><p>websocket object that handles the connection</p>
+</dd>
+<dt><strong>message</strong><span class="classifier"><cite>dict</cite></span></dt><dd><p>the message to send</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 <div class="section" id="module-producer.utils">
 <span id="producer-utils-module"></span><h2>producer.utils module<a class="headerlink" href="#module-producer.utils" title="Permalink to this headline">¶</a></h2>
@@ -216,6 +299,24 @@
 <dt id="producer.utils.NumpyEncoder">
 <em class="property">class </em><code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">NumpyEncoder</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">skipkeys=False</em>, <em class="sig-param">ensure_ascii=True</em>, <em class="sig-param">check_circular=True</em>, <em class="sig-param">allow_nan=True</em>, <em class="sig-param">sort_keys=False</em>, <em class="sig-param">indent=None</em>, <em class="sig-param">separators=None</em>, <em class="sig-param">default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.NumpyEncoder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">json.encoder.JSONEncoder</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.utils.NumpyEncoder.default" title="producer.utils.NumpyEncoder.default"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default</span></code></a>(obj)</p></td>
+<td><p>Implement this method in a subclass such that it returns a serializable object for <code class="docutils literal notranslate"><span class="pre">o</span></code>, or calls the base implementation (to raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">encode</span></code>(o)</p></td>
+<td><p>Return a JSON string representation of a Python data structure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">iterencode</span></code>(o[, _one_shot])</p></td>
+<td><p>Encode the given object and yield each string representation as available.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="producer.utils.NumpyEncoder.default">
 <code class="sig-name descname">default</code><span class="sig-paren">(</span><em class="sig-param">obj</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.NumpyEncoder.default" title="Permalink to this definition">¶</a></dt>

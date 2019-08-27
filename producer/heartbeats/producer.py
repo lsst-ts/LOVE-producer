@@ -11,8 +11,9 @@ NO_HEARTBEAT_EVENT_TIMESTAMP = -2
 
 
 class HeartbeatProducer:
+
     def __init__(self, domain, send_heartbeat, csc_list):
-        """Monitors CSC heartbeats and produces messages for the LOVE manager
+        """Monitor CSC heartbeats and produces messages for the LOVE manager.
 
         It has a default configuration for the monitoring parameters which are overriden by
         a specific config.json file.
