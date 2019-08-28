@@ -3,11 +3,11 @@ version: "3.7"
 services:
 
   producer:
-    container_name: producer
+    container_name: producer-local
     build:
       context: .
       dockerfile: Dockerfile-dev
-    image: love-producer-image-docs
+    image: love-producer-image-mount
     volumes:
       - .:/usr/src/love
     command: "/usr/src/love/setup.sh"
