@@ -16,6 +16,8 @@ from heartbeats.producer import HeartbeatProducer
 from command_receiver.receiver import Receiver
 from utils import NumpyEncoder
 
+CONFIG_PATH = '/usr/src/love/config/config.json'
+
 
 def on_ws_message(ws, message, receiver, loop):
     async def receive_it():
@@ -144,7 +146,7 @@ def read_config(path, key=None):
 if __name__ == '__main__':
     """ Runs the Producer """
     print('***** Starting Producer *****')
-    path = '/usr/src/love/config/config.json'
+    path = CONFIG_PATH
     csc_list = read_config(path)
     sq_list = read_config(path, 'ScriptQueue')
     print('List of CSCs to listen:', csc_list)

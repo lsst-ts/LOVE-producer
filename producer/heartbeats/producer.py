@@ -8,6 +8,7 @@ MAX_LOST_HEARTBEATS_DEFAULT = 5
 HEARTBEAT_TIMEOUT_DEFAULT = 15
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
+HEARTBEATS_CONFIG_PATH = './heartbeats/config.json'
 
 
 class HeartbeatProducer:
@@ -30,7 +31,7 @@ class HeartbeatProducer:
         self.csc_list = csc_list
 
         # params to replace the defaults later
-        with open('/usr/src/love/heartbeats/config.json') as config_file:
+        with open(HEARTBEATS_CONFIG_PATH) as config_file:
             self.heartbeat_params = json.loads(config_file.read())
 
         self.remotes = []  # for cleanup
