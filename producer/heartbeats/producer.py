@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import os
 import threading
 from lsst.ts import salobj
 
@@ -8,7 +9,7 @@ MAX_LOST_HEARTBEATS_DEFAULT = 5
 HEARTBEAT_TIMEOUT_DEFAULT = 15
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
-HEARTBEATS_CONFIG_PATH = './heartbeats/config.json'
+HEARTBEATS_CONFIG_PATH = 'config.json'
 
 
 class HeartbeatProducer:
@@ -31,7 +32,8 @@ class HeartbeatProducer:
         self.csc_list = csc_list
 
         # params to replace the defaults later
-        with open(HEARTBEATS_CONFIG_PATH) as config_file:
+        path = os.path.join(os.path.dirname(__file__), HEARTBEATS_CONFIG_PATH)
+        with open(path) as config_file:
             self.heartbeat_params = json.loads(config_file.read())
 
         self.remotes = []  # for cleanup
