@@ -1,3 +1,4 @@
+"""Main executable of the LOVE-producer."""
 import asyncio
 import json
 import os

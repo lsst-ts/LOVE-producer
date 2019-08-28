@@ -1,0 +1,15 @@
+version: "3.7"
+
+services:
+
+  producer:
+    container_name: producer
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    image: love-producer-image-docs
+    volumes:
+      - .:/usr/src/love
+    command: "/usr/src/love/setup.sh"
+    stdin_open: true
+    tty: true
