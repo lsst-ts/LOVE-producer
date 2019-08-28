@@ -33,6 +33,20 @@ pipeline {
         }
       }
     }
+    stage("Test Docker Image") {
+      when {
+        anyOf {
+          branch "master"
+          branch "develop"
+          branch "release/*"
+        }
+      }
+      steps {
+        script {
+          sh "docker run --entrypoint='' ${dockerImageName} /usr/src/love/producer/run-tests.sh"
+        }
+      }
+    }
     stage("Push Docker image") {
       when {
         anyOf {
