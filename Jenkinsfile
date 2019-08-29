@@ -43,7 +43,7 @@ pipeline {
       }
       steps {
         script {
-          sh "docker run --entrypoint='' ${dockerImageName} /usr/src/love/producer/run-tests.sh"
+          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
         }
       }
     }
