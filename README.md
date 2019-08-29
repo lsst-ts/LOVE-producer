@@ -1,5 +1,9 @@
 # LOVE-producer
 
+This repository contains the code of the LOVE-producer application, that acts as middleware between the LOVE-manager and SAL.
+
+See the documentation here: https://lsst-ts.github.io/LOVE-producer/html/index.html
+
 ## 1. Use as part of the LOVE system
 In order to use the LOVE-producer as part of the LOVE system we recommend to use the docker-compose and configuration files provided in the [LOVE-integration-tools](https://github.com/lsst-ts/LOVE-integration-tools) repo. Please follow the instructions there.
 
@@ -24,14 +28,14 @@ cd /usr/src/love
 ```
 
 ### 2.2 Run tests
-Once inside the container and in the love folder you can run the tests as follows:
+Once inside the container and in the `love` folder you can run the tests as follows:
 ```
 cd producer
 python -m unittest
 ```
 
 ### 2.3 Build documentation
-Once inside the container and in the love folder you can build the documentation as follows:
+Once inside the container and in the `love` folder you can build the documentation as follows:
 ```
 cd docsrc
 ./create_docs.sh
