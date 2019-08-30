@@ -1,4 +1,4 @@
-FROM lsstts/develop-env:20190705_sal3.10.0_salobj
+FROM lsstts/develop-env:salobj4_b30
 
 WORKDIR /usr/src/love
 COPY producer/requirements.txt .
