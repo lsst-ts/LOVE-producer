@@ -1,3 +1,4 @@
+"""Main executable of the LOVE-producer."""
 import asyncio
 import json
 import os
@@ -14,6 +15,8 @@ from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
 from command_receiver.receiver import Receiver
 from utils import NumpyEncoder
+
+CONFIG_PATH = 'config/config.json'
 
 
 def on_ws_message(ws, message, receiver, loop):
@@ -128,7 +131,10 @@ def read_config(path, key=None):
         The list of CSCs to run as a tuple with the CSC name and index
     """
     print('Reading config file: ', path)
-    data = json.load(open(path, 'r'))
+    with open(path) as config_file:
+        data = json.loads(config_file.read())
+
+    # data = json.load(open(path, 'r'))
     csc_list = []
     if key:
         for csc_instance in data[key]:
@@ -143,7 +149,7 @@ def read_config(path, key=None):
 if __name__ == '__main__':
     """ Runs the Producer """
     print('***** Starting Producer *****')
-    path = '/usr/src/love/config/config.json'
+    path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
     csc_list = read_config(path)
     sq_list = read_config(path, 'ScriptQueue')
     print('List of CSCs to listen:', csc_list)

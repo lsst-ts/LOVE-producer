@@ -2,4 +2,4 @@
 
 source .setup.sh
 
-python -u /usr/src/love/main.py
+python -u /usr/src/love/producer/main.py
