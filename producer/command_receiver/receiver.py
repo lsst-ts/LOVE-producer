@@ -12,9 +12,13 @@ class Receiver:
     def __init__(self, domain, csc_list):
         self.remote_dict = {}
         for name, salindex in csc_list:
-            print('- Listening to telemetries and events from CSC: ', (name, salindex))
-            remote = salobj.Remote(domain=domain, name=name, index=salindex)
-            self.remote_dict[(name, salindex)] = remote
+            print('- Listening to commands for CSC: ', (name, salindex))
+            try:
+                remote = salobj.Remote(domain=domain, name=name, index=salindex)
+                self.remote_dict[(name, salindex)] = remote
+            except Exception as e:
+                print('CSC', name, 'raised exception on Receiver:', e)
+                
 
     async def process_message(self, message):
         data = json.loads(message)
