@@ -154,8 +154,8 @@
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
 <img alt="../_images/Producer-overview.png" src="../_images/Producer-overview.png" />
-<p>The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. “Messages” can be understood without distinction as events, telemetries, commands parameters and their acknowledgements.</p>
-<p>The LOVE-producer (or just the Producer) is part of the LSST Operations and Visualization Environment (L.O.V.E).</p>
+<p>The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. “Messages” can be understood without distinction as events, telemetries, commands parameters and their acknowledgements. The LOVE-producer (or just the Producer) is part of the LSST Operations and Visualization Environment (L.O.V.E).</p>
+<p>As shown in the figure, the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> gives information of which SAL <cite>topics</cite> (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. At the same time, the LOVE-manager can send command parameters which in turn will be processed to produce commands with <cite>salobj</cite>, returning a message acknowledging the correct reception of said command or an error message.</p>
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
 <p>The LOVE-producer reads a <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file (located in the <code class="code docutils literal notranslate"><span class="pre">producer/config/</span></code> folder) to create the instances of the <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> class that are used to read SAL data and send commands. This file specifies each topic name and the SAL index for which messages will be produced. For example:</p>
