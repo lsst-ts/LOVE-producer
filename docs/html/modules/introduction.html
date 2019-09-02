@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; LOVE-producer 0.2.1 documentation</title>
+  <title>Overview &mdash; LOVE-producer 0.2.1 documentation</title>
   
 
   
@@ -82,7 +82,10 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../apidoc/modules.html">ApiDoc</a></li>
 </ul>
 
@@ -129,7 +132,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>Introduction</li>
+      <li>Overview</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -148,19 +151,27 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>The LOVE-producer is part of the LSST Operation and Visualization Environment (L.O.V.E.) project.
-It is written in Python.</p>
-<p>The LOVE-producer is an intermediary between the LOVE-manager and SAL.
-It handles communication to SAL components and communicates through websocket messages with the LOVE-manager.</p>
-<p>The LOVE-producer <code class="code docutils literal notranslate"><span class="pre">main</span></code> module is the main point of execution, where the code for the different producers is run. The different producers are split into 4 different modules:</p>
-<ul class="simple">
-<li><p><code class="code docutils literal notranslate"><span class="pre">command_receiver</span></code>:</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">heartbeats</span></code>:</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">scriptqueue</span></code>:</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">telemetries_events</span></code>:</p></li>
-</ul>
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<img alt="../_images/Producer-overview.png" src="../_images/Producer-overview.png" />
+<p>The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. “Messages” can be understood without distinction as events, telemetries, commands parameters and their acknowledgements.</p>
+<p>The LOVE-producer (or just the Producer) is part of the LSST Operations and Visualization Environment (L.O.V.E).</p>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>The LOVE-producer reads a <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file (located in the <code class="code docutils literal notranslate"><span class="pre">producer/config/</span></code> folder) to create the instances of the <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> class that are used to read SAL data and send commands. This file specifies each topic name and the SAL index for which messages will be produced. For example:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;Test&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span> <span class="nt">&quot;index&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;command_sim&quot;</span> <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="nt">&quot;ScriptQueue&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span> <span class="nt">&quot;index&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;command_sim&quot;</span> <span class="p">},</span>
+        <span class="p">{</span> <span class="nt">&quot;index&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nt">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;command_sim&quot;</span> <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>configures the Producer to produce messages from/to the <code class="code docutils literal notranslate"><span class="pre">Test</span></code> CSC with index <code class="code docutils literal notranslate"><span class="pre">1</span></code> and the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> CSCs with indices <code class="code docutils literal notranslate"><span class="pre">1</span></code> and <code class="code docutils literal notranslate"><span class="pre">2</span></code>. The <cite>source</cite> parameter is ignored but kept for consistency in the integration with the <cite>LOVE-simulator</cite>.</p>
+</div>
 </div>
 
 
