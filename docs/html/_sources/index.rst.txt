@@ -11,6 +11,7 @@ Welcome to LOVE-producer's documentation!
    :caption: Contents:
 
    modules/introduction.rst
+   modules/how_it_works.rst
    apidoc/modules.rst
 
 
