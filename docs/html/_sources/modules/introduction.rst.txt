@@ -3,9 +3,9 @@ Overview
 
 .. image:: ../assets/Producer-overview.png
 
-The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. "Messages" can be understood without distinction as events, telemetries, commands parameters and their acknowledgements. The LOVE-producer (or just the Producer) is part of the LSST Operations and Visualization Environment (L.O.V.E).
+The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. "Messages" can be understood without distinction as events, telemetries or commands parameters and their acknowledgements. The LOVE-producer (or just the Producer) is part of the LSST Operations and Visualization Environment (L.O.V.E).
 
-As shown in the figure, the :code:`config.json` gives information of which SAL `topics` (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. At the same time, the LOVE-manager can send command parameters which in turn will be processed to produce commands with `salobj`, returning a message acknowledging the correct reception of said command or an error message. 
+As shown in the figure, the :code:`config.json` gives information of which SAL topics (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. At the same time, the LOVE-manager can send command parameters which in turn will be processed to produce commands with :code:`salobj`, returning a message acknowledging the successful reception of said command or an error message. 
 
 
 
