@@ -2,29 +2,29 @@ How it works
 ===============
 
 .. image:: ../assets/Producer-details.svg
-The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State` and :code:`Command Receiver`) each refered to as "a Producer", and a python script :code:`main.py`. Each Producer provides an interface to extract specific information from the SAL parsed into a message in JSON format with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program, in charge of handling the websockets communication with the LOVE-manager and reading the `config.json` file.
+The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State` and :code:`Command Receiver`), each refered to as "a Producer", and a :code:`main.py` python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager. 
 
 
 The :code:`main.py` file
 ------------------
 
-It uses the `websocket` library to send messages to the address :code:`ws://<WS_HOST>/?password=<WS_PASS>`, :code:`<WS_HOST>` and :code:`<WS_PASS>` are read from environment variables. It configures each Producer according to the `config.json` and extracts data by either passing  callbacks or making direct calls to :code:`get_message` functions and send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is  consistent with the LOVE-manager and has this structure
+It uses the :code:`websocket` library to send messages to the :code:`ws://<WS_HOST>/?password=<WS_PASS>` URL, where  :code:`WS_HOST` and :code:`WS_PASS` are read from environment variables. It configures each Producer according to the :code:`config.json` and extracts data by either passing callbacks or making direct calls to message getters functions to send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is consistent with the what the LOVE-manager expects and has this structure:
 
 .. code-block:json
 
     {
-        category: 'cmd'/'ack',
+        category: 'event", 
         data: [{
             csc: 'ScriptQueue',
             salindex: 1,
             data: {
-                stream: {
-                    cmd: 'CommandPath',
-                    params: {
-                        'param1': 'value1',
-                        'param2': 'value2',
-                        ...
-                    },
+                stream1: {
+                    param1: { ... },
+                    param2: { ... },
+                },
+                stream2: {
+                    param_a: { ... },
+                    param_b: { ... }
                 }
             }
         }]
@@ -34,7 +34,7 @@ It uses the `websocket` library to send messages to the address :code:`ws://<WS_
 Telemetries and Events producer
 --------------------------------------------
 
-It creates a :code:`salobj.Remote` object for a list of :code:`CSC, salindex` pairs(created in the :code:`main.py` from the :code:`config.json` file). It provides a :code:`get_telemetry_message` that returns a dict containing the last value of each telemetry on each :code:`salobj.Remote`, and a :code:`get_events_message` that similarly extracts all events data a The :code:`main.py`. These two methods are called by the :code:`main.py` every two seconds.
+It creates a :code:`salobj.Remote` object for a list of :code:`(CSC, salindex)` pair given as input (created in the :code:`main.py` from the :code:`config.json` file). It provides a :code:`get_telemetry_message` that returns a dict containing the last value of each telemetry on each :code:`salobj.Remote`, and a :code:`get_events_message` that similarly extracts all events data a The :code:`main.py`. These two methods are called by the :code:`main.py` every two seconds.
 
 
 Heartbeats producer
