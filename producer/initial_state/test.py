@@ -89,5 +89,65 @@ class TestTelemetryMessages(unittest.TestCase):
         asyncio.get_event_loop().run_until_complete(doit())
 
 
+    def test_summaryState_change_after_producer_was_created(self):
+            """
+            Test it can produce the default summaryState message correctly
+            when a change happens after the producer hsa been created
+            """
+
+            async def doit():
+                async with Harness(initial_state=salobj.State.STANDBY) as harness:
+                    # Arrange
+                    initial_state = await harness.remote.evt_summaryState.next(flush=False)
+                    self.assertEqual(initial_state.summaryState, salobj.State.STANDBY.value)
+
+                    producer = InitialStateProducer(domain=harness.csc.domain, csc_list=[
+                        ('Test', harness.csc.salinfo.index)])
+
+                    # Act
+                    await harness.remote.cmd_start.start()
+                    produced_message = await producer.process_message({
+                        "category": "initial-state",
+                        "data": [{
+                            "csc": "Test",
+                            "salindex": harness.csc.salinfo.index,
+                            "data": {
+                                "stream": {
+                                    "event_name": "summaryState"
+                                }
+                            }
+                        }]
+                    })
+                    # Assert
+
+                    second_state = await harness.remote.evt_summaryState.next(flush=False)
+
+
+                    to_delete = ["TestID", "private_host", "private_origin", "private_rcvStamp",
+                                 "private_revCode", "private_seqNum", "private_sndStamp", "priority"]
+
+                    for key in to_delete:
+                        if key in produced_message["data"][0]["data"]["summaryState"][0]:
+                            del produced_message["data"][0]["data"]["summaryState"][0][key]
+
+                    # Assert
+                    expected_message = {
+                        "category": "event",
+                        "data": [{
+                            "csc": "Test",
+                            "salindex": harness.csc.salinfo.index,
+                            "data": {
+                                "summaryState": [{
+                                    "summaryState": {
+                                        "value": salobj.State.DISABLED.value,
+                                        "dataType": "Int"
+                                    }
+                                }]
+                            }
+                        }]
+                    }
+                    self.assertEqual(produced_message, expected_message)
+            asyncio.get_event_loop().run_until_complete(doit())
+
 if __name__ == '__main__':
     unittest.main()
