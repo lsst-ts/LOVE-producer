@@ -17,6 +17,7 @@ class Harness:
             handler = logging.StreamHandler()
             self.csc.log.addHandler(handler)
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
+
     async def __aenter__(self):
         await self.csc.start_task
         await self.remote.start_task
@@ -46,15 +47,14 @@ class TestTelemetryMessages(unittest.TestCase):
                     ('Test', harness.csc.salinfo.index)])
 
                 # Act
+
                 produced_message = await producer.process_message({
-                    "category": "initial-state",
+                    "category": "initial_state",
                     "data": [{
                         "csc": "Test",
                         "salindex": harness.csc.salinfo.index,
-                        "data": {
-                            "stream": {
+                        "stream": {
                                 "event_name": "summaryState"
-                            }
                         }
                     }]
                 })
@@ -104,14 +104,12 @@ class TestTelemetryMessages(unittest.TestCase):
                 # Act
                 await harness.remote.cmd_start.start()
                 produced_message = await producer.process_message({
-                    "category": "initial-state",
+                    "category": "initial_state",
                     "data": [{
                         "csc": "Test",
                         "salindex": harness.csc.salinfo.index,
-                        "data": {
-                            "stream": {
-                                "event_name": "summaryState"
-                            }
+                        "stream": {
+                            "event_name": "summaryState"
                         }
                     }]
                 })
@@ -159,7 +157,7 @@ class TestTelemetryMessages(unittest.TestCase):
 
     #         # Act
     #         produced_message = await producer.process_message({
-    #             "category": "initial-state",
+    #             "category": "initial_state",
     #             "data": [{
     #                 "csc": "Test",
     #                 "salindex": index,

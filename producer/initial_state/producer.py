@@ -11,6 +11,7 @@ class InitialStateProducer:
         for (csc, salindex) in csc_list:
             try:
                 self.remote_dict[(csc, salindex)] = salobj.Remote(domain, csc, salindex)
+                print('- Loaded InitialState Remote for', csc, salindex)
             except Exception as e:
                 print('InitialStateProducer could not load Remote for', csc, salindex)
 
@@ -18,11 +19,11 @@ class InitialStateProducer:
         """ Tries to obtain the current data for an event with salobj """
         request_data = message["data"][0]
         csc = request_data["csc"]
-        salindex = request_data["salindex"]
-        event_name = request_data["data"]["stream"]["event_name"]
-
+        salindex = int(request_data["salindex"])
+        event_name = request_data["stream"]["event_name"]
+        if((csc, salindex) not in self.remote_dict):
+            return
         remote = self.remote_dict[(csc, salindex)]
-        await remote.start_task
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
             # check latest seen data, if not available then "request" it
@@ -30,7 +31,7 @@ class InitialStateProducer:
             if evt_data is None:
                 evt_data = await evt_object.next(flush=False, timeout=60)
         except Exception as e:
-            print('InitialStateProducer failed to obtain data from {}-{}'.format(csc, salindex))
+            print('InitialStateProducer failed to obtain data from {}-{}-{}'.format(csc, salindex, event_name))
             print(e)
             return
         result = {}
@@ -47,7 +48,7 @@ class InitialStateProducer:
             "data": [{
                 "csc": csc,
                 "salindex": salindex,
-                "data": {"summaryState": [result]}
+                "data": {event_name: [result]}
             }]
         }
         return message
