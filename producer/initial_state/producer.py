@@ -7,6 +7,17 @@ from lsst.ts import salobj
 
 class InitialStateProducer:
     def __init__(self, domain, csc_list):
+        """
+            Produces LOVE messages with the latest info of an event on demand.
+            It first loads several remotes (constructor) and then
+            produces messages for the LOVE-manager through the process_message function.
+
+
+            Parameters
+            ---------
+            domain: salobj Domain object to create salobj Remotes
+            csc_list: List of  (csc, salindex) pairs
+        """
         self.remote_dict = {}
         for (csc, salindex) in csc_list:
             try:
@@ -16,7 +27,50 @@ class InitialStateProducer:
                 print('InitialStateProducer could not load Remote for', csc, salindex)
 
     async def process_message(self, message):
-        """ Tries to obtain the current data for an event with salobj """
+        """ 
+        Tries to obtain the current data for an event with salobj.
+
+        Parameters
+        ----------
+        message: dictionary with the LOVE-schema see example:
+
+        Returns
+        -------
+        answer: a dictionary such as those delivered by the Telemetries_Events producer
+
+        Example
+        ------
+
+        message = {
+            "category": "initial_state",
+            "data": [{
+                "csc": "Test",
+                "salindex": 1,
+                "stream": {
+                        "event_name": "summaryState"
+                }
+            }]
+        }
+        answer = await producer.process_message(message)
+        
+        # {
+        #     "category": "event",
+        #     "data": [{
+        #         "csc": "Test",
+        #         "salindex": 1,
+        #         "data": {
+        #             "summaryState": [{
+        #                 "summaryState": {
+        #                     "value": 1,
+        #                     "dataType": "Int"
+        #                 }
+        #             }]
+        #         }
+        #     }]
+        # }
+
+
+        """
         request_data = message["data"][0]
         csc = request_data["csc"]
         salindex = int(request_data["salindex"])
