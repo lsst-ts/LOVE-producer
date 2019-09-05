@@ -22,15 +22,16 @@ class InitialStateProducer:
         event_name = request_data["data"]["stream"]["event_name"]
 
         remote = self.remote_dict[(csc, salindex)]
+        await remote.start_task
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
             # check latest seen data, if not available then "request" it
             evt_data = evt_object.get(flush=False)
             if evt_data is None:
-                evt_data = await evt_object.next(flush=False)
-            import pdb; pdb.set_trace()
+                evt_data = await evt_object.next(flush=False, timeout=60)
         except Exception as e:
             print('InitialStateProducer failed to obtain data from {}-{}'.format(csc, salindex))
+            print(e)
             return
         result = {}
         for parameter_name in evt_data._member_attributes:
