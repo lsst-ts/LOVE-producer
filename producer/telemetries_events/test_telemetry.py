@@ -3,6 +3,7 @@ import logging
 from .producer import Producer
 import asyncio
 from lsst.ts import salobj
+from utils import getDataType
 
 STD_TIMEOUT = 5  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -47,7 +48,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 # Assert
                 tel_scalars = await harness.remote.tel_scalars.next(flush=False, timeout=STD_TIMEOUT)
                 tel_parameters = tel_scalars._member_attributes
-                expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': generic_producer.getDataType(
+                expected_data = {p: {'value': getattr(tel_scalars, p), 'dataType': getDataType(
                     getattr(tel_scalars, p))} for p in tel_parameters}
                 expected_message = {
                     "category": "telemetry",
@@ -89,7 +90,7 @@ class TestTelemetryMessages(unittest.TestCase):
                 # Assert
                 tel_arrays = await harness.remote.tel_arrays.next(flush=False, timeout=STD_TIMEOUT)
                 tel_parameters = tel_arrays._member_attributes
-                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': generic_producer.getDataType(
+                expected_data = {p: {'value': getattr(tel_arrays, p), 'dataType': getDataType(
                     getattr(tel_arrays, p))} for p in tel_parameters}
                 expected_message = {
                     "category": "telemetry",

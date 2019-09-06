@@ -8,6 +8,7 @@ Subpackages
 
    producer.command_receiver
    producer.heartbeats
+   producer.initial_state
    producer.scriptqueue
    producer.telemetries_events
 

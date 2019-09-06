@@ -2,7 +2,7 @@ import asyncio
 import json
 import numpy as np
 import threading
-from utils import NumpyEncoder
+from utils import NumpyEncoder, getDataType
 from lsst.ts import salobj
 
 
@@ -18,21 +18,7 @@ class Producer:
         for name, salindex in csc_list:
             print('- Listening to telemetries and events from CSC: ', (name, salindex))
             self.remote_list.append(salobj.Remote(domain=domain, name=name, index=salindex))
-
-    def getDataType(self, value):
-        if isinstance(value, (np.ndarray)) and value.ndim == 0:
-            return 'Array<%s>' % self.getDataType(value.item())
-
-        if isinstance(value, (list, tuple, np.ndarray)):
-            return 'Array<%s>' % self.getDataType(value[0])
-        if isinstance(value, (int, np.integer)):
-            return 'Int'
-        if isinstance(value, float):
-            return 'Float'
-        if isinstance(value, str):
-            return 'String'
-        return 'None'
-
+    
     def get_remote_tel_values(self, remote):
         tel_names = remote.salinfo.telemetry_names
         values = {}
@@ -42,7 +28,7 @@ class Producer:
             if data is None:
                 continue
             tel_parameters = list(data._member_attributes)
-            tel_result = {p: {'value': getattr(data, p), 'dataType': self.getDataType(
+            tel_result = {p: {'value': getattr(data, p), 'dataType': getDataType(
                 getattr(data, p))} for p in tel_parameters}
             values[tel] = tel_result
         return values
@@ -58,7 +44,7 @@ class Producer:
                 if data is None:
                     break
                 evt_parameters = list(data._member_attributes)
-                evt_result = {p: {'value': getattr(data, p), 'dataType': self.getDataType(
+                evt_result = {p: {'value': getattr(data, p), 'dataType': getDataType(
                     getattr(data, p))} for p in evt_parameters}
                 evt_results.append(evt_result)
             if len(evt_results) == 0:

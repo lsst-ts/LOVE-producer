@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.heartbeats.html">producer.heartbeats package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.initial_state.html">producer.initial_state package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.telemetries_events.html">producer.telemetries_events package</a></li>
 </ul>
@@ -187,6 +188,13 @@
 <li class="toctree-l2"><a class="reference internal" href="producer.heartbeats.html#module-producer.heartbeats">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="producer.initial_state.html">producer.initial_state package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="producer.initial_state.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.initial_state.html#module-producer.initial_state.producer">producer.initial_state.producer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.initial_state.html#module-producer.initial_state.test">producer.initial_state.test module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.initial_state.html#module-producer.initial_state">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-example-producer-module">producer.scriptqueue.example_producer module</a></li>
@@ -223,7 +231,7 @@
 
 <dl class="function">
 <dt id="producer.main.on_ws_message">
-<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_message</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">message</em>, <em class="sig-param">receiver</em>, <em class="sig-param">loop</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_message" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">producer.main.</code><code class="sig-name descname">on_ws_message</code><span class="sig-paren">(</span><em class="sig-param">ws</em>, <em class="sig-param">message</em>, <em class="sig-param">receiver</em>, <em class="sig-param">initialStateProducer</em>, <em class="sig-param">loop</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.main.on_ws_message" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -340,6 +348,11 @@ implement default like this:</p>
 </dd></dl>
 
 </dd></dl>
+
+<dl class="function">
+<dt id="producer.utils.getDataType">
+<code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">getDataType</code><span class="sig-paren">(</span><em class="sig-param">value</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.getDataType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="module-producer">

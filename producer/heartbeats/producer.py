@@ -22,7 +22,6 @@ class HeartbeatProducer:
 
         Parameters
         ----------
-        loop: asyncio event loop being used
         domain: salobj Domain object to create salobj Remotes
         send_heartbeat: callback that receives one argument, the message dictionary to be sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
