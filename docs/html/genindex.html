@@ -156,6 +156,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
@@ -222,7 +223,7 @@
 </li>
       <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.producer.Producer.get_telemetry_message">get_telemetry_message() (producer.telemetries_events.producer.Producer method)</a>
 </li>
-      <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.producer.Producer.getDataType">getDataType() (producer.telemetries_events.producer.Producer method)</a>
+      <li><a href="apidoc/producer.html#producer.utils.getDataType">getDataType() (in module producer.utils)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -235,6 +236,8 @@
       <ul>
         <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.test.Harness">(class in producer.heartbeats.test)</a>
 </li>
+        <li><a href="apidoc/producer.initial_state.html#producer.initial_state.test.Harness">(class in producer.initial_state.test)</a>
+</li>
         <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_events.Harness">(class in producer.telemetries_events.test_events)</a>
 </li>
         <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_telemetry.Harness">(class in producer.telemetries_events.test_telemetry)</a>
@@ -243,6 +246,14 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.producer.HeartbeatProducer">HeartbeatProducer (class in producer.heartbeats.producer)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="apidoc/producer.initial_state.html#producer.initial_state.producer.InitialStateProducer">InitialStateProducer (class in producer.initial_state.producer)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -291,7 +302,11 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/producer.command_receiver.html#producer.command_receiver.receiver.Receiver.process_message">process_message() (producer.command_receiver.receiver.Receiver method)</a>
+
+      <ul>
+        <li><a href="apidoc/producer.initial_state.html#producer.initial_state.producer.InitialStateProducer.process_message">(producer.initial_state.producer.InitialStateProducer method)</a>
 </li>
+      </ul></li>
       <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.producer.Producer">Producer (class in producer.telemetries_events.producer)</a>
 </li>
       <li><a href="apidoc/producer.html#module-producer">producer (module)</a>
@@ -306,9 +321,15 @@
 </li>
       <li><a href="apidoc/producer.heartbeats.html#module-producer.heartbeats.producer">producer.heartbeats.producer (module)</a>
 </li>
+      <li><a href="apidoc/producer.heartbeats.html#module-producer.heartbeats.test">producer.heartbeats.test (module)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="apidoc/producer.heartbeats.html#module-producer.heartbeats.test">producer.heartbeats.test (module)</a>
+      <li><a href="apidoc/producer.initial_state.html#module-producer.initial_state">producer.initial_state (module)</a>
+</li>
+      <li><a href="apidoc/producer.initial_state.html#module-producer.initial_state.producer">producer.initial_state.producer (module)</a>
+</li>
+      <li><a href="apidoc/producer.initial_state.html#module-producer.initial_state.test">producer.initial_state.test (module)</a>
 </li>
       <li><a href="apidoc/producer.html#module-producer.main">producer.main (module)</a>
 </li>
@@ -389,6 +410,8 @@
       <ul>
         <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.test.TestTelemetryMessages.setUp">(producer.heartbeats.test.TestTelemetryMessages method)</a>
 </li>
+        <li><a href="apidoc/producer.initial_state.html#producer.initial_state.test.TestTelemetryMessages.setUp">(producer.initial_state.test.TestTelemetryMessages method)</a>
+</li>
       </ul></li>
       <li><a href="apidoc/producer.scriptqueue.html#producer.scriptqueue.producer.ScriptQueueProducer.setup">setup() (producer.scriptqueue.producer.ScriptQueueProducer method)</a>
 </li>
@@ -410,6 +433,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/producer.command_receiver.html#producer.command_receiver.test.TestCommandsFromMessages.test_command_ack">test_command_ack() (producer.command_receiver.test.TestCommandsFromMessages method)</a>
 </li>
+      <li><a href="apidoc/producer.initial_state.html#producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState">test_default_initial_summaryState() (producer.initial_state.test.TestTelemetryMessages method)</a>
+</li>
       <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_not_received">test_heartbeat_not_received() (producer.heartbeats.test.TestTelemetryMessages method)</a>
 </li>
       <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_received">test_heartbeat_received() (producer.heartbeats.test.TestTelemetryMessages method)</a>
@@ -418,11 +443,13 @@
 </li>
       <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_events.TestEventsMessages.test_produced_message_with_event_scalar">test_produced_message_with_event_scalar() (producer.telemetries_events.test_events.TestEventsMessages method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_arrays">test_produced_message_with_telemetry_arrays() (producer.telemetries_events.test_telemetry.TestTelemetryMessages method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_scalar">test_produced_message_with_telemetry_scalar() (producer.telemetries_events.test_telemetry.TestTelemetryMessages method)</a>
+</li>
+      <li><a href="apidoc/producer.initial_state.html#producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created">test_summaryState_change_after_producer_was_created() (producer.initial_state.test.TestTelemetryMessages method)</a>
 </li>
       <li><a href="apidoc/producer.command_receiver.html#producer.command_receiver.test.TestCommandsFromMessages">TestCommandsFromMessages (class in producer.command_receiver.test)</a>
 </li>
@@ -431,6 +458,8 @@
       <li><a href="apidoc/producer.heartbeats.html#producer.heartbeats.test.TestTelemetryMessages">TestTelemetryMessages (class in producer.heartbeats.test)</a>
 
       <ul>
+        <li><a href="apidoc/producer.initial_state.html#producer.initial_state.test.TestTelemetryMessages">(class in producer.initial_state.test)</a>
+</li>
         <li><a href="apidoc/producer.telemetries_events.html#producer.telemetries_events.test_telemetry.TestTelemetryMessages">(class in producer.telemetries_events.test_telemetry)</a>
 </li>
       </ul></li>

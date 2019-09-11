@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>producer.heartbeats package &mdash; LOVE-producer 0.2.1 documentation</title>
+  <title>producer.initial_state package &mdash; LOVE-producer 0.2.1 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="producer.initial_state package" href="producer.initial_state.html" />
-    <link rel="prev" title="producer.command_receiver package" href="producer.command_receiver.html" /> 
+    <link rel="next" title="producer.scriptqueue package" href="producer.scriptqueue.html" />
+    <link rel="prev" title="producer.heartbeats package" href="producer.heartbeats.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,8 +88,8 @@
 <li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.heartbeats package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="producer.initial_state.html">producer.initial_state package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.heartbeats.html">producer.heartbeats package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.initial_state package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.telemetries_events.html">producer.telemetries_events package</a></li>
 </ul>
@@ -151,13 +151,13 @@
         
           <li><a href="producer.html">producer package</a> &raquo;</li>
         
-      <li>producer.heartbeats package</li>
+      <li>producer.initial_state package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/apidoc/producer.heartbeats.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apidoc/producer.initial_state.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -170,16 +170,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="producer-heartbeats-package">
-<h1>producer.heartbeats package<a class="headerlink" href="#producer-heartbeats-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="producer-initial-state-package">
+<h1>producer.initial_state package<a class="headerlink" href="#producer-initial-state-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-producer.heartbeats.producer">
-<span id="producer-heartbeats-producer-module"></span><h2>producer.heartbeats.producer module<a class="headerlink" href="#module-producer.heartbeats.producer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.initial_state.producer">
+<span id="producer-initial-state-producer-module"></span><h2>producer.initial_state.producer module<a class="headerlink" href="#module-producer.initial_state.producer" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="producer.heartbeats.producer.HeartbeatProducer">
-<em class="property">class </em><code class="sig-prename descclassname">producer.heartbeats.producer.</code><code class="sig-name descname">HeartbeatProducer</code><span class="sig-paren">(</span><em class="sig-param">domain</em>, <em class="sig-param">send_heartbeat</em>, <em class="sig-param">csc_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.initial_state.producer.InitialStateProducer">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.producer.</code><code class="sig-name descname">InitialStateProducer</code><span class="sig-paren">(</span><em class="sig-param">domain</em>, <em class="sig-param">csc_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.producer.InitialStateProducer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -188,75 +188,75 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message" title="producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_heartbeat_message</span></code></a>(remote_name, salindex, …)</p></td>
-<td><p>Generates a message with the heartbeat info of a CSC in dictionary format.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 74%" />
-<col style="width: 26%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>monitor_remote_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.initial_state.producer.InitialStateProducer.process_message" title="producer.initial_state.producer.InitialStateProducer.process_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_message</span></code></a>(message)</p></td>
+<td><p>Tries to obtain the current data for an event with salobj.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message">
-<code class="sig-name descname">get_heartbeat_message</code><span class="sig-paren">(</span><em class="sig-param">remote_name</em>, <em class="sig-param">salindex</em>, <em class="sig-param">nlost_subsequent</em>, <em class="sig-param">timestamp</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a message with the heartbeat info of a CSC in dictionary format.</p>
-<dl class="field-list simple">
+<dt id="producer.initial_state.producer.InitialStateProducer.process_message">
+<em class="property">async </em><code class="sig-name descname">process_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.producer.InitialStateProducer.process_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain the current data for an event with salobj.</p>
+<dl class="field-list">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>remote_name: str</strong></dt><dd><p>Name of the CSC</p>
-</dd>
-<dt><strong>salindex: int</strong></dt><dd><p>Salindex of the CSC</p>
-</dd>
-<dt><strong>nlost_subsequent:</strong></dt><dd><p>Number of subsequent or consecutive lost heartbeats since last observed heartbeat</p>
-</dd>
-<dt><strong>timestamp: float</strong></dt><dd><p>Timestamp of the last observed heartbeat.</p>
-</dd>
+<dt><strong>message: dictionary with the LOVE-schema see example:</strong></dt><dd></dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>dict</strong></dt><dd><p>Dictionary that, converted to string, is compatible with the LOVE-manager message format.</p>
+<dd class="field-even"><dl>
+<dt><strong>answer: a dictionary such as those delivered by the Telemetries_Events producer</strong></dt><dd></dd>
+<dt><strong>Example</strong></dt><dd></dd>
+<dt><strong>——</strong></dt><dd></dd>
+<dt><strong>message = {</strong></dt><dd><p>“category”: “initial_state”,
+“data”: [{</p>
+<blockquote>
+<div><p>“csc”: “Test”,
+“salindex”: 1,
+“stream”: {</p>
+<blockquote>
+<div><p>“event_name”: “summaryState”</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}]</p>
 </dd>
+<dt><strong>}</strong></dt><dd></dd>
+<dt><strong>answer = await producer.process_message(message)</strong></dt><dd></dd>
+<dt><strong># {</strong></dt><dd></dd>
+<dt><strong>#     “category”: “event”,</strong></dt><dd></dd>
+<dt><strong>#     “data”: [{</strong></dt><dd></dd>
+<dt><strong>#         “csc”: “Test”,</strong></dt><dd></dd>
+<dt><strong>#         “salindex”: 1,</strong></dt><dd></dd>
+<dt><strong>#         “data”: {</strong></dt><dd></dd>
+<dt><strong>#             “summaryState”: [{</strong></dt><dd></dd>
+<dt><strong>#                 “summaryState”: {</strong></dt><dd></dd>
+<dt><strong>#                     “value”: 1,</strong></dt><dd></dd>
+<dt><strong>#                     “dataType”: “Int”</strong></dt><dd></dd>
+<dt><strong>#                 }</strong></dt><dd></dd>
+<dt><strong>#             }]</strong></dt><dd></dd>
+<dt><strong>#         }</strong></dt><dd></dd>
+<dt><strong>#     }]</strong></dt><dd></dd>
+<dt><strong># }</strong></dt><dd></dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="method">
-<dt id="producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat">
-<em class="property">async </em><code class="sig-name descname">monitor_remote_heartbeat</code><span class="sig-paren">(</span><em class="sig-param">remote_name</em>, <em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="producer.heartbeats.producer.HeartbeatProducer.start">
-<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer.start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-producer.heartbeats.test">
-<span id="producer-heartbeats-test-module"></span><h2>producer.heartbeats.test module<a class="headerlink" href="#module-producer.heartbeats.test" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.initial_state.test">
+<span id="producer-initial-state-test-module"></span><h2>producer.initial_state.test module<a class="headerlink" href="#module-producer.initial_state.test" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="producer.heartbeats.test.Harness">
-<em class="property">class </em><code class="sig-prename descclassname">producer.heartbeats.test.</code><code class="sig-name descname">Harness</code><span class="sig-paren">(</span><em class="sig-param">initial_state</em>, <em class="sig-param">config_dir=None</em>, <em class="sig-param">CscClass=&lt;class 'lsst.ts.salobj.test_csc.TestCsc'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test.Harness" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.initial_state.test.Harness">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.test.</code><code class="sig-name descname">Harness</code><span class="sig-paren">(</span><em class="sig-param">initial_state</em>, <em class="sig-param">config_dir=None</em>, <em class="sig-param">CscClass=&lt;class 'lsst.ts.salobj.test_csc.TestCsc'&gt;</em>, <em class="sig-param">index=1</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.Harness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 </dd></dl>
 
 <dl class="class">
-<dt id="producer.heartbeats.test.TestTelemetryMessages">
-<em class="property">class </em><code class="sig-prename descclassname">producer.heartbeats.test.</code><code class="sig-name descname">TestTelemetryMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test.TestTelemetryMessages" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.initial_state.test.TestTelemetryMessages">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.test.</code><code class="sig-name descname">TestTelemetryMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
@@ -382,7 +382,7 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">failureException</span></code></p></td>
 <td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.AssertionError</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.test.TestTelemetryMessages.setUp" title="producer.heartbeats.test.TestTelemetryMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.setUp" title="producer.initial_state.test.TestTelemetryMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
 <td><p>Hook method for setting up the test fixture before exercising it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpClass</span></code>()</p></td>
@@ -403,11 +403,11 @@
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDownClass</span></code>()</p></td>
 <td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_not_received" title="producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_not_received"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_heartbeat_not_received</span></code></a>()</p></td>
-<td><p>When monitoring the wrong (csc,salindex) it should report 1 lost heartbeat</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState" title="producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_default_initial_summaryState</span></code></a>()</p></td>
+<td><p>Test it can produce the default summaryState message correctly when the producer starts after the event was triggered</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_received" title="producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_received"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_heartbeat_received</span></code></a>()</p></td>
-<td><p>When monitoring the right (csc,salindex) it should report 0 lost heartbeat</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created" title="producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_summaryState_change_after_producer_was_created</span></code></a>()</p></td>
+<td><p>Test it can produce the summaryState message correctly when a change happens after the producer hsa been created</p></td>
 </tr>
 </tbody>
 </table>
@@ -480,28 +480,30 @@
 </tbody>
 </table>
 <dl class="method">
-<dt id="producer.heartbeats.test.TestTelemetryMessages.setUp">
-<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test.TestTelemetryMessages.setUp" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.initial_state.test.TestTelemetryMessages.setUp">
+<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.setUp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hook method for setting up the test fixture before exercising it.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_not_received">
-<code class="sig-name descname">test_heartbeat_not_received</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_not_received" title="Permalink to this definition">¶</a></dt>
-<dd><p>When monitoring the wrong (csc,salindex) it should report 1 lost heartbeat</p>
+<dt id="producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState">
+<code class="sig-name descname">test_default_initial_summaryState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test it can produce the default summaryState message correctly
+when the producer starts after the event was triggered</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_received">
-<code class="sig-name descname">test_heartbeat_received</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test.TestTelemetryMessages.test_heartbeat_received" title="Permalink to this definition">¶</a></dt>
-<dd><p>When monitoring the right (csc,salindex) it should report 0 lost heartbeat</p>
+<dt id="producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created">
+<code class="sig-name descname">test_summaryState_change_after_producer_was_created</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test it can produce the summaryState message correctly
+when a change happens after the producer hsa been created</p>
 </dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-producer.heartbeats">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.heartbeats" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.initial_state">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.initial_state" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -513,10 +515,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="producer.initial_state.html" class="btn btn-neutral float-right" title="producer.initial_state package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="producer.scriptqueue.html" class="btn btn-neutral float-right" title="producer.scriptqueue package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="producer.command_receiver.html" class="btn btn-neutral float-left" title="producer.command_receiver package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="producer.heartbeats.html" class="btn btn-neutral float-left" title="producer.heartbeats package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

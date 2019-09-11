@@ -2,7 +2,7 @@ How it works
 ===============
 
 .. image:: ../assets/Producer-details.svg
-The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State` and :code:`Command Receiver`), each refered to as "a Producer", and a :code:`main.py` python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager. 
+The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State`, :code:`Command Receiver` and :code:`Initial State`), each refered to as "a Producer", and a :code:`main.py` python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager. 
 
 
 The :code:`main.py` file
@@ -59,3 +59,8 @@ Commands receiver
 
 It provides a :code:`process_message` function that the :code:`main.py` script calls whenever it receives a command message from the `LOVE-manager`. This method uses this information to produce a command with :code:`salobj.Remote` and then returns back to the manager an acknowledgment message if the command runs succesfuly.
 
+
+Initial State Producer
+--------------------------------------------
+
+Produces LOVE messages with the latest info of an event. It first loads several remotes in the constructor and then produces messages for the LOVE-manager through the process_message function everytime a request is received in the websocket :code:`on_message` event.
