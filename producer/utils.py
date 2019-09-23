@@ -26,3 +26,18 @@ def getDataType(value):
     if isinstance(value, str):
         return 'String'
     return 'None'
+
+
+def onemsg_generator(category, csc, salindex, streamsDict):
+    """Generates one msg for the LOVE-manager from a single (csc,salindex) source """
+
+    return {
+        'category': category,
+        'data': [
+            {
+                'csc': csc,
+                'salindex': salindex,
+                'data': json.loads(json.dumps(streamsDict, cls=NumpyEncoder))
+            }
+        ]
+    }

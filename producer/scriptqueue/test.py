@@ -4,7 +4,7 @@ from lsst.ts import salobj
 from lsst.ts import scriptqueue
 import os
 from .producer import ScriptQueueProducer
-
+from unittest.mock import MagicMock
 
 STD_TIMEOUT = 10
 START_TIMEOUT = 20
@@ -21,11 +21,6 @@ class ScriptQueueStateTestCase(unittest.TestCase):
 
     def test_available_scripts(self):
         """Test the list of available scripts has the right content with the right format """
-        callback_future = asyncio.Future()
-
-        def callback(message):
-            callback_future.set_result(message)
-
         async def doit():
             async with scriptqueue.ScriptQueue(
                     index=1,
@@ -38,12 +33,13 @@ class ScriptQueueStateTestCase(unittest.TestCase):
                 await remote.cmd_start.start(timeout=30)
                 await remote.cmd_enable.start(timeout=30)
 
-                scriptqueue_producer = ScriptQueueProducer(domain=queue.domain, send_state=callback, index=1)
+                callback = MagicMock()
+                scriptqueue_producer = ScriptQueueProducer(domain=queue.domain, send_message_callback=callback, index=1)
 
                 # Act
                 asyncio.create_task(remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
                 availableScripts = await remote.evt_availableScripts.next(flush=False)
-                message = await callback_future
+                message = callback.call_args[0][0]
 
                 # Assert
                 expected_standard = [{
@@ -60,14 +56,11 @@ class ScriptQueueStateTestCase(unittest.TestCase):
 
                 expected_available = expected_standard + expected_external
                 received_available = message['data'][0]['data']['stream']['available_scripts']
-
                 self.assertEqual(expected_available, received_available)
 
-                # Clean up
+                # # Clean up
                 await remote.close()
                 await scriptqueue_producer.queue.close()
-                for script in scriptqueue_producer.scripts:
-                    await script["remote"].close()
 
 
         asyncio.get_event_loop().run_until_complete(doit())
