@@ -1,0 +1,559 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>producer.initial_state package &mdash; LOVE-producer 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="producer.scriptqueue package" href="producer.scriptqueue.html" />
+    <link rel="prev" title="producer.heartbeats package" href="producer.heartbeats.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LOVE-producer
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../modules/introduction.html">Overview and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/how_it_works.html">How it works</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.heartbeats.html">producer.heartbeats package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.initial_state package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.telemetries_events.html">producer.telemetries_events package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.main">producer.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.utils">producer.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LOVE-producer</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">ApiDoc</a> &raquo;</li>
+        
+          <li><a href="producer.html">producer package</a> &raquo;</li>
+        
+      <li>producer.initial_state package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/apidoc/producer.initial_state.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="producer-initial-state-package">
+<h1>producer.initial_state package<a class="headerlink" href="#producer-initial-state-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-producer.initial_state.producer">
+<span id="producer-initial-state-producer-module"></span><h2>producer.initial_state.producer module<a class="headerlink" href="#module-producer.initial_state.producer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="producer.initial_state.producer.InitialStateProducer">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.producer.</code><code class="sig-name descname">InitialStateProducer</code><span class="sig-paren">(</span><em class="sig-param">domain</em>, <em class="sig-param">csc_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.producer.InitialStateProducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.initial_state.producer.InitialStateProducer.process_message" title="producer.initial_state.producer.InitialStateProducer.process_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_message</span></code></a>(message)</p></td>
+<td><p>Tries to obtain the current data for an event with salobj.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="producer.initial_state.producer.InitialStateProducer.process_message">
+<em class="property">async </em><code class="sig-name descname">process_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.producer.InitialStateProducer.process_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain the current data for an event with salobj.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>message: dictionary with the LOVE-schema see example:</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>answer: a dictionary such as those delivered by the Telemetries_Events producer</strong></dt><dd></dd>
+<dt><strong>Example</strong></dt><dd></dd>
+<dt><strong>——</strong></dt><dd></dd>
+<dt><strong>message = {</strong></dt><dd><p>“category”: “initial_state”,
+“data”: [{</p>
+<blockquote>
+<div><p>“csc”: “Test”,
+“salindex”: 1,
+“stream”: {</p>
+<blockquote>
+<div><p>“event_name”: “summaryState”</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}]</p>
+</dd>
+<dt><strong>}</strong></dt><dd></dd>
+<dt><strong>answer = await producer.process_message(message)</strong></dt><dd></dd>
+<dt><strong># {</strong></dt><dd></dd>
+<dt><strong>#     “category”: “event”,</strong></dt><dd></dd>
+<dt><strong>#     “data”: [{</strong></dt><dd></dd>
+<dt><strong>#         “csc”: “Test”,</strong></dt><dd></dd>
+<dt><strong>#         “salindex”: 1,</strong></dt><dd></dd>
+<dt><strong>#         “data”: {</strong></dt><dd></dd>
+<dt><strong>#             “summaryState”: [{</strong></dt><dd></dd>
+<dt><strong>#                 “summaryState”: {</strong></dt><dd></dd>
+<dt><strong>#                     “value”: 1,</strong></dt><dd></dd>
+<dt><strong>#                     “dataType”: “Int”</strong></dt><dd></dd>
+<dt><strong>#                 }</strong></dt><dd></dd>
+<dt><strong>#             }]</strong></dt><dd></dd>
+<dt><strong>#         }</strong></dt><dd></dd>
+<dt><strong>#     }]</strong></dt><dd></dd>
+<dt><strong># }</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-producer.initial_state.test">
+<span id="producer-initial-state-test-module"></span><h2>producer.initial_state.test module<a class="headerlink" href="#module-producer.initial_state.test" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="producer.initial_state.test.Harness">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.test.</code><code class="sig-name descname">Harness</code><span class="sig-paren">(</span><em class="sig-param">initial_state</em>, <em class="sig-param">config_dir=None</em>, <em class="sig-param">CscClass=&lt;class 'lsst.ts.salobj.test_csc.TestCsc'&gt;</em>, <em class="sig-param">index=1</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.Harness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="producer.initial_state.test.TestTelemetryMessages">
+<em class="property">class </em><code class="sig-prename descclassname">producer.initial_state.test.</code><code class="sig-name descname">TestTelemetryMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(*args, **kwds)</p></td>
+<td><p>Call self as a function.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanup</span></code>(**kwargs)</p></td>
+<td><p>Add a function, with arguments, to be called when the test is completed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addTypeEqualityFunc</span></code>(typeobj, function)</p></td>
+<td><p>Add a type specific assertEqual style function to compare a type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAlmostEqual</span></code>(first, second[, places, …])</p></td>
+<td><p>Fail if the two objects are unequal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is more than the given delta.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertCountEqual</span></code>(first, second[, msg])</p></td>
+<td><p>An unordered sequence comparison asserting that the same elements, regardless of order.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertDictContainsSubset</span></code>(subset, dictionary)</p></td>
+<td><p>Checks whether dictionary is a superset of subset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Fail if the two objects are unequal as determined by the ‘==’ operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertFalse</span></code>(expr[, msg])</p></td>
+<td><p>Check that the expression is false.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreater</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreaterEqual</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIn</span></code>(member, container[, msg])</p></td>
+<td><p>Just like self.assertTrue(a in b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIs</span></code>(expr1, expr2[, msg])</p></td>
+<td><p>Just like self.assertTrue(a is b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsInstance</span></code>(obj, cls[, msg])</p></td>
+<td><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNone</span></code>(obj[, msg])</p></td>
+<td><p>Same as self.assertTrue(obj is None), with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNot</span></code>(expr1, expr2[, msg])</p></td>
+<td><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNotNone</span></code>(obj[, msg])</p></td>
+<td><p>Included for symmetry with assertIsNone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLess</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLessEqual</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertListEqual</span></code>(list1, list2[, msg])</p></td>
+<td><p>A list-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLogs</span></code>([logger, level])</p></td>
+<td><p>Fail unless a log message of level <em>level</em> or higher is emitted on <em>logger_name</em> or its children.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertMultiLineEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Assert that two multi-line strings are equal.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotAlmostEqual</span></code>(first, second[, …])</p></td>
+<td><p>Fail if the two objects are equal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is less than the given delta.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Fail if the two objects are equal as determined by the ‘!=’ operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIn</span></code>(member, container[, msg])</p></td>
+<td><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIsInstance</span></code>(obj, cls[, msg])</p></td>
+<td><p>Included for symmetry with assertIsInstance.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotRegex</span></code>(text, unexpected_regex[, msg])</p></td>
+<td><p>Fail the test if the text matches the regular expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaises</span></code>(expected_exception, *args, **kwargs)</p></td>
+<td><p>Fail unless an exception of class expected_exception is raised by the callable when invoked with specified positional and keyword arguments.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaisesRegex</span></code>(expected_exception, …)</p></td>
+<td><p>Asserts that the message in a raised exception matches a regex.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRegex</span></code>(text, expected_regex[, msg])</p></td>
+<td><p>Fail the test unless the text matches the regular expression.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSequenceEqual</span></code>(seq1, seq2[, msg, seq_type])</p></td>
+<td><p>An equality assertion for ordered sequences (like lists and tuples).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSetEqual</span></code>(set1, set2[, msg])</p></td>
+<td><p>A set-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTrue</span></code>(expr[, msg])</p></td>
+<td><p>Check that the expression is true.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTupleEqual</span></code>(tuple1, tuple2[, msg])</p></td>
+<td><p>A tuple-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarns</span></code>(expected_warning, *args, **kwargs)</p></td>
+<td><p>Fail unless a warning of class warnClass is triggered by the callable when invoked with specified positional and keyword arguments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarnsRegex</span></code>(expected_warning, …)</p></td>
+<td><p>Asserts that the message in a triggered warning matches a regexp.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">debug</span></code>()</p></td>
+<td><p>Run the test without collecting errors in a TestResult</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doCleanups</span></code>()</p></td>
+<td><p>Execute all cleanup functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>([msg])</p></td>
+<td><p>Fail immediately, with the given message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">failureException</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.AssertionError</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.setUp" title="producer.initial_state.test.TestTelemetryMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
+<td><p>Hook method for setting up the test fixture before exercising it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpClass</span></code>()</p></td>
+<td><p>Hook method for setting up class fixture before running tests in the class.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortDescription</span></code>()</p></td>
+<td><p>Returns a one-line description of the test, or None if no description has been provided.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code>(reason)</p></td>
+<td><p>Skip this test.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subTest</span></code>([msg])</p></td>
+<td><p>Return a context manager that will return the enclosed block of code in a subtest identified by the optional message and keyword parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDown</span></code>()</p></td>
+<td><p>Hook method for deconstructing the test fixture after testing it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDownClass</span></code>()</p></td>
+<td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState" title="producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_default_initial_summaryState</span></code></a>()</p></td>
+<td><p>Test it can produce the default summaryState message correctly when the producer starts after the event was triggered</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created" title="producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_summaryState_change_after_producer_was_created</span></code></a>()</p></td>
+<td><p>Test it can produce the summaryState message correctly when a change happens after the producer hsa been created</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 72%" />
+<col style="width: 28%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>assertAlmostEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertDictEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertNotAlmostEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertNotEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertNotRegexpMatches</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertRaisesRegexp</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertRegexpMatches</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assert_</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>countTestCases</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>defaultTestResult</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failIf</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failIfAlmostEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failIfEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failUnless</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failUnlessAlmostEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failUnlessEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failUnlessRaises</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>id</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>run</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="producer.initial_state.test.TestTelemetryMessages.setUp">
+<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState">
+<code class="sig-name descname">test_default_initial_summaryState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.test_default_initial_summaryState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test it can produce the default summaryState message correctly
+when the producer starts after the event was triggered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created">
+<code class="sig-name descname">test_summaryState_change_after_producer_was_created</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.initial_state.test.TestTelemetryMessages.test_summaryState_change_after_producer_was_created" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test it can produce the summaryState message correctly
+when a change happens after the producer hsa been created</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-producer.initial_state">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.initial_state" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="producer.scriptqueue.html" class="btn btn-neutral float-right" title="producer.scriptqueue package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="producer.heartbeats.html" class="btn btn-neutral float-left" title="producer.heartbeats package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Inria Chile
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

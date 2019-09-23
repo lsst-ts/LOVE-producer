@@ -134,9 +134,9 @@ class ScriptQueueProducer:
         # print('config_schema_callback\n\n\n\n\n')
         # print(event.configSchema)
         for script in self.state["available_scripts"]:
-            if (script.type == "standard") == event.isStandard:
-                if script.path == event.path:
-                    script.configSchema = event.configSchema
+            if (script['type'] == "standard") == event.isStandard:
+                if script['path'] == event.path:
+                    script['configSchema'] = event.configSchema
                     break
 
     def setup_script(self, salindex):

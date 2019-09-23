@@ -1,3 +1,4 @@
+"""Main executable of the LOVE-producer."""
 import asyncio
 import json
 import os
@@ -13,16 +14,30 @@ from telemetries_events.producer import Producer
 from scriptqueue.producer import ScriptQueueProducer
 from heartbeats.producer import HeartbeatProducer
 from command_receiver.receiver import Receiver
+from initial_state.producer import InitialStateProducer
 from utils import NumpyEncoder
 
+CONFIG_PATH = 'config/config.json'
 
-def on_ws_message(ws, message, receiver, loop):
+
+def on_ws_message(ws, message, receiver, initialStateProducer, loop):
     async def receive_it():
-        print("### message ###")
-        answer = await receiver.process_message(message)
-        if not answer is None:
+        jsonmessage = json.loads(message)
+        if jsonmessage["category"] == "initial_state":
+            answer = await initialStateProducer.process_message(jsonmessage)
+            if answer is None:
+                return
             dumped_answer = json.dumps(answer, cls=NumpyEncoder)
             ws.send(dumped_answer)
+            return
+
+        if jsonmessage["category"] == "cmd":
+            answer = await receiver.process_message(message)
+            if answer is None:
+                return
+            dumped_answer = json.dumps(answer, cls=NumpyEncoder)
+            ws.send(dumped_answer)
+            return
     asyncio.run_coroutine_threadsafe(receive_it(), loop)
 
 
@@ -87,6 +102,16 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     }
     ws.send(json.dumps(cmd_subscribe_msg))
 
+    # Handle initial-state requests
+    initial_state_subscribe_msg = {
+        'option': 'subscribe',
+        'category': 'initial_state',
+        'csc': 'all',
+        'salindex': 'all',
+        'stream': 'all'
+    }
+    ws.send(json.dumps(initial_state_subscribe_msg))
+
     def run(*args):
         asyncio.set_event_loop(args[0])
         producer_heartbeat.start()
@@ -128,7 +153,10 @@ def read_config(path, key=None):
         The list of CSCs to run as a tuple with the CSC name and index
     """
     print('Reading config file: ', path)
-    data = json.load(open(path, 'r'))
+    with open(path) as config_file:
+        data = json.loads(config_file.read())
+
+    # data = json.load(open(path, 'r'))
     csc_list = []
     if key:
         for csc_instance in data[key]:
@@ -143,7 +171,7 @@ def read_config(path, key=None):
 if __name__ == '__main__':
     """ Runs the Producer """
     print('***** Starting Producer *****')
-    path = '/usr/src/love/config/config.json'
+    path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
     csc_list = read_config(path)
     sq_list = read_config(path, 'ScriptQueue')
     print('List of CSCs to listen:', csc_list)
@@ -159,6 +187,7 @@ if __name__ == '__main__':
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
     url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
     receiver = Receiver(domain, csc_list)
+    initialStateProducer = InitialStateProducer(domain, csc_list)
 
     ws = websocket.WebSocketApp(
         url,
@@ -174,7 +203,7 @@ if __name__ == '__main__':
 
     ws.on_open = lambda ws: on_ws_open(
         ws, domain, message_getters, loop, csc_list, sq_list)
-    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver, loop)
+    ws.on_message = lambda ws, message: on_ws_message(ws, message, receiver, initialStateProducer, loop)
 
     # Emitter
     while True:
