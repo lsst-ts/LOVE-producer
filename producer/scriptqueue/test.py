@@ -5,7 +5,7 @@ from lsst.ts import scriptqueue
 import os
 from .producer import ScriptQueueProducer
 from unittest.mock import MagicMock
-
+from lsst.ts.idl.enums.ScriptQueue import Location
 STD_TIMEOUT = 10
 START_TIMEOUT = 20
 END_TIMEOUT = 10
@@ -38,8 +38,7 @@ class ScriptQueueStateTestCase(unittest.TestCase):
 
                 # Act
                 asyncio.create_task(remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
-                availableScripts = await remote.evt_availableScripts.next(flush=False)
-                message = callback.call_args[0][0]
+                availableScripts = await remote.evt_availableScripts.next(flush=True)
 
                 # Assert
                 expected_standard = [{
@@ -54,6 +53,17 @@ class ScriptQueueStateTestCase(unittest.TestCase):
                     'configSchema': ''
                 } for path in availableScripts.external.split(':')]
 
+                max_tries = 5
+                for lap in range(max_tries):
+                    if len(callback.call_args_list) == 0:
+                        await asyncio.sleep(0.5)
+                        continue
+                    message = callback.call_args_list[-1][0][0]
+                    available_scripts = message['data'][0]['data']['stream']['available_scripts']
+                    if not available_scripts is None and len(available_scripts) > 0:
+                        break
+                    await asyncio.sleep(0.5)
+
                 expected_available = expected_standard + expected_external
                 received_available = message['data'][0]['data']['stream']['available_scripts']
                 self.assertEqual(expected_available, received_available)
@@ -61,6 +71,53 @@ class ScriptQueueStateTestCase(unittest.TestCase):
                 # # Clean up
                 await remote.close()
                 await scriptqueue_producer.queue.close()
+        asyncio.get_event_loop().run_until_complete(doit())
 
+    def test_current_script(self):
+        """Test that the index of the current script is ok"""
 
+        async def doit():
+            async with scriptqueue.ScriptQueue(
+                    index=1,
+                    standardpath=self.testdata_standardpath,
+                    externalpath=self.testdata_externalpath) as queue:
+                queue.summaryState = salobj.State.ENABLED
+                # Arrange
+                remote = salobj.Remote(queue.domain, 'ScriptQueue', 1)
+                await asyncio.gather(queue.start_task, remote.start_task)
+                await remote.cmd_start.start()
+                await remote.cmd_enable.start()
+                callback = MagicMock()
+
+                scriptqueue_producer = ScriptQueueProducer(domain=queue.domain, send_message_callback=callback, index=1)
+
+                # Act
+                salindex = await remote.cmd_add.set_start(isStandard=True,
+                                                          path="script1",
+                                                          config="wait_time: 1",
+                                                          location=Location.FIRST,
+                                                          locationSalIndex=0,
+                                                          descr="test_add", timeout=5)
+
+                while True:
+                    # there is no warranty of when the remote will be updated
+                    # so wait for it
+                    data = await remote.evt_queue.next(flush=True)
+                    if data.currentSalIndex == int(salindex.result):
+                        break
+                    await asyncio.sleep(0.5)
+
+                max_tries = 5
+                for lap in range(max_tries):
+                    message = callback.call_args_list[-1][0][0]
+                    currentIndex = message['data'][0]['data']['stream']['currentIndex']
+                    if not currentIndex is None and currentIndex > 0:
+                        break
+                    await asyncio.sleep(0.5)
+                # Assert
+                self.assertEqual(currentIndex, data.currentSalIndex)
+
+                # # Clean up
+                await remote.close()
+                await scriptqueue_producer.queue.close()
         asyncio.get_event_loop().run_until_complete(doit())

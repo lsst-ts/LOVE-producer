@@ -21,10 +21,10 @@ class ScriptQueueProducer:
         self.state = {
             "available_scripts": [],
             "running": False,
-            "waitingIndices": [],
-            "currentIndex": 0,
-            "finishedIndices": [],
-            "enabled": False,
+            # "waitingIndices": [],
+            # "currentIndex": 0,
+            # "finishedIndices": [],
+            # "enabled": False,
         }
         self.cmd_timeout = 120
         self.scripts = {}

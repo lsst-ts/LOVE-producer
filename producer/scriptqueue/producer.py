@@ -12,14 +12,17 @@ class ScriptQueueProducer:
         self.send_message_callback = send_message_callback
         self.salindex = index
         self.state = {
-            "available_scripts": []
+            "available_scripts": [],
+            # "running": False,
+            "waitingIndices": [],
+            # "currentIndex": 0,
+            # "finishedIndices": [],
+            # "enabled": False
         }
-        self.setup()
-
-    def setup(self):
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
 
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
+        self.set_callback(self.queue.evt_queue, self.callback_queue)
 
     # --- Event callbacks ----
     def set_callback(self, evt, callback):
@@ -56,6 +59,30 @@ class ScriptQueueProducer:
                 }
             )
             # self.query_script_config(False, script_path)
+
+    def callback_queue(self, event):
+        """
+        Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
+        """
+        # self.state["running"] = event.running == 1
+        self.state["currentIndex"] = event.currentSalIndex
+        # self.state["finishedIndices"] = list(
+        #     event.pastSalIndices[:event.pastLength])
+        # self.state["waitingIndices"] = list(event.salIndices[:event.length])
+        # self.state["enabled"] = event.enabled == 1
+
+        # scripts = [
+        #     *self.state["waitingIndices"],
+        #     *self.state["finishedIndices"]
+        # ]
+
+        # if self.state["currentIndex"] > 0:
+        #     scripts.append(self.state["currentIndex"])
+
+        # for salindex in scripts:
+        #     if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
+        #         self.setup_script(salindex)
+        #         self.query_script_info(salindex)
 
     # ---- Message creation ------
 
