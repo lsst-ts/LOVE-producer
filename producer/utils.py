@@ -41,3 +41,28 @@ def onemsg_generator(category, csc, salindex, streamsDict):
             }
         ]
     }
+
+
+def get_stream_from_last_message(message, category, csc, salindex, stream):
+    """
+    Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+    If not found then it will throw an error
+    """
+    if message['category'] != category: return
+    for m in message['data']:
+        if m['csc'] == csc and m['salindex'] == salindex:
+            return m['data'][stream]
+
+    raise Exception('Stream {}-{}-{}-{} not found in message'.format(category, csc, salindex, stream))
+                
+def get_parameter_from_last_message(message, category, csc, salindex, stream, parameter):
+    """
+    Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+    If not found then it will throw an error
+    """
+    if message['category'] != category: return
+    for m in message['data']:
+        if m['csc'] == csc and m['salindex'] == salindex:
+            return m['data'][stream][parameter]
+
+    raise Exception('Parameter {}-{}-{}-{}-{} not found in message'.format(category, csc, salindex, stream, parameter))

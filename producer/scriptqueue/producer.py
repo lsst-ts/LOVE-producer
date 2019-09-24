@@ -13,11 +13,11 @@ class ScriptQueueProducer:
         self.salindex = index
         self.state = {
             "available_scripts": [],
-            # "running": False,
+            "enabled": False,
+            "running": False,
             "waitingIndices": [],
-            # "currentIndex": 0,
-            # "finishedIndices": [],
-            # "enabled": False
+            "currentIndex": 0,
+            "finishedIndices": [],
         }
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
 
@@ -64,12 +64,12 @@ class ScriptQueueProducer:
         """
         Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
         """
-        # self.state["running"] = event.running == 1
+        self.state["running"] = event.running == 1
         self.state["currentIndex"] = event.currentSalIndex
-        # self.state["finishedIndices"] = list(
-        #     event.pastSalIndices[:event.pastLength])
-        # self.state["waitingIndices"] = list(event.salIndices[:event.length])
-        # self.state["enabled"] = event.enabled == 1
+        self.state["finishedIndices"] = list(
+            event.pastSalIndices[:event.pastLength])
+        self.state["waitingIndices"] = list(event.salIndices[:event.length])
+        self.state["enabled"] = event.enabled == 1
 
         # scripts = [
         #     *self.state["waitingIndices"],
