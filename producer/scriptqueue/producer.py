@@ -1,11 +1,14 @@
 import asyncio
 from lsst.ts import salobj
 from utils import onemsg_generator
-
+from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
+from lsst.ts.idl.enums.Script import ScriptState
 
 class ScriptQueueProducer:
-    """Monitors the state of the ScriptQueue and its Script
-    and provides interfaces to produce messages for the LOVE-manager"""
+    """
+    Listens to several callbacks of the ScriptQueue and Script CSCs
+    to build their states and to produce messages for the LOVE-manager
+    in the 'event-ScriptQueueState-salindex-stream' group."""
 
     def __init__(self, domain, send_message_callback, index):
         self.domain = domain
@@ -23,6 +26,8 @@ class ScriptQueueProducer:
 
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
         self.set_callback(self.queue.evt_queue, self.callback_queue)
+        self.cmd_timeout = 60
+        self.set_callback(self.queue.evt_configSchema, self.config_schema_callback)
 
     # --- Event callbacks ----
     def set_callback(self, evt, callback):
@@ -49,7 +54,7 @@ class ScriptQueueProducer:
                     "configSchema": ""
                 }
             )
-            # self.query_script_config(True, script_path)
+            self.query_script_config(True, script_path)
         for script_path in event.external.split(':'):
             self.state["available_scripts"].append(
                 {
@@ -58,7 +63,7 @@ class ScriptQueueProducer:
                     "configSchema": ""
                 }
             )
-            # self.query_script_config(False, script_path)
+            self.query_script_config(False, script_path)
 
     def callback_queue(self, event):
         """
@@ -83,6 +88,16 @@ class ScriptQueueProducer:
         #     if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
         #         self.setup_script(salindex)
         #         self.query_script_info(salindex)
+    
+    def config_schema_callback(self, event):
+        event_script_type = "external"
+        if event.isStandard: 
+            event_script_type = "standard"
+        for script in self.state["available_scripts"]:
+
+            if script['path'] == event.path and script['type'] == event_script_type :
+                script['configSchema'] = event.configSchema
+                break
 
     # ---- Message creation ------
 
@@ -92,3 +107,13 @@ class ScriptQueueProducer:
         message = onemsg_generator('event','ScriptQueue', self.salindex, {'stream': self.state} )
         return message
 
+    # --------- SAL queries ---------
+    def query_script_config(self, isStandard, script_path):
+        """
+            Send command to the queue to trigger the script config event
+        """
+        try:
+            asyncio.create_task(self.queue.cmd_showSchema.set_start(isStandard=isStandard, path=script_path, timeout=self.cmd_timeout))
+        except salobj.AckError as ack_err:
+            print(f"Could not get info on script {script_path}. "
+                  f"Failed with ack.result={ack_err.ack.result}")

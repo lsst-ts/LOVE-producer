@@ -6,6 +6,7 @@ import warnings
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 import os
+import yaml
 from .producer import ScriptQueueProducer
 from unittest.mock import MagicMock
 from lsst.ts.idl.enums.ScriptQueue import Location
@@ -47,37 +48,74 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             warnings.warn(f"Killed {nkilled} subprocesses")
         await self.queue.close()
 
-    async def test_evt_availableScripts_callback(self):
-        """Test the data from evt_availableScripts is properly obtained """
+    async def test_available_scripts_info(self):
+        """
+        Test the data in the list of available scripts is correct.
+        It should get the information from these events:
+        - evt_availableScripts
+        - evt_configSchema
+        """
 
         # Arrange:
         async def producer_cor(target_salindex):
             while True:
                 message = await self.message_queue.get()
-                available_scripts = utils.get_parameter_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream', 'available_scripts')
+                available_scripts = utils.get_parameter_from_last_message(
+                    message, 'event', 'ScriptQueue', 1, 'stream', 'available_scripts')
                 if available_scripts is not None and len(available_scripts) > 0:
-                    return available_scripts
+                    allConfigReady = True
+                    for script in available_scripts:
+                        if script['configSchema'] == '' and script["path"] != 'unloadable':
+                            allConfigReady = False
+                            break
+                    if allConfigReady:
+                        return available_scripts
 
         producer_task = asyncio.create_task(producer_cor(100002))
 
         # Act
-        asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
+        helper_task = asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
         availableScripts = await self.remote.evt_availableScripts.next(flush=True)
 
         received_available = await producer_task
+        await helper_task
 
         # Assert
-        expected_standard = [{
-            'type': 'standard',
-            'path': path,
-            'configSchema': ''
-        } for path in availableScripts.standard.split(':')]
+        expected_standard = [
+            {
+                'type': 'standard',
+                'path': path,
+                'configSchema': salobj.TestScript.get_schema()
+            } if path != 'unloadable' and path != 'subdir/subsubdir/script4' else {
+                'type': 'standard',
+                'path': path,
+                'configSchema': ''
+            }
+            for path in availableScripts.standard.split(':')
+        ]
 
-        expected_external = [{
-            'type': 'external',
-            'path': path,
-            'configSchema': ''
-        } for path in availableScripts.external.split(':')]
+        expected_external = [
+            {
+                'type': 'external',
+                'path': path,
+                'configSchema': salobj.TestScript.get_schema()
+            } if path != 'unloadable' and path != 'subdir/subsubdir/script4' else {
+                'type': 'external',
+                'path': path,
+                'configSchema': ''
+            } for path in availableScripts.external.split(':')
+        ]
+        received_available = [
+            {
+                'type': script['type'],
+                'path': script['path'],
+                'configSchema': yaml.safe_load(script['configSchema'])
+            } if script['path'] != 'unloadable' and script['path'] != 'subdir/subsubdir/script4' else {
+                'type': script['type'],
+                'path': script['path'],
+                'configSchema': ''
+            } for script in received_available
+        ]
 
         expected_available = expected_standard + expected_external
         self.assertEqual(expected_available, received_available)
