@@ -47,57 +47,56 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             warnings.warn(f"Killed {nkilled} subprocesses")
         await self.queue.close()
 
-    # async def test_evt_availableScripts(self):
-    #     """Test the data from evt_availableScripts is properly obtained """
+    async def test_evt_availableScripts_callback(self):
+        """Test the data from evt_availableScripts is properly obtained """
 
-    #     # Act
-    #     asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
-    #     availableScripts = await self.remote.evt_availableScripts.next(flush=True)
+        # Arrange:
+        async def producer_cor(target_salindex):
+            while True:
+                message = await self.message_queue.get()
+                available_scripts = utils.get_parameter_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream', 'available_scripts')
+                if available_scripts is not None and len(available_scripts) > 0:
+                    return available_scripts
 
-    #     # Assert
-    #     expected_standard = [{
-    #         'type': 'standard',
-    #         'path': path,
-    #         'configSchema': ''
-    #     } for path in availableScripts.standard.split(':')]
+        producer_task = asyncio.create_task(producer_cor(100002))
 
-    #     expected_external = [{
-    #         'type': 'external',
-    #         'path': path,
-    #         'configSchema': ''
-    #     } for path in availableScripts.external.split(':')]
+        # Act
+        asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
+        availableScripts = await self.remote.evt_availableScripts.next(flush=True)
 
-    #     max_tries = 5
-    #     for lap in range(max_tries):
-    #         if len(self.callback.call_args_list) == 0:
-    #             await asyncio.sleep(0.5)
-    #             continue
-    #         message = self.callback.call_args_list[-1][0][0]
-    #         available_scripts = message['data'][0]['data']['stream']['available_scripts']
-    #         if not available_scripts is None and len(available_scripts) > 0:
-    #             break
-    #         await asyncio.sleep(0.5)
+        received_available = await producer_task
 
-    #     expected_available = expected_standard + expected_external
-    #     received_available = message['data'][0]['data']['stream']['available_scripts']
-    #     self.assertEqual(expected_available, received_available)
+        # Assert
+        expected_standard = [{
+            'type': 'standard',
+            'path': path,
+            'configSchema': ''
+        } for path in availableScripts.standard.split(':')]
 
-    async def test_queue_event_matches(self):
+        expected_external = [{
+            'type': 'external',
+            'path': path,
+            'configSchema': ''
+        } for path in availableScripts.external.split(':')]
+
+        expected_available = expected_standard + expected_external
+        self.assertEqual(expected_available, received_available)
+
+    async def test_evt_queue_callback(self):
         """Test the data from evt_queue is properly obtained after adding some scripts to the queue"""
 
+        # Arrange:
         async def helper_cor(target_salindex):
             while True:
                 # there is no warranty of when the remote will be updated
                 # so better wait for it
                 data = await self.remote.evt_queue.next(flush=True)
-                print('\nHELPER COR:', data)
                 if data.currentSalIndex == target_salindex:
                     return data
 
         async def producer_cor(target_salindex):
             while True:
                 message = await self.message_queue.get()
-                print('\nPRODUCER COR:', utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream'))
                 currentIndex = utils.get_parameter_from_last_message(
                     message, 'event', 'ScriptQueue', 1, 'stream', 'currentIndex')
                 if currentIndex is not None and currentIndex == target_salindex:
