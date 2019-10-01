@@ -29,7 +29,11 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                                              externalpath=externalpath,
                                              verbose=True)
 
-        self.callback = MagicMock()
+        self.message_queue = asyncio.Queue()
+
+        def callback(msg):
+            asyncio.create_task(self.message_queue.put(msg))
+        self.callback = callback
         self.scriptqueue_producer = ScriptQueueProducer(
             domain=self.queue.domain, send_message_callback=self.callback, index=1)
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
@@ -43,79 +47,107 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             warnings.warn(f"Killed {nkilled} subprocesses")
         await self.queue.close()
 
-    async def test_evt_availableScripts(self):
-        """Test the data from evt_availableScripts is properly obtained """
+    # async def test_evt_availableScripts(self):
+    #     """Test the data from evt_availableScripts is properly obtained """
 
-        # Act
-        asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
-        availableScripts = await self.remote.evt_availableScripts.next(flush=True)
+    #     # Act
+    #     asyncio.create_task(self.remote.cmd_showAvailableScripts.start(timeout=STD_TIMEOUT))
+    #     availableScripts = await self.remote.evt_availableScripts.next(flush=True)
 
-        # Assert
-        expected_standard = [{
-            'type': 'standard',
-            'path': path,
-            'configSchema': ''
-        } for path in availableScripts.standard.split(':')]
+    #     # Assert
+    #     expected_standard = [{
+    #         'type': 'standard',
+    #         'path': path,
+    #         'configSchema': ''
+    #     } for path in availableScripts.standard.split(':')]
 
-        expected_external = [{
-            'type': 'external',
-            'path': path,
-            'configSchema': ''
-        } for path in availableScripts.external.split(':')]
+    #     expected_external = [{
+    #         'type': 'external',
+    #         'path': path,
+    #         'configSchema': ''
+    #     } for path in availableScripts.external.split(':')]
 
-        max_tries = 5
-        for lap in range(max_tries):
-            if len(self.callback.call_args_list) == 0:
-                await asyncio.sleep(0.5)
-                continue
-            message = self.callback.call_args_list[-1][0][0]
-            available_scripts = message['data'][0]['data']['stream']['available_scripts']
-            if not available_scripts is None and len(available_scripts) > 0:
-                break
-            await asyncio.sleep(0.5)
+    #     max_tries = 5
+    #     for lap in range(max_tries):
+    #         if len(self.callback.call_args_list) == 0:
+    #             await asyncio.sleep(0.5)
+    #             continue
+    #         message = self.callback.call_args_list[-1][0][0]
+    #         available_scripts = message['data'][0]['data']['stream']['available_scripts']
+    #         if not available_scripts is None and len(available_scripts) > 0:
+    #             break
+    #         await asyncio.sleep(0.5)
 
-        expected_available = expected_standard + expected_external
-        received_available = message['data'][0]['data']['stream']['available_scripts']
-        self.assertEqual(expected_available, received_available)
+    #     expected_available = expected_standard + expected_external
+    #     received_available = message['data'][0]['data']['stream']['available_scripts']
+    #     self.assertEqual(expected_available, received_available)
 
     async def test_queue_event_matches(self):
         """Test the data from evt_queue is properly obtained after adding some scripts to the queue"""
 
-        # Act: add some scripts to the queue
-        nscripts_to_add = 5
-        for i in range(nscripts_to_add):
-            if i > 0:
-                await asyncio.sleep(0.5)
-            salindex = await self.remote.cmd_add.set_start(isStandard=True,
-                                                        path="script1",
-                                                        config="wait_time: 1",
-                                                        location=Location.FIRST,
-                                                        locationSalIndex=0,
-                                                        descr="test_add", timeout=5)
-
-            for lap in range(10):
+        async def helper_cor(target_salindex):
+            while True:
                 # there is no warranty of when the remote will be updated
                 # so better wait for it
                 data = await self.remote.evt_queue.next(flush=True)
-                if data.currentSalIndex == int(salindex.result):
-                    break
+                print('\nHELPER COR:', data)
+                if data.currentSalIndex == target_salindex:
+                    return data
+
+        async def producer_cor(target_salindex):
+            while True:
+                message = await self.message_queue.get()
+                print('\nPRODUCER COR:', utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream'))
+                currentIndex = utils.get_parameter_from_last_message(
+                    message, 'event', 'ScriptQueue', 1, 'stream', 'currentIndex')
+                if currentIndex is not None and currentIndex == target_salindex:
+                    return message
+
+        helper_task = asyncio.create_task(helper_cor(100002))
+        producer_task = asyncio.create_task(producer_cor(100002))
+
+        # Act: add some scripts to the queue
+        nscripts_to_add = 5
+        # third_script_duration = 10
+        for i in range(nscripts_to_add):
+            duration = 0.1
+            # if i == 2: duration = third_script_duration
+            ack = await self.remote.cmd_add.set_start(isStandard=True,
+                                                      path="script1",
+                                                      config="wait_time: {}".format(duration),
+                                                      location=Location.LAST,
+                                                      locationSalIndex=0,
+                                                      descr="test_add", timeout=5)
 
         # wait until the current script is the same as in the queue
-        laps_tolerance = 10
-        for lap in range(laps_tolerance ):
-            if lap > 0:
-                await asyncio.sleep(0.5)
-            message = self.callback.call_args_list[-1][0][0]
-            currentIndex = utils.get_parameter_from_last_message(
-                message, 'event', 'ScriptQueue', 1, 'stream', 'currentIndex')
-            if not currentIndex is None and currentIndex > 0 and currentIndex == data.currentSalIndex:
-                break
+
+        [data, message] = await asyncio.gather(helper_task, producer_task)
+        stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
 
         # Assert
-        stream = utils.get_stream_from_last_message(
-            message, 'event', 'ScriptQueue', 1, 'stream')
-        self.assertEqual(currentIndex, data.currentSalIndex)
+        self.assertEqual(data.currentSalIndex, stream["currentIndex"])
         self.assertEqual(data.pastSalIndices[:data.pastLength],  stream['finishedIndices'])
         self.assertEqual(data.salIndices[:data.length],  stream['waitingIndices'])
         self.assertEqual(data.running,  stream['running'])
         self.assertEqual(data.enabled,  stream['enabled'])
+
+    # async def test_evt_script_data(self):
+    #     """
+    #     Test the data from evt_queue is properly obtained  by monitoring all of its states changes from
+    #     UNKNOWN to DONE
+    #     """
+    #     # Act:
+    #     ack=await self.remote.cmd_add.set_start(isStandard=True,
+    #                                               path="script1",
+    #                                               config="wait_time: 1",
+    #                                               location=Location.FIRST,
+    #                                               locationSalIndex=0,
+    #                                               descr="test_add", timeout=5)
+
+    #     script_remote=salobj.Remote(domain=self.queue.domain, name="Script", index=int(ack.result))
+    #     message=self.callback.call_args_list[-1][0][0]
+    #     stream=utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
+
+    #     retrieved_waiting=stream['waitingIndices']
+    #     expected_waiting=[int(ack.result)]
+    #     self.assertEqual(retrieved_waiting, expected_waiting)
