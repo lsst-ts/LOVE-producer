@@ -179,10 +179,6 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             while True:
                 message = await self.message_queue.get()
                 stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
-
-                import pprint
-                pprint.pprint(stream['finished_scripts'])
-                print('\t', target_salindex)
                 if(len(stream['finished_scripts']) > 0 and stream['finished_scripts'][0]["index"] == int(target_salindex)):
                     return stream
 
@@ -207,24 +203,20 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         [message, data] = await asyncio.gather(producer_task, helper_task)
 
         finished_script = message['finished_scripts'][0]
+        expected_script = {
+            "index": data.salIndex,
+            "type": "standard" if data.isStandard else "external",
+            "path": data.path,
+            "process_state": ScriptProcessState(data.processState).name,
+            "script_state": ScriptState(data.scriptState).name,
+            "timestampConfigureEnd": data.timestampConfigureEnd,
+            "timestampConfigureStart": data.timestampConfigureStart,
+            "timestampProcessEnd": data.timestampProcessEnd,
+            "timestampProcessStart": data.timestampProcessStart,
+            "timestampRunStart": data.timestampRunStart,
+        }
 
-        import pdb
-        pdb.set_trace()
-        self.assertEqual(
-            finished_script,
-            {
-                "index": data.salIndex,
-                "type": "standard" if data.isStandard else "external",
-                "path": data.path,
-                "process_state": ScriptProcessState(data.processState).name,
-                "script_state": ScriptState(data.scriptState).name,
-                "timestampConfigureEnd": data.timestampConfigureEnd,
-                "timestampConfigureStart": data.timestampConfigureStart,
-                "timestampProcessEnd": data.timestampProcessEnd,
-                "timestampProcessStart": data.timestampProcessStart,
-                "timestampRunStart": data.timestampRunStart,
-            }
-        )
+        self.assertEqual(finished_script, expected_script)
 
         # helper_task = asyncio.create_task(helper_cor(ack.result))
         # await helper_task

@@ -31,16 +31,30 @@ class ScriptQueueProducer:
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
         self.set_callback(self.queue.evt_queue, self.callback_queue)
         self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
+        self.set_callback(self.queue.evt_script, self.callback_queue_script)
 
     def setup_script(self, salindex):
-        self.scripts[salindex] = {}
+        self.scripts[salindex] = self.new_empty_script()
+
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["remote"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["setup"] = True
-        print(self.scripts)
+    
     def new_empty_script(self):
+        default = "UNKNOWN"
         return {
+            "remote": None,
+            "setup": False,  # flag to trigger show_script only once,
             "index": -1,
+            "path": default,
+            "type": default,
+            "process_state": default,
+            "script_state": default,
+            "timestampConfigureEnd": 0,
+            "timestampConfigureStart": 0,
+            "timestampProcessEnd": 0,
+            "timestampProcessStart": 0,
+            "timestampRunStart": 0,
         }
     # --- Event callbacks ----
     def set_callback(self, evt, callback):
@@ -99,7 +113,6 @@ class ScriptQueueProducer:
 
         for salindex in scripts:
             if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
-                print('\n\n\nwill setup script', salindex)
                 self.setup_script(salindex)
                 # self.query_script_info(salindex)
 
@@ -113,11 +126,36 @@ class ScriptQueueProducer:
                 script['configSchema'] = event.configSchema
                 break
 
+    def callback_queue_script(self, event):
+        """
+            Callback for the queue.evt_script event
+        """
+        if(event.salIndex not in self.scripts):
+            self.scripts[event.salIndex] = self.new_empty_script()
+
+        self.scripts[event.salIndex]["type"] = "standard" if event.isStandard else "external"
+        self.scripts[event.salIndex]["path"] = event.path
+        self.scripts[event.salIndex]["process_state"] = ScriptProcessState(event.processState).name
+        self.scripts[event.salIndex]["script_state"] = ScriptState(event.scriptState).name
+        self.scripts[event.salIndex]["timestampConfigureEnd"] = event.timestampConfigureEnd
+        self.scripts[event.salIndex]["timestampConfigureStart"] = event.timestampConfigureStart
+        self.scripts[event.salIndex]["timestampProcessEnd"] = event.timestampProcessEnd
+        self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
+        self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
     # ---- Message creation ------
 
     def parse_script(self, script):
         return {
-            "index": script['index']
+            "index": script['index'],
+            "path": script["path"],
+            "type": script["type"],
+            "process_state": script["process_state"],
+            "script_state": script["script_state"],
+            "timestampConfigureEnd": script["timestampConfigureEnd"],
+            "timestampConfigureStart": script["timestampConfigureStart"],
+            "timestampProcessEnd": script["timestampProcessEnd"],
+            "timestampProcessStart": script["timestampProcessStart"],
+            "timestampRunStart": script["timestampRunStart"],
         }
 
     def get_state_message(self):
@@ -125,7 +163,7 @@ class ScriptQueueProducer:
         stream = {
             'enabled': self.state['enabled'],
             'running': self.state['running'],
-            # 'available_scripts': self.state['available_scripts'],
+            'available_scripts': self.state['available_scripts'],
             'waitingIndices': self.state['waitingIndices'],
             'finishedIndices': self.state['finishedIndices'],
             'currentIndex': self.state['currentIndex'],
