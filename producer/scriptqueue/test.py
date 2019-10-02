@@ -172,7 +172,10 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
 
     async def test_script_state_info(self):
         """
-        Test the state of a script is properly obtained once it reaches the DONE state
+        Test the state of a script is properly obtained once it reaches the DONE state.
+        This tests callbacks for the following events:
+        - ScriptQueue.evt_script
+        - Script.evt_metadata
         """
         # Arrange
         async def producer_cor(target_salindex):
@@ -182,7 +185,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                 if(len(stream['finished_scripts']) > 0 and stream['finished_scripts'][0]["index"] == int(target_salindex)):
                     return stream
 
-        async def helper_cor(target_salindex):
+        async def helper_evt_script_cor(target_salindex):
             while True:
                 # there is no warranty of when the remote will be updated
                 # so better wait for it
@@ -191,18 +194,25 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                 if ScriptProcessState(data.processState).name == 'DONE' and ScriptState(data.scriptState).name == 'DONE':
                     return data
 
+
         ack = await self.remote.cmd_add.set_start(isStandard=True,
                                                   path="script1",
-                                                  config="wait_time: 1",
+                                                  config="wait_time: 0.1",
                                                   location=Location.FIRST,
                                                   locationSalIndex=0,
                                                   descr="test_add", timeout=5)
+
+        script_remote = salobj.Remote(self.queue.domain, 'Script', int(ack.result) )
+
         producer_task = asyncio.create_task(producer_cor(ack.result))
-        helper_task = asyncio.create_task(helper_cor(ack.result))
+        helper_evt_script_task = asyncio.create_task(helper_evt_script_cor(ack.result))
 
-        [message, data] = await asyncio.gather(producer_task, helper_task)
-
-        finished_script = message['finished_scripts'][0]
+        # Act
+        [message, data] = await asyncio.gather(producer_task, helper_evt_script_task)
+        metadata = await script_remote.evt_metadata.next(flush=False)
+        
+        # Assert
+        finished_script = message['finished_scripts'][0]        
         expected_script = {
             "index": data.salIndex,
             "type": "standard" if data.isStandard else "external",
@@ -214,16 +224,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             "timestampProcessEnd": data.timestampProcessEnd,
             "timestampProcessStart": data.timestampProcessStart,
             "timestampRunStart": data.timestampRunStart,
+            "expected_duration": metadata.duration
         }
 
         self.assertEqual(finished_script, expected_script)
-
-        # helper_task = asyncio.create_task(helper_cor(ack.result))
-        # await helper_task
-
-        # Act:
-
-        # Assert
-        # retrieved_waiting = stream['waitingIndices']
-        # expected_waiting = [int(ack.result)]
-        # self.assertEqual(retrieved_waiting, expected_waiting)

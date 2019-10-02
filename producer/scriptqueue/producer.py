@@ -36,10 +36,13 @@ class ScriptQueueProducer:
     def setup_script(self, salindex):
         self.scripts[salindex] = self.new_empty_script()
 
+        remote = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["index"] = salindex
-        self.scripts[salindex]["remote"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
+        self.scripts[salindex]["remote"] = remote
         self.scripts[salindex]["setup"] = True
-    
+
+        self.set_callback(remote.evt_metadata, lambda ev: self.metadata_callback_script(salindex, ev))
+
     def new_empty_script(self):
         default = "UNKNOWN"
         return {
@@ -55,8 +58,10 @@ class ScriptQueueProducer:
             "timestampProcessEnd": 0,
             "timestampProcessStart": 0,
             "timestampRunStart": 0,
+            "expected_duration": 0,
         }
     # --- Event callbacks ----
+
     def set_callback(self, evt, callback):
         """
             Adds a callback to a salobj event using appending a 
@@ -142,6 +147,15 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampProcessEnd"] = event.timestampProcessEnd
         self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
+
+    def metadata_callback_script(self, salindex, event):
+        """
+            Callback for the logevent_metadata. Used to extract
+            the expected duration of the script.
+
+            event : SALPY_Script.Script_logevent_metadataC
+        """
+        self.scripts[salindex]["expected_duration"] = event.duration
     # ---- Message creation ------
 
     def parse_script(self, script):
@@ -156,6 +170,7 @@ class ScriptQueueProducer:
             "timestampProcessEnd": script["timestampProcessEnd"],
             "timestampProcessStart": script["timestampProcessStart"],
             "timestampRunStart": script["timestampRunStart"],
+            "expected_duration": script["expected_duration"]
         }
 
     def get_state_message(self):
@@ -168,7 +183,7 @@ class ScriptQueueProducer:
             'finishedIndices': self.state['finishedIndices'],
             'currentIndex': self.state['currentIndex'],
             'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
-            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices'] ]
+            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']]
 
         }
         message = onemsg_generator('event', 'ScriptQueue', self.salindex, {'stream': stream})
