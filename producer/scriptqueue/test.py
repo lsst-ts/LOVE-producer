@@ -178,11 +178,14 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         async def producer_cor(target_salindex):
             while True:
                 message = await self.message_queue.get()
-                finished_scripts = utils.get_parameter_from_last_message(
-                    message, 'event', 'ScriptQueue', 1, 'stream', 'finished_scripts')
-                if finished_scripts[0] is not None and finished_scripts[0]["index"] == target_salindex:
-                    return finished_scripts[0]    
-        
+                stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
+
+                import pprint
+                pprint.pprint(stream['finished_scripts'])
+                print('\t', target_salindex)
+                if(len(stream['finished_scripts']) > 0 and stream['finished_scripts'][0]["index"] == int(target_salindex)):
+                    return stream
+
         async def helper_cor(target_salindex):
             while True:
                 # there is no warranty of when the remote will be updated
@@ -191,7 +194,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                 print(ScriptProcessState(data.processState).name, ScriptState(data.scriptState).name)
                 if ScriptProcessState(data.processState).name == 'DONE' and ScriptState(data.scriptState).name == 'DONE':
                     return data
-        
+
         ack = await self.remote.cmd_add.set_start(isStandard=True,
                                                   path="script1",
                                                   config="wait_time: 1",
@@ -199,13 +202,34 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                                                   locationSalIndex=0,
                                                   descr="test_add", timeout=5)
         producer_task = asyncio.create_task(producer_cor(ack.result))
-
-        script_remote = salobj.Remote(domain=self.queue.domain, name="Script", index=int(ack.result))
         helper_task = asyncio.create_task(helper_cor(ack.result))
-        await helper_task
+
+        [message, data] = await asyncio.gather(producer_task, helper_task)
+
+        finished_script = message['finished_scripts'][0]
+
+        import pdb
+        pdb.set_trace()
+        self.assertEqual(
+            finished_script,
+            {
+                "index": data.salIndex,
+                "type": "standard" if data.isStandard else "external",
+                "path": data.path,
+                "process_state": ScriptProcessState(data.processState).name,
+                "script_state": ScriptState(data.scriptState).name,
+                "timestampConfigureEnd": data.timestampConfigureEnd,
+                "timestampConfigureStart": data.timestampConfigureStart,
+                "timestampProcessEnd": data.timestampProcessEnd,
+                "timestampProcessStart": data.timestampProcessStart,
+                "timestampRunStart": data.timestampRunStart,
+            }
+        )
+
+        # helper_task = asyncio.create_task(helper_cor(ack.result))
+        # await helper_task
 
         # Act:
-        finished_script = await producer_task
 
         # Assert
         # retrieved_waiting = stream['waitingIndices']

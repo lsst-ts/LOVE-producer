@@ -4,6 +4,7 @@ from utils import onemsg_generator
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 
+
 class ScriptQueueProducer:
     """
     Listens to several callbacks of the ScriptQueue and Script CSCs
@@ -22,6 +23,7 @@ class ScriptQueueProducer:
             "currentIndex": 0,
             "finishedIndices": [],
         }
+        self.scripts = {}
         self.cmd_timeout = 60
 
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
@@ -30,6 +32,16 @@ class ScriptQueueProducer:
         self.set_callback(self.queue.evt_queue, self.callback_queue)
         self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
 
+    def setup_script(self, salindex):
+        self.scripts[salindex] = {}
+        self.scripts[salindex]["index"] = salindex
+        self.scripts[salindex]["remote"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
+        self.scripts[salindex]["setup"] = True
+        print(self.scripts)
+    def new_empty_script(self):
+        return {
+            "index": -1,
+        }
     # --- Event callbacks ----
     def set_callback(self, evt, callback):
         """
@@ -77,44 +89,51 @@ class ScriptQueueProducer:
         self.state["waitingIndices"] = list(event.salIndices[:event.length])
         self.state["enabled"] = event.enabled == 1
 
-        # scripts = [
-        #     *self.state["waitingIndices"],
-        #     *self.state["finishedIndices"]
-        # ]
+        scripts = [
+            *self.state["waitingIndices"],
+            *self.state["finishedIndices"]
+        ]
 
-        # if self.state["currentIndex"] > 0:
-        #     scripts.append(self.state["currentIndex"])
+        if self.state["currentIndex"] > 0:
+            scripts.append(self.state["currentIndex"])
 
-        # for salindex in scripts:
-        #     if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
-        #         self.setup_script(salindex)
-        #         self.query_script_info(salindex)
-    
+        for salindex in scripts:
+            if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
+                print('\n\n\nwill setup script', salindex)
+                self.setup_script(salindex)
+                # self.query_script_info(salindex)
+
     def callback_config_schema(self, event):
         event_script_type = "external"
-        if event.isStandard: 
+        if event.isStandard:
             event_script_type = "standard"
         for script in self.state["available_scripts"]:
 
-            if script['path'] == event.path and script['type'] == event_script_type :
+            if script['path'] == event.path and script['type'] == event_script_type:
                 script['configSchema'] = event.configSchema
                 break
 
     # ---- Message creation ------
 
+    def parse_script(self, script):
+        return {
+            "index": script['index']
+        }
+
     def get_state_message(self):
         """Parses the current state into a LOVE friendly format"""
-
         stream = {
             'enabled': self.state['enabled'],
             'running': self.state['running'],
-            'available_scripts': self.state['available_scripts'],
+            # 'available_scripts': self.state['available_scripts'],
             'waitingIndices': self.state['waitingIndices'],
             'finishedIndices': self.state['finishedIndices'],
             'currentIndex': self.state['currentIndex'],
+            'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
+            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices'] ]
 
         }
-        message = onemsg_generator('event','ScriptQueue', self.salindex, {'stream': stream} )
+        message = onemsg_generator('event', 'ScriptQueue', self.salindex, {'stream': stream})
         return message
 
     # --------- SAL queries ---------
@@ -123,7 +142,8 @@ class ScriptQueueProducer:
             Send command to the queue to trigger the script config event
         """
         try:
-            asyncio.create_task(self.queue.cmd_showSchema.set_start(isStandard=isStandard, path=script_path, timeout=self.cmd_timeout))
+            asyncio.create_task(self.queue.cmd_showSchema.set_start(
+                isStandard=isStandard, path=script_path, timeout=self.cmd_timeout))
         except salobj.AckError as ack_err:
             print(f"Could not get info on script {script_path}. "
                   f"Failed with ack.result={ack_err.ack.result}")
