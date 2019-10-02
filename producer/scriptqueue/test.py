@@ -5,6 +5,8 @@ import warnings
 
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
+from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
+from lsst.ts.idl.enums.Script import ScriptState
 import os
 import yaml
 from .producer import ScriptQueueProducer
@@ -168,23 +170,44 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         self.assertEqual(data.running,  stream['running'])
         self.assertEqual(data.enabled,  stream['enabled'])
 
-    # async def test_evt_script_data(self):
-    #     """
-    #     Test the data from evt_queue is properly obtained  by monitoring all of its states changes from
-    #     UNKNOWN to DONE
-    #     """
-    #     # Act:
-    #     ack=await self.remote.cmd_add.set_start(isStandard=True,
-    #                                               path="script1",
-    #                                               config="wait_time: 1",
-    #                                               location=Location.FIRST,
-    #                                               locationSalIndex=0,
-    #                                               descr="test_add", timeout=5)
+    async def test_script_state_info(self):
+        """
+        Test the state of a script is properly obtained once it reaches the DONE state
+        """
+        # Arrange
+        async def producer_cor(target_salindex):
+            while True:
+                message = await self.message_queue.get()
+                finished_scripts = utils.get_parameter_from_last_message(
+                    message, 'event', 'ScriptQueue', 1, 'stream', 'finished_scripts')
+                if finished_scripts[0] is not None and finished_scripts[0]["index"] == target_salindex:
+                    return finished_scripts[0]    
+        
+        async def helper_cor(target_salindex):
+            while True:
+                # there is no warranty of when the remote will be updated
+                # so better wait for it
+                data = await self.remote.evt_script.next(flush=True)
+                print(ScriptProcessState(data.processState).name, ScriptState(data.scriptState).name)
+                if ScriptProcessState(data.processState).name == 'DONE' and ScriptState(data.scriptState).name == 'DONE':
+                    return data
+        
+        ack = await self.remote.cmd_add.set_start(isStandard=True,
+                                                  path="script1",
+                                                  config="wait_time: 1",
+                                                  location=Location.FIRST,
+                                                  locationSalIndex=0,
+                                                  descr="test_add", timeout=5)
+        producer_task = asyncio.create_task(producer_cor(ack.result))
 
-    #     script_remote=salobj.Remote(domain=self.queue.domain, name="Script", index=int(ack.result))
-    #     message=self.callback.call_args_list[-1][0][0]
-    #     stream=utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
+        script_remote = salobj.Remote(domain=self.queue.domain, name="Script", index=int(ack.result))
+        helper_task = asyncio.create_task(helper_cor(ack.result))
+        await helper_task
 
-    #     retrieved_waiting=stream['waitingIndices']
-    #     expected_waiting=[int(ack.result)]
-    #     self.assertEqual(retrieved_waiting, expected_waiting)
+        # Act:
+        finished_script = await producer_task
+
+        # Assert
+        # retrieved_waiting = stream['waitingIndices']
+        # expected_waiting = [int(ack.result)]
+        # self.assertEqual(retrieved_waiting, expected_waiting)

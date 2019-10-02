@@ -22,12 +22,13 @@ class ScriptQueueProducer:
             "currentIndex": 0,
             "finishedIndices": [],
         }
+        self.cmd_timeout = 60
+
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
 
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
         self.set_callback(self.queue.evt_queue, self.callback_queue)
-        self.cmd_timeout = 60
-        self.set_callback(self.queue.evt_configSchema, self.config_schema_callback)
+        self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
 
     # --- Event callbacks ----
     def set_callback(self, evt, callback):
@@ -89,7 +90,7 @@ class ScriptQueueProducer:
         #         self.setup_script(salindex)
         #         self.query_script_info(salindex)
     
-    def config_schema_callback(self, event):
+    def callback_config_schema(self, event):
         event_script_type = "external"
         if event.isStandard: 
             event_script_type = "standard"
@@ -104,7 +105,16 @@ class ScriptQueueProducer:
     def get_state_message(self):
         """Parses the current state into a LOVE friendly format"""
 
-        message = onemsg_generator('event','ScriptQueue', self.salindex, {'stream': self.state} )
+        stream = {
+            'enabled': self.state['enabled'],
+            'running': self.state['running'],
+            'available_scripts': self.state['available_scripts'],
+            'waitingIndices': self.state['waitingIndices'],
+            'finishedIndices': self.state['finishedIndices'],
+            'currentIndex': self.state['currentIndex'],
+
+        }
+        message = onemsg_generator('event','ScriptQueue', self.salindex, {'stream': stream} )
         return message
 
     # --------- SAL queries ---------
