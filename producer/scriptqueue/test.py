@@ -177,6 +177,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         - ScriptQueue.evt_script
         - Script.evt_metadata
         - Script.evt_state
+        - Script.evt_description
         """
         # Arrange
         async def producer_cor(target_salindex):
@@ -207,17 +208,24 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                                                   locationSalIndex=0,
                                                   descr="test_add", timeout=5)
 
-        script_remote = salobj.Remote(self.queue.domain, 'Script', int(ack.result) )
+        script_remote = salobj.Remote(self.queue.domain, 'Script', int(ack.result))
 
         producer_task = asyncio.create_task(producer_cor(ack.result))
         helper_evt_script_task = asyncio.create_task(helper_evt_script_cor(ack.result))
-        metadata_coro = script_remote.evt_metadata.next(flush=False)
         state_task = asyncio.create_task(helper_evt_state(script_remote))
         # Act
-        [message, data, metadata, state] = await asyncio.gather(producer_task, helper_evt_script_task, metadata_coro, state_task)
-        
+        [message, data, state] = await asyncio.gather(
+            producer_task,
+            helper_evt_script_task,
+            state_task,
+        )
+        # TODO
+        # checkpoints = await script_remote.evt_checkpoints.next(flush=False)
+        metadata = await script_remote.evt_metadata.next(flush=False)
+        description = await script_remote.evt_description.next(flush=False)
+
         # # Assert
-        finished_script = message['finished_scripts'][0]        
+        finished_script = message['finished_scripts'][0]
         expected_script = {
             "index": data.salIndex,
             "type": "standard" if data.isStandard else "external",
@@ -231,7 +239,12 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             "timestampRunStart": data.timestampRunStart,
 
             "expected_duration": metadata.duration,
-            "last_checkpoint": state.lastCheckpoint
+            "last_checkpoint": state.lastCheckpoint,
+            # TODO "pause_checkpoints": checkpoints.pause,
+            # TODO "stop_checkpoints": checkpoints.stop,
+            "description": description.description,
+            "classname": description.classname,
+            "remotes": description.remotes,
         }
 
-        self.assertEqual(finished_script, expected_script)
+        self.assertEqual(expected_script, finished_script)

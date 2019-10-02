@@ -43,6 +43,7 @@ class ScriptQueueProducer:
 
         self.set_callback(remote.evt_metadata, lambda ev: self.callback_script_metadata(salindex, ev))
         self.set_callback(remote.evt_state, lambda ev: self.callback_script_state(salindex, ev))
+        self.set_callback(remote.evt_description, lambda ev: self.callback_script_description(salindex, ev))
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -60,7 +61,9 @@ class ScriptQueueProducer:
             "timestampProcessStart": 0,
             "timestampRunStart": 0,
             "expected_duration": 0,
-            "last_checkpoint": ""
+            "description": "",
+            "classname": "",
+            "remotes": ""
         }
     # --- Event callbacks ----
 
@@ -158,6 +161,7 @@ class ScriptQueueProducer:
             event : SALPY_Script.Script_logevent_metadataC
         """
         self.scripts[salindex]["expected_duration"] = event.duration
+
     def callback_script_state(self, salindex, event):
         """
             Callback for the Script_logevet_state event. Used to update
@@ -168,8 +172,17 @@ class ScriptQueueProducer:
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
         self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
 
-    
-    
+    def callback_script_description(self, salindex, event):
+        """
+            Callback for the logevent_description. Used to extract
+            the expected duration of the script.
+
+            event : SALPY_Script.Script_logevent_descriptionC
+        """
+        self.scripts[salindex]["description"] = event.description
+        self.scripts[salindex]["classname"] = event.classname
+        self.scripts[salindex]["remotes"] = event.remotes
+
     # ---- Message creation ------
 
     def parse_script(self, script):
@@ -186,6 +199,9 @@ class ScriptQueueProducer:
             "timestampRunStart": script["timestampRunStart"],
             "expected_duration": script["expected_duration"],
             "last_checkpoint": script["last_checkpoint"],
+            "description": script["description"],
+            "classname": script["classname"],
+            "remotes": script["remotes"],
         }
 
     def get_state_message(self):
