@@ -41,7 +41,8 @@ class ScriptQueueProducer:
         self.scripts[salindex]["remote"] = remote
         self.scripts[salindex]["setup"] = True
 
-        self.set_callback(remote.evt_metadata, lambda ev: self.metadata_callback_script(salindex, ev))
+        self.set_callback(remote.evt_metadata, lambda ev: self.callback_script_metadata(salindex, ev))
+        self.set_callback(remote.evt_state, lambda ev: self.callback_script_state(salindex, ev))
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -59,6 +60,7 @@ class ScriptQueueProducer:
             "timestampProcessStart": 0,
             "timestampRunStart": 0,
             "expected_duration": 0,
+            "last_checkpoint": ""
         }
     # --- Event callbacks ----
 
@@ -148,7 +150,7 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
-    def metadata_callback_script(self, salindex, event):
+    def callback_script_metadata(self, salindex, event):
         """
             Callback for the logevent_metadata. Used to extract
             the expected duration of the script.
@@ -156,6 +158,18 @@ class ScriptQueueProducer:
             event : SALPY_Script.Script_logevent_metadataC
         """
         self.scripts[salindex]["expected_duration"] = event.duration
+    def callback_script_state(self, salindex, event):
+        """
+            Callback for the Script_logevet_state event. Used to update
+            the state of the script.
+
+            event : SALPY_Script.Script_logevent_stateC
+        """
+        self.scripts[salindex]["script_state"] = ScriptState(event.state).name
+        self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
+
+    
+    
     # ---- Message creation ------
 
     def parse_script(self, script):
@@ -170,7 +184,8 @@ class ScriptQueueProducer:
             "timestampProcessEnd": script["timestampProcessEnd"],
             "timestampProcessStart": script["timestampProcessStart"],
             "timestampRunStart": script["timestampRunStart"],
-            "expected_duration": script["expected_duration"]
+            "expected_duration": script["expected_duration"],
+            "last_checkpoint": script["last_checkpoint"],
         }
 
     def get_state_message(self):

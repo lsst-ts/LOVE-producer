@@ -176,6 +176,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         This tests callbacks for the following events:
         - ScriptQueue.evt_script
         - Script.evt_metadata
+        - Script.evt_state
         """
         # Arrange
         async def producer_cor(target_salindex):
@@ -190,10 +191,14 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                 # there is no warranty of when the remote will be updated
                 # so better wait for it
                 data = await self.remote.evt_script.next(flush=True)
-                print(ScriptProcessState(data.processState).name, ScriptState(data.scriptState).name)
                 if ScriptProcessState(data.processState).name == 'DONE' and ScriptState(data.scriptState).name == 'DONE':
                     return data
 
+        async def helper_evt_state(script_remote):
+            while True:
+                data = await script_remote.evt_state.next(flush=False)
+                if(data.lastCheckpoint == "end"):
+                    return data
 
         ack = await self.remote.cmd_add.set_start(isStandard=True,
                                                   path="script1",
@@ -206,12 +211,12 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
 
         producer_task = asyncio.create_task(producer_cor(ack.result))
         helper_evt_script_task = asyncio.create_task(helper_evt_script_cor(ack.result))
-
+        metadata_coro = script_remote.evt_metadata.next(flush=False)
+        state_task = asyncio.create_task(helper_evt_state(script_remote))
         # Act
-        [message, data] = await asyncio.gather(producer_task, helper_evt_script_task)
-        metadata = await script_remote.evt_metadata.next(flush=False)
+        [message, data, metadata, state] = await asyncio.gather(producer_task, helper_evt_script_task, metadata_coro, state_task)
         
-        # Assert
+        # # Assert
         finished_script = message['finished_scripts'][0]        
         expected_script = {
             "index": data.salIndex,
@@ -224,7 +229,9 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             "timestampProcessEnd": data.timestampProcessEnd,
             "timestampProcessStart": data.timestampProcessStart,
             "timestampRunStart": data.timestampRunStart,
-            "expected_duration": metadata.duration
+
+            "expected_duration": metadata.duration,
+            "last_checkpoint": state.lastCheckpoint
         }
 
         self.assertEqual(finished_script, expected_script)
