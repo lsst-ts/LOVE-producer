@@ -63,7 +63,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             while True:
                 message = await self.message_queue.get()
                 available_scripts = utils.get_parameter_from_last_message(
-                    message, 'event', 'ScriptQueue', 1, 'stream', 'available_scripts')
+                    message, 'event', 'ScriptQueueState', 1, 'stream', 'available_scripts')
                 if available_scripts is not None and len(available_scripts) > 0:
                     allConfigReady = True
                     for script in available_scripts:
@@ -138,7 +138,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             while True:
                 message = await self.message_queue.get()
                 currentIndex = utils.get_parameter_from_last_message(
-                    message, 'event', 'ScriptQueue', 1, 'stream', 'currentIndex')
+                    message, 'event', 'ScriptQueueState', 1, 'stream', 'currentIndex')
                 if currentIndex is not None and currentIndex == target_salindex:
                     return message
 
@@ -161,7 +161,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         # wait until the current script is the same as in the queue
 
         [data, message] = await asyncio.gather(helper_task, producer_task)
-        stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
+        stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
 
         # Assert
         self.assertEqual(data.currentSalIndex, stream["currentIndex"])
@@ -183,7 +183,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         async def producer_cor(target_salindex):
             while True:
                 message = await self.message_queue.get()
-                stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueue', 1, 'stream')
+                stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
                 if(len(stream['finished_scripts']) > 0 and stream['finished_scripts'][0]["index"] == int(target_salindex)):
                     return stream
 

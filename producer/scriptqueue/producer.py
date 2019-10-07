@@ -8,7 +8,7 @@ from lsst.ts.idl.enums.Script import ScriptState
 class ScriptQueueProducer:
     """
     Listens to several callbacks of the ScriptQueue and Script CSCs
-    to build their states and to produce messages for the LOVE-manager
+    to build their states and produce messages for the LOVE-manager
     in the 'event-ScriptQueueState-salindex-stream' group."""
 
     def __init__(self, domain, send_message_callback, index):
@@ -61,6 +61,7 @@ class ScriptQueueProducer:
             "timestampProcessStart": 0,
             "timestampRunStart": 0,
             "expected_duration": 0,
+            "last_checkpoint": "",
             "description": "",
             "classname": "",
             "remotes": ""
@@ -75,7 +76,8 @@ class ScriptQueueProducer:
 
         def do_callback_and_send(event):
             callback(event)
-            self.send_message_callback(self.get_state_message())
+            m = self.get_state_message()
+            self.send_message_callback(m)
 
         evt.callback = do_callback_and_send
 
@@ -217,7 +219,7 @@ class ScriptQueueProducer:
             'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']]
 
         }
-        message = onemsg_generator('event', 'ScriptQueue', self.salindex, {'stream': stream})
+        message = onemsg_generator('event', 'ScriptQueueState', self.salindex, {'stream': stream})
         return message
 
     # --------- SAL queries ---------

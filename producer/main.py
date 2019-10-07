@@ -88,7 +88,7 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     print('Heartbeat producer created')
 
     producer_scriptqueues = [
-        ScriptQueueProducer(loop, domain, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
+        ScriptQueueProducer(domain, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
     ]
     print('ScriptQueue producers created')
 
@@ -116,8 +116,8 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
         asyncio.set_event_loop(args[0])
         producer_heartbeat.start()
         while True:
-            for producer_scriptqueue in producer_scriptqueues:
-                producer_scriptqueue.update()
+            # for producer_scriptqueue in producer_scriptqueues:
+            #     producer_scriptqueue.update()
             for get_message in message_getters:
                 message = get_message()
                 ws.send(json.dumps(message))
