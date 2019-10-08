@@ -41,11 +41,8 @@ class HeartbeatProducer:
         for i in range(len(self.csc_list)):
             sal_lib_params = self.csc_list[i]
             sal_lib_name = sal_lib_params[0]
-            index = 0
             print('- Listening to heartbeats from CSC: ', sal_lib_params)
-            if len(sal_lib_params) > 1:
-                [sal_lib_name, index] = sal_lib_params
-            index = int(index)
+            [sal_lib_name, index] = sal_lib_params
 
             asyncio.get_event_loop().create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
 
@@ -76,6 +73,9 @@ class HeartbeatProducer:
             max_lost_heartbeats = next((el["max_lost_heartbeats"]
                                         for el in self.heartbeat_params[remote_name] if el["index"] == salindex), MAX_LOST_HEARTBEATS_DEFAULT)
 
+        if salindex is None:
+            salindex = 0
+            
         heartbeat = {
             'csc': remote_name,
             'salindex': salindex,
