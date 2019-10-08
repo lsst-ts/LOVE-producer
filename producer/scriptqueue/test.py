@@ -170,7 +170,8 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         self.assertEqual(data.running,  stream['running'])
         self.assertEqual(data.enabled,  stream['enabled'])
 
-    async def test_script_state_info(self):
+    async def test_finished_script_state_info(self):
+
         """
         Test the state of a script is properly obtained once it reaches the DONE state.
         This tests callbacks for the following events:
@@ -248,3 +249,29 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         }
 
         self.assertEqual(expected_script, finished_script)
+
+    async def test_waiting_and_current_scripts_state_info(self):
+        
+        # Arrange
+        
+        # - Sends 5 scripts, the third one should be longer
+        # - Store  their remotes
+
+
+        # - wait for the queue to reach a state where the current script is the third script
+
+        # Act
+        # - get the data from the producer
+
+
+        # Assert
+        # - build expected data:
+
+        # - - on each current script: 
+        # - - flush the evt_script remote
+        # - - run showScript
+        # - - get evt_script data
+        # - - get the evt_metadata, evt_description, evt_state without flushing
+
+
+        # - assert it
