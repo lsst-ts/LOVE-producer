@@ -216,7 +216,9 @@ class ScriptQueueProducer:
             'finishedIndices': self.state['finishedIndices'],
             'currentIndex': self.state['currentIndex'],
             'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
-            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']]
+            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']],
+            'waiting_scripts': [self.parse_script(self.scripts[index]) for index in self.state['waitingIndices']],
+            'current': self.parse_script(self.scripts[self.state['currentIndex']]) if self.state['currentIndex'] > 0 else 'None',
 
         }
         message = onemsg_generator('event', 'ScriptQueueState', self.salindex, {'stream': stream})

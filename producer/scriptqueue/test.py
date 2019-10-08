@@ -251,27 +251,107 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         self.assertEqual(expected_script, finished_script)
 
     async def test_waiting_and_current_scripts_state_info(self):
-        
+
         # Arrange
-        
+
         # - Sends 5 scripts, the third one should be longer
         # - Store  their remotes
 
+        durations = [0.1, 0.1, 100000, 0.1, 0.1]
+        remotes = []
 
-        # - wait for the queue to reach a state where the current script is the third script
+        for duration in durations:
+            ack = await self.remote.cmd_add.set_start(isStandard=True,
+                                                      path="script1",
+                                                      config="wait_time: {}".format(duration),
+                                                      location=Location.LAST,
+                                                      locationSalIndex=0,
+                                                      descr="test_add", timeout=5)
+
+            remotes.append(salobj.Remote(self.queue.domain, 'Script', int(ack.result)))
+
+        # - wait for the queue to reach a state where the third script  is the current script and it is running
+        async def wait_salindex_tobe_current(target_salindex):
+            while True:
+                # self.remote.evt_queue.flush()
+                # await self.remote.cmd_showQueue.start()
+                data = await self.remote.evt_queue.next(flush=False)
+                if data.currentSalIndex == target_salindex:
+                    return data
+
+        async def wait_for_script_tobe_running(target_index):
+            while True:
+                self.remote.evt_script.flush()
+                await self.remote.cmd_showScript.set_start(salIndex=target_index)
+                script_data = await self.remote.evt_script.next(flush=False)
+
+                if ScriptProcessState(script_data.processState).name != 'RUNNING':
+                    continue
+                if ScriptState(script_data.scriptState).name != 'RUNNING':
+                    continue
+                return script_data
 
         # Act
+        queue_state = await wait_salindex_tobe_current(remotes[2].salinfo.index)
+        script_state = await wait_for_script_tobe_running(remotes[2].salinfo.index)
+
         # - get the data from the producer
+        async def producer_cor(target_salindex):
+            while True:
+                message = await self.message_queue.get()
+                stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
+                if('index' in stream['current'] and stream['current']["index"] == int(target_salindex) and stream['current']['script_state'] == 'RUNNING' and stream['current']['process_state'] == 'RUNNING'):
+                    return stream
+
+        stream = await producer_cor(remotes[2].salinfo.index)
+        all_scripts = {s["index"]: s for s in [stream['current'], *stream['waiting_scripts']]}
+
 
 
         # Assert
-        # - build expected data:
+        async def helper_evt_state(script_remote, target_value):
+            while True:
+                data = await script_remote.evt_state.next(flush=False)
+                if(data.lastCheckpoint == target_value):
+                    return data
+        # - build expected data from evt_script data, evt_metadata, evt_description, evt_state without flushing
+        expected_scripts = []
+        for [expected_evt_state, remote] in zip(["start", None, None], remotes[2:]):
+            # clean and set evt script
+            self.remote.evt_script.flush()
+            ack = await self.remote.cmd_showScript.set_start(salIndex=remote.salinfo.index)
+            
+            # get the data
+            data = await self.remote.evt_script.next(flush=False)
+            metadata = await remote.evt_metadata.next(flush=False)
+            state = await helper_evt_state(remote, expected_evt_state) if expected_evt_state is not None else None
+            description = await remote.evt_description.next(flush=False)
 
-        # - - on each current script: 
-        # - - flush the evt_script remote
-        # - - run showScript
-        # - - get evt_script data
-        # - - get the evt_metadata, evt_description, evt_state without flushing
+            # build it
+            expected_last_checkpoint = '' if expected_evt_state is None else state.lastCheckpoint
+            expected_scripts.append({
+                "index": data.salIndex,
+                "type": "standard" if data.isStandard else "external",
+                "path": data.path,
+                "process_state": ScriptProcessState(data.processState).name,
+                "script_state": ScriptState(data.scriptState).name,
+                "timestampConfigureEnd": data.timestampConfigureEnd,
+                "timestampConfigureStart": data.timestampConfigureStart,
+                "timestampProcessEnd": data.timestampProcessEnd,
+                "timestampProcessStart": data.timestampProcessStart,
+                "timestampRunStart": data.timestampRunStart,
 
-
+                "expected_duration": metadata.duration,
+                "last_checkpoint": expected_last_checkpoint,
+                # TODO "pause_checkpoints": checkpoints.pause,
+                # TODO "stop_checkpoints": checkpoints.stop,
+                "description": description.description,
+                "classname": description.classname,
+                "remotes": description.remotes,
+            })
+        
         # - assert it
+        for expected_script in expected_scripts:
+            produced_script = all_scripts[expected_script["index"]]
+            self.assertEqual(expected_script, produced_script)
+
