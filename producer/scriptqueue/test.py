@@ -22,6 +22,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
     """
         Based on: https://github.com/lsst-ts/ts_scriptqueue/blob/25a3d996c9e71edc30afb61179ec39dcee151dc8/tests/test_script_queue.py#L106
     """
+    maxDiff = None
     async def setUp(self):
         salobj.set_random_lsst_dds_domain()
         self.datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
@@ -306,9 +307,8 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         stream = await producer_cor(remotes[2].salinfo.index)
         all_scripts = {s["index"]: s for s in [stream['current'], *stream['waiting_scripts']]}
 
-
-
         # Assert
+
         async def helper_evt_state(script_remote, target_value):
             while True:
                 data = await script_remote.evt_state.next(flush=False)
@@ -320,7 +320,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             # clean and set evt script
             self.remote.evt_script.flush()
             ack = await self.remote.cmd_showScript.set_start(salIndex=remote.salinfo.index)
-            
+
             # get the data
             data = await self.remote.evt_script.next(flush=False)
             metadata = await remote.evt_metadata.next(flush=False)
@@ -349,9 +349,52 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
                 "classname": description.classname,
                 "remotes": description.remotes,
             })
-        
+
         # - assert it
         for expected_script in expected_scripts:
             produced_script = all_scripts[expected_script["index"]]
             self.assertEqual(expected_script, produced_script)
 
+    async def test_update(self):
+        """Test the producer starts with default state and gets the actual state after running update()"""
+        # Arrange
+
+        # - Add a script to the queue and wait until it finished
+        # - Create the producer
+        ack = await self.remote.cmd_add.set_start(isStandard=True,
+                                                  path="script1",
+                                                  config="wait_time: 0.1",
+                                                  location=Location.LAST,
+                                                  locationSalIndex=0,
+                                                  descr="test_add", timeout=5)
+
+        script_index = int(ack.result)
+
+        async def wait_script_finished(target_salindex):
+            """ Waits until the script with target_salindex is in the pastSalIndices"""
+            while True:
+                data = await self.remote.evt_queue.next(flush=False)
+                if target_salindex in data.pastSalIndices:
+                    return data
+        queue_state = await wait_script_finished(script_index)
+
+        # - Create a new producer and get its state
+        while not self.message_queue.empty():
+            await self.message_queue.get()            
+        producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=self.callback, index=1)   
+        message = producer.get_state_message()
+        stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
+
+        # - compare the evt_queue with the data in the producers state: script should not be in any place
+        self.assertEqual([], stream['finished_scripts'])
+        self.assertEqual('None', stream['current'])
+        self.assertEqual([], stream['waiting_scripts'])
+
+        # Act
+        # - Update the producer and compare the states again
+        producer.update()
+        await asyncio.sleep(1)
+        message = await self.message_queue.get()
+        new_stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
+        self.assertTrue(new_stream['finished_scripts'])
+        self.assertEqual(script_index, new_stream['finished_scripts'][0]["index"])

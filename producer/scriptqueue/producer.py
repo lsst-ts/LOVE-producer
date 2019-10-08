@@ -235,3 +235,34 @@ class ScriptQueueProducer:
         except salobj.AckError as ack_err:
             print(f"Could not get info on script {script_path}. "
                   f"Failed with ack.result={ack_err.ack.result}")
+
+    def query_queue_state(self):
+        """
+            Triggers the queue event by sending a command.
+            Returns 0 if everything is fine; -1 otherwise.
+        """
+        try:
+            asyncio.create_task(self.queue.cmd_showQueue.start(timeout=self.cmd_timeout))
+            return 0
+        except Exception as e:
+            print(e)
+            return -1
+
+    def query_available_scripts(self):
+        """
+            Sends commands to the queue to trigger the queue.evt_availableScripts
+        """
+        asyncio.create_task(self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout))
+
+        return 0
+
+    def update(self):
+        """
+            Tries to trigger the queue event which will
+            update all the info in the queue and its scripts
+            if succeeds.
+        """
+        if self.query_queue_state() < 0:
+            print('could not get sate of the queue')
+            return
+        self.query_available_scripts()
