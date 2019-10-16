@@ -23,6 +23,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
         Based on: https://github.com/lsst-ts/ts_scriptqueue/blob/25a3d996c9e71edc30afb61179ec39dcee151dc8/tests/test_script_queue.py#L106
     """
     maxDiff = None
+
     async def setUp(self):
         salobj.set_random_lsst_dds_domain()
         self.datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
@@ -355,46 +356,152 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             produced_script = all_scripts[expected_script["index"]]
             self.assertEqual(expected_script, produced_script)
 
-    async def test_update(self):
-        """Test the producer starts with default state and gets the actual state after running update()"""
-        # Arrange
+    async def wait_queue_state(self, enabled=True, running=True, currentSalIndex=0, waiting=[], finished=[]):
+        """ Waits until the queue evt pops a certain state """
+        while True:
+            state = await self.remote.evt_queue.next(flush=False)
+            if state.running != running:
+                print('notrunning ', state.running,  running)
+                continue
 
-        # - Add a script to the queue and wait until it finished
-        # - Create the producer
+            if state.enabled != enabled:
+                print('notenabled ', state.enabled,  enabled)
+                continue
+
+            if state.currentSalIndex != currentSalIndex:
+                print('not currentSalIndex', state.currentSalIndex,  currentSalIndex)
+                continue
+
+            if state.length != len(waiting):
+                print('not length', state.length)
+                continue
+            if state.salIndices[:state.length] != waiting:
+                print('not salIndices', state.salIndices[:state.length],  waiting)
+                continue
+
+            if state.pastLength != len(finished):
+                print('not pastLength', state.pastLength)
+                continue
+            if state.pastSalIndices[:state.pastLength] != finished:
+                print('not pastSalIndices', state.pastSalIndices[:state.pastLength],  finished)
+                continue
+
+            print('all okay', enabled, running, currentSalIndex, waiting, finished)
+            return state
+
+    async def wait_for_empty_message_queue(self, message_queue):
+        if message_queue == None :
+            message_queue = self.message_queue
+
+        messages = []
+        while not message_queue.empty():
+            messages.append(await message_queue.get())
+        return messages
+
+    async def wait_script_state(self):
+        pass
+
+
+
+
+
+
+class MyTestCase(asynctest.TestCase):
+    async def setUp(self):
+        # Create the CSC and a remote to wait for events
+        salobj.set_random_lsst_dds_domain()
+        datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
+        standardpath = os.path.join(datadir, "standard")
+        externalpath = os.path.join(datadir, "external")
+        self.queue = scriptqueue.ScriptQueue(index=1,
+                                             standardpath=standardpath,
+                                             externalpath=externalpath,
+                                             verbose=True)
+        await self.queue.start_task
+
+        self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
+        await self.remote.start_task
+        await self.remote.cmd_start.start(timeout=30)
+        await self.remote.cmd_enable.start(timeout=30)
+
+        # Add a script
         ack = await self.remote.cmd_add.set_start(isStandard=True,
                                                   path="script1",
                                                   config="wait_time: 0.1",
                                                   location=Location.LAST,
                                                   locationSalIndex=0,
                                                   descr="test_add", timeout=5)
+        self.script_index = int(ack.result)
 
-        script_index = int(ack.result)
+        # Wait for it to reach the pastQueue
+        while True:
+            state = await self.remote.evt_queue.next(flush=False)
+            print(
+                f"\033[92mqueue={state.salIndices[0]}, current={state.currentSalIndex}, past={state.pastSalIndices[0]}\u001b[0m")
+            if state.pastSalIndices[0] == int(self.script_index):
+                break
 
-        async def wait_script_finished(target_salindex):
-            """ Waits until the script with target_salindex is in the pastSalIndices"""
-            while True:
-                data = await self.remote.evt_queue.next(flush=False)
-                if target_salindex in data.pastSalIndices:
-                    return data
-        queue_state = await wait_script_finished(script_index)
+        # Pause the queue (just in case), and wait for it to be paused
+        await self.remote.cmd_pause.start()
+        while True:
+            state = await self.remote.evt_queue.next(flush=True)
+            print(f'\033[92mrunning?{state.running}\u001b[0m')
+            if not state.running:
+                break
 
-        # - Create a new producer and get its state
-        while not self.message_queue.empty():
-            await self.message_queue.get()            
-        producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=self.callback, index=1)   
-        message = producer.get_state_message()
+    # async def update(self):
+    #     # Configure a remote to listen for callbacks of the evt_queue
+
+    #     callback_remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
+    #     await callback_remote.start_task
+
+    #     # the callback should save messages to a queue
+    #     message_queue = asyncio.Queue()
+
+    #     def callback(msg):
+    #         print('\033[92mwriting with callback\u001b[0m')
+    #         asyncio.create_task(message_queue.put(msg))
+    #     callback_remote.evt_queue.callback = callback
+
+    #     # with self.assertRaises(asyncio.TimeoutError): 
+    #     print(f'\033[92m waiting 10 s \u001b[0m')
+
+        
+    #     # m = await message_queue.get()
+    #     # import pdb;pdb.set_trace()
+    #     with self.assertRaises(asyncio.TimeoutError):
+    #         message = await asyncio.wait_for(message_queue.get(), timeout=10)
+
+    async def update2(self):
+        print('\033[92masdfadsfasdfadsfadsf\u001b[0m')
+        # Configure a callback for the producer
+        message_queue = asyncio.Queue()
+
+        def callback(msg):
+            print('\033[92mwriting with callback\u001b[0m')
+            print('\033[92m',msg,'\u001b[0m')
+            asyncio.create_task(message_queue.put(msg))
+
+        producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=callback, index=1)
+        await producer.setup()
+
+        # make sure no more events are triggered
+        with self.assertRaises(asyncio.TimeoutError): 
+            print('waiting 10s for message')
+            message = await asyncio.wait_for(message_queue.get(), timeout=5)
+            print('\033[92m\n\n message,', message,'\u001b[0m')
+
+
+        # update
+
+        # producer.update()
+        await producer.queue.cmd_showQueue.start(timeout=10)
+        print('\033[92mqsize',message_queue.qsize(),'\u001b[0m')
+        message = await message_queue.get()
+        print('got message')
         stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
-
-        # - compare the evt_queue with the data in the producers state: script should not be in any place
-        self.assertEqual([], stream['finished_scripts'])
+        
+        # Assert: 
+        self.assertEqual(self.script_index, stream['finished_scripts'][0]['index'])
         self.assertEqual('None', stream['current'])
         self.assertEqual([], stream['waiting_scripts'])
-
-        # Act
-        # - Update the producer and compare the states again
-        producer.update()
-        await asyncio.sleep(1)
-        message = await self.message_queue.get()
-        new_stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
-        self.assertTrue(new_stream['finished_scripts'])
-        self.assertEqual(script_index, new_stream['finished_scripts'][0]["index"])

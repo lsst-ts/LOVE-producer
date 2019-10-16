@@ -23,27 +23,33 @@ class ScriptQueueProducer:
             "currentIndex": 0,
             "finishedIndices": [],
         }
+
+        self.initial_data = {}
         self.scripts = {}
         self.cmd_timeout = 60
-
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
+
+    async def setup(self):
+        await self.queue.start_task
 
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
         self.set_callback(self.queue.evt_queue, self.callback_queue)
         self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
         self.set_callback(self.queue.evt_script, self.callback_queue_script)
 
+        # --- Event callbacks ----
+
     def setup_script(self, salindex):
         self.scripts[salindex] = self.new_empty_script()
 
-        remote = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["index"] = salindex
-        self.scripts[salindex]["remote"] = remote
+        self.scripts[salindex]["remote"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
+        self.scripts[salindex]["remote_update"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["setup"] = True
 
-        self.set_callback(remote.evt_metadata, lambda ev: self.callback_script_metadata(salindex, ev))
-        self.set_callback(remote.evt_state, lambda ev: self.callback_script_state(salindex, ev))
-        self.set_callback(remote.evt_description, lambda ev: self.callback_script_description(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_metadata, lambda ev: self.callback_script_metadata(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_state, lambda ev: self.callback_script_state(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_description, lambda ev: self.callback_script_description(salindex, ev))
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -78,7 +84,6 @@ class ScriptQueueProducer:
             callback(event)
             m = self.get_state_message()
             self.send_message_callback(m)
-
         evt.callback = do_callback_and_send
 
     def callback_available_scripts(self, event):
@@ -126,7 +131,7 @@ class ScriptQueueProducer:
         for salindex in scripts:
             if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
                 self.setup_script(salindex)
-                # self.query_script_info(salindex)
+                # asyncio.create_task(self.query_script_info(salindex))
 
     def callback_config_schema(self, event):
         event_script_type = "external"
@@ -142,6 +147,7 @@ class ScriptQueueProducer:
         """
             Callback for the queue.evt_script event
         """
+        print('CALLBACK SCRIPT')
         if(event.salIndex not in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
 
@@ -221,10 +227,22 @@ class ScriptQueueProducer:
             'current': self.parse_script(self.scripts[self.state['currentIndex']]) if self.state['currentIndex'] > 0 else 'None',
 
         }
+        print('adsf')
         message = onemsg_generator('event', 'ScriptQueueState', self.salindex, {'stream': stream})
         return message
 
     # --------- SAL queries ---------
+
+    async def query_script_info(self, salindex):
+        """
+            Send commands to the queue to trigger the script events of each script
+        """
+        try:
+            await self.queue.cmd_showScript.set_start(salIndex=salindex, timeout=self.cmd_timeout)
+        except salobj.AckError as ack_err:
+            print(f"Could not get info on script {salindex}. "
+                  f"Failed with ack.result={ack_err.ack.result}")
+
     def query_script_config(self, isStandard, script_path):
         """
             Send command to the queue to trigger the script config event
@@ -236,33 +254,34 @@ class ScriptQueueProducer:
             print(f"Could not get info on script {script_path}. "
                   f"Failed with ack.result={ack_err.ack.result}")
 
-    def query_queue_state(self):
-        """
-            Triggers the queue event by sending a command.
-            Returns 0 if everything is fine; -1 otherwise.
-        """
-        try:
-            asyncio.create_task(self.queue.cmd_showQueue.start(timeout=self.cmd_timeout))
-            return 0
-        except Exception as e:
-            print(e)
-            return -1
-
-    def query_available_scripts(self):
-        """
-            Sends commands to the queue to trigger the queue.evt_availableScripts
-        """
-        asyncio.create_task(self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout))
-
-        return 0
-
-    def update(self):
+    async def update(self):
         """
             Tries to trigger the queue event which will
             update all the info in the queue and its scripts
             if succeeds.
         """
-        if self.query_queue_state() < 0:
-            print('could not get sate of the queue')
-            return
-        self.query_available_scripts()
+
+        try:
+            print('-------show queue')
+            await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
+            print('-------show available')
+            await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
+            for script_index in self.scripts:
+                # print('-------show script', script_index)
+                print('show script')
+                await self.queue.cmd_showScript.set_start(salIndex=script_index)
+                print('exit show script')
+                # # print('---------------------------1')
+                # remote = self.scripts[script_index]["remote_update"]
+                # # print('---------------------------2')
+                # await self.scripts[script_index]["remote_update"].start_task
+                # # print('---------------------------3')
+                # import pdb;pdb.set_trace()
+                # evt_description_data = await remote.evt_description.next(flush=False)
+                # import pdb; pdb.set_trace()
+
+
+            return True
+        except Exception as e:
+            print(e)
+            return False
