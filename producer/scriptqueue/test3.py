@@ -1,6 +1,7 @@
 import asyncio
 import os
 import asynctest
+import warnings
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
@@ -52,7 +53,12 @@ class MyTestCase(asynctest.TestCase):
             print(f'\033[92mrunning?{state.running}\u001b[0m')
             if not state.running:
                 break
-
+    
+    async def tearDown(self):
+        nkilled = len(self.queue.model.terminate_all())
+        if nkilled > 0:
+            warnings.warn(f"Killed {nkilled} subprocesses")
+        await self.queue.close()
     # async def update(self):
     #     # Configure a remote to listen for callbacks of the evt_queue
 
@@ -76,7 +82,7 @@ class MyTestCase(asynctest.TestCase):
     #     with self.assertRaises(asyncio.TimeoutError):
     #         message = await asyncio.wait_for(message_queue.get(), timeout=10)
 
-    async def update2(self):
+    async def test_update2(self):
         self.remote.evt_script.flush()
         await self.remote.cmd_showScript.set_start(salIndex=self.script_index)
         evt_script_data = await self.remote.evt_script.next(flush=False)
