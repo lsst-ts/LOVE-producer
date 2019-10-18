@@ -168,11 +168,17 @@ def read_config(path, key=None):
     csc_list = []
     if key:
         for csc_instance in data[key]:
-            csc_list.append((key, csc_instance['index']))
+            index = None
+            if 'index' in csc_instance:
+                index = csc_instance['index']
+            csc_list.append((key, index))
     else:
         for csc_key, csc_value in data.items():
             for csc_instance in csc_value:
-                csc_list.append((csc_key, csc_instance['index']))
+                index = None
+                if 'index' in csc_instance:
+                    index = csc_instance['index']
+                csc_list.append((csc_key, index))
     return csc_list
 
 
