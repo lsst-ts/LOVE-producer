@@ -227,7 +227,6 @@ class ScriptQueueProducer:
             'current': self.parse_script(self.scripts[self.state['currentIndex']]) if self.state['currentIndex'] > 0 else 'None',
 
         }
-        print('adsf')
         message = onemsg_generator('event', 'ScriptQueueState', self.salindex, {'stream': stream})
         return message
 

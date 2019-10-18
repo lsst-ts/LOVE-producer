@@ -150,5 +150,3 @@ class MyTestCase(asynctest.TestCase):
         self.assertEqual(expected_script, produced_script)
         self.assertEqual('None', stream['current'])
         self.assertEqual([], stream['waiting_scripts'])
-
-        print('asdfasdf')
