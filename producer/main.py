@@ -16,6 +16,7 @@ from heartbeats.producer import HeartbeatProducer
 from command_receiver.receiver import Receiver
 from initial_state.producer import InitialStateProducer
 from utils import NumpyEncoder
+import utils
 
 CONFIG_PATH = 'config/config.json'
 
@@ -60,6 +61,10 @@ def send_message_callback(ws, message):
     message : `dict`
         the message to send
     """
+
+    cscs = utils.get_all_csc_names_in_message(message)
+    print(cscs)
+    
     ws.send(json.dumps(message))
 
 
@@ -90,6 +95,8 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
     producer_scriptqueues = [
         ScriptQueueProducer(domain, lambda m: send_message_callback(ws, m), sq[1]) for sq in sq_list
     ]
+    for producer in producer_scriptqueues:
+        loop.create_task(producer.setup())
     print('ScriptQueue producers created')
 
     # Accept commands
@@ -116,8 +123,9 @@ def on_ws_open(ws, domain, message_getters, loop, csc_list, sq_list):
         asyncio.set_event_loop(args[0])
         producer_heartbeat.start()
         while True:
-            # for producer_scriptqueue in producer_scriptqueues:
-            #     producer_scriptqueue.update()
+            for producer_scriptqueue in producer_scriptqueues:
+
+                loop.create_task(producer_scriptqueue.update())
             for get_message in message_getters:
                 message = get_message()
                 ws.send(json.dumps(message))
