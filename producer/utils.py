@@ -66,3 +66,10 @@ def get_parameter_from_last_message(message, category, csc, salindex, stream, pa
             return m['data'][stream][parameter]
 
     raise Exception('Parameter {}-{}-{}-{}-{} not found in message'.format(category, csc, salindex, stream, parameter))
+
+
+def get_all_csc_names_in_message(message):
+    """
+        Returns a list of all cscs names contained in a message
+    """
+    return [data['csc'] for data in message['data']]    
