@@ -73,3 +73,41 @@ def get_all_csc_names_in_message(message):
         Returns a list of all cscs names contained in a message
     """
     return [data['csc'] for data in message['data']]    
+
+
+def read_config(path, key=None):
+    """ Reads a given config file and returns the lists of CSCs to listen to.
+    It can read the full file (by default), or read only a specific key
+
+    Parameters
+    ----------
+    path: `string`
+        The full path of the config file
+    key: `string`
+        optional key to read
+
+    Returns
+    -------
+    csc_list: `[()]`
+        The list of CSCs to run as a tuple with the CSC name and index
+    """
+    print('Reading config file: ', path)
+    with open(path) as config_file:
+        data = json.loads(config_file.read())
+
+    # data = json.load(open(path, 'r'))
+    csc_list = []
+    if key:
+        for csc_instance in data[key]:
+            index = None
+            if 'index' in csc_instance:
+                index = csc_instance['index']
+            csc_list.append((key, index))
+    else:
+        for csc_key, csc_value in data.items():
+            for csc_instance in csc_value:
+                index = None
+                if 'index' in csc_instance:
+                    index = csc_instance['index']
+                csc_list.append((csc_key, index))
+    return csc_list

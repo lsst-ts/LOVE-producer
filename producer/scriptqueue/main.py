@@ -41,7 +41,7 @@ class ScriptQueueWSClient():
 
     def send_message_callback(self, message):
         """Sends messages through websockets. Called after each scriptqueue event """
-        print('### sending message')
+        print(f'### ScriptQueue-{self.salindex} | ### sending message')
         asyncio.create_task(self.websocket.send(json.dumps(message)))
 
     async def handle_message_reception(self):
@@ -69,7 +69,12 @@ async def main(salindex):
 
 
 if __name__ == '__main__':
+    print('***** Starting Scriptqueue Producers *****')
+    path = os.path.join(os.path.dirname(__file__), '..', CONFIG_PATH)
+    sq_list = utils.read_config(path, 'ScriptQueue')
+    
+    print('List of Script Queues to listen:', sq_list)
     loop = asyncio.get_event_loop()
-    loop.create_task(main(1))
-    loop.create_task(main(2))
+    for name, salindex in sq_list:
+        loop.create_task(main(salindex))        
     loop.run_forever()
