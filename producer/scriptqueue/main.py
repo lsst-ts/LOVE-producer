@@ -62,19 +62,23 @@ class ScriptQueueWSClient():
                 print(f'### ScriptQueue-{self.salindex} | message:', message)
 
 
-async def main(salindex):
+async def init_client(salindex):
     sqclient = ScriptQueueWSClient(salindex)
     await sqclient.start_ws_client()
     await sqclient.producer.update()
 
 
-if __name__ == '__main__':
+async def main():
     print('***** Starting Scriptqueue Producers *****')
     path = os.path.join(os.path.dirname(__file__), '..', CONFIG_PATH)
     sq_list = utils.read_config(path, 'ScriptQueue')
-    
+
     print('List of Script Queues to listen:', sq_list)
-    loop = asyncio.get_event_loop()
     for name, salindex in sq_list:
-        loop.create_task(main(salindex))        
+        asyncio.create_task(init_client(salindex))
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
     loop.run_forever()
