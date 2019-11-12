@@ -14,17 +14,17 @@ WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
 class ScriptQueueWSClient():
     """Handles the websocket client connection between the ScriptQueue Producer and the LOVE-manager."""
 
-    def __init__(self):
+    def __init__(self, salindex):
         self.domain = salobj.Domain()
         self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
-        self.salindex = 1
+        self.salindex = salindex
         self.producer = ScriptQueueProducer(self.domain, self.send_message_callback, self.salindex)
 
     async def start_ws_client(self):
         """ Initializes the websocket client and producer callbacks """
 
         self.websocket = await websockets.client.connect(self.url)
-        print('### loaded ws')
+        print(f'### ScriptQueue-{self.salindex} | loaded ws')
         initial_state_subscribe_msg = {
             'option': 'subscribe',
             'category': 'initial_state',
@@ -33,9 +33,9 @@ class ScriptQueueWSClient():
             'stream': 'all'
         }
         await self.websocket.send(json.dumps(initial_state_subscribe_msg))
-        print('### subscribed initial state')
+        print(f'### ScriptQueue-{self.salindex} | subscribed initial state')
         await self.producer.setup()
-        print('### loaded producer')
+        print(f'### ScriptQueue-{self.salindex} | loaded producer')
 
         asyncio.create_task(self.handle_message_reception())
 
@@ -54,21 +54,22 @@ class ScriptQueueWSClient():
                 if message['category'] is not None:
                     stream = utils.get_stream_from_last_message(
                         message, 'initial_state', 'ScriptQueueState', f"{self.salindex}", 'event_name')
-                print('\n found it!!')
+                print(f'### ScriptQueue-{self.salindex} | found it!!')
                 print(stream)
                 await self.producer.update()
             except Exception as e:
-                print('\nexception\n', e)
-                print('message:', message)
+                print(f'### ScriptQueue-{self.salindex} | exception\n', e)
+                print(f'### ScriptQueue-{self.salindex} | message:', message)
 
 
-async def main():
-    sqclient = ScriptQueueWSClient()
+async def main(salindex):
+    sqclient = ScriptQueueWSClient(salindex)
     await sqclient.start_ws_client()
     await sqclient.producer.update()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.create_task(main())
+    loop.create_task(main(1))
+    loop.create_task(main(2))
     loop.run_forever()
