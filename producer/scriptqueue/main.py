@@ -6,17 +6,13 @@ from lsst.ts import salobj
 from producer import ScriptQueueProducer
 import os
 import utils
-CONFIG_PATH = 'config/config.json'
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-
 
 class ScriptQueueWSClient():
     """Handles the websocket client connection between the ScriptQueue Producer and the LOVE-manager."""
 
     def __init__(self, salindex):
         self.domain = salobj.Domain()
-        self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+        self.url = "ws://{}/?password={}".format(utils.WS_HOST, utils.WS_PASS)
         self.salindex = salindex
         self.producer = ScriptQueueProducer(self.domain, self.send_message_callback, self.salindex)
 
@@ -70,7 +66,7 @@ async def init_client(salindex):
 
 async def main():
     print('***** Starting Scriptqueue Producers *****')
-    path = os.path.join(os.path.dirname(__file__), '..', CONFIG_PATH)
+    path = os.path.join(os.path.dirname(__file__), '..', utils.CONFIG_PATH)
     sq_list = utils.read_config(path, 'ScriptQueue')
 
     print('List of Script Queues to listen:', sq_list)

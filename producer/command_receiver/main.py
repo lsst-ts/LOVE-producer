@@ -6,17 +6,13 @@ from lsst.ts import salobj
 from receiver import Receiver
 import os
 import utils
-CONFIG_PATH = 'config/config.json'
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-
 
 class CommandWSClient():
     """Handles the websocket client connection between the Commands Receiver and the LOVE-manager."""
 
     def __init__(self, csc_list):
         self.domain = salobj.Domain()
-        self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+        self.url = "ws://{}/?password={}".format(utils.WS_HOST, utils.WS_PASS)
         self.csc_list = csc_list
         self.receiver = Receiver(self.domain, self.csc_list)
 
@@ -58,7 +54,7 @@ class CommandWSClient():
 
 async def main():
     print('***** Starting Scriptqueue Producers *****')
-    path = os.path.join(os.path.dirname(__file__), '..', CONFIG_PATH)
+    path = os.path.join(os.path.dirname(__file__), '..', utils.CONFIG_PATH)
     csc_list = utils.read_config(path)
     print('List of CSCs to listen:', csc_list)
 
