@@ -147,7 +147,7 @@ class ScriptQueueProducer:
         """
             Callback for the queue.evt_script event
         """
-        print('CALLBACK SCRIPT')
+        # print('CALLBACK SCRIPT')
         if(event.salIndex not in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
 
@@ -261,15 +261,15 @@ class ScriptQueueProducer:
         """
 
         try:
-            print('-------show queue')
+            # print('-------show queue')
             await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
-            print('-------show available')
+            # print('-------show available')
             await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
             for script_index in self.scripts:
                 # print('-------show script', script_index)
-                print('show script')
+                # print('show script')
                 await self.queue.cmd_showScript.set_start(salIndex=script_index)
-                print('exit show script')
+                # print('exit show script')
                 # # print('---------------------------1')
                 # remote = self.scripts[script_index]["remote_update"]
                 # # print('---------------------------2')
