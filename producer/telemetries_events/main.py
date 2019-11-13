@@ -35,14 +35,39 @@ class TelemetryEventsWSClient():
         await self.websocket.send(json.dumps(initial_state_subscribe_msg))
         print(f'### Telemetry&Events | subscribed initial state')
         asyncio.create_task(self.send_messages_after_timeout())
+        asyncio.create_task(self.handle_message_reception())
 
-    
     async def send_messages_after_timeout(self):
         while True:
             for get_message in self.message_getters:
                 message = get_message()
+                print('send before 2', message, 'asdf')
                 await self.websocket.send(json.dumps(message))
+                print('wait 2')
             await asyncio.sleep(2)
+
+    async def handle_message_reception(self):
+        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
+        while True:
+            message = await self.websocket.recv()
+            message = json.loads(message)
+            try:
+                if message['category'] is None:
+                    continue
+                if 'data' not in message:
+                    continue
+                if len(message['data']) == 0:
+                    continue
+
+                answer = await self.producer.process_message(message)
+                if answer is None:
+                    continue
+                dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
+                asyncio.create_task(self.websocket.send(dumped_answer))
+                print(f'### Telemetry&Events | found it!!')
+            except Exception as e:
+                print(f'### Telemetry&Events | exception\n', e)
+                print(f'### Telemetry&Events | message:', message)
 
 
 async def main():
