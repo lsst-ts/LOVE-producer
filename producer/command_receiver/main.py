@@ -53,7 +53,7 @@ class CommandWSClient():
 
 
 async def main():
-    print('***** Starting Scriptqueue Producers *****')
+    print('***** Starting Command Receivers *****')
     path = os.path.join(os.path.dirname(__file__), '..', utils.CONFIG_PATH)
     csc_list = utils.read_config(path)
     print('List of CSCs to listen:', csc_list)

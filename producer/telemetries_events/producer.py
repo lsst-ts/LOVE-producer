@@ -1,7 +1,6 @@
 import asyncio
 import json
 import numpy as np
-import threading
 from utils import NumpyEncoder, getDataType
 from lsst.ts import salobj
 
@@ -12,8 +11,7 @@ class Producer:
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
-    def __init__(self, loop, domain, csc_list):
-        self.loop = loop
+    def __init__(self, domain, csc_list):
         self.remote_list = []
         for name, salindex in csc_list:
             print('- Listening to telemetries and events from CSC: ', (name, salindex))
@@ -88,3 +86,85 @@ class Producer:
             "data": output_list
         }
         return message
+
+
+    async def process_message(self, message):
+            """ 
+            Tries to obtain the current data for an event with salobj.
+
+            Parameters
+            ----------
+            message: dictionary with the LOVE-schema see example:
+
+            Returns
+            -------
+            answer: a dictionary such as those delivered by the Telemetries_Events producer
+
+            Example
+            ------
+
+            message = {
+                "category": "initial_state",
+                "data": [{
+                    "csc": "Test",
+                    "salindex": 1,
+                    "stream": {
+                            "event_name": "summaryState"
+                    }
+                }]
+            }
+            answer = await producer.process_message(message)
+            
+            # {
+            #     "category": "event",
+            #     "data": [{
+            #         "csc": "Test",
+            #         "salindex": 1,
+            #         "data": {
+            #             "summaryState": [{
+            #                 "summaryState": {
+            #                     "value": 1,
+            #                     "dataType": "Int"
+            #                 }
+            #             }]
+            #         }
+            #     }]
+            # }
+
+
+            """
+            request_data = message["data"][0]
+            csc = request_data["csc"]
+            salindex = int(request_data["salindex"])
+            event_name = request_data["stream"]["event_name"]
+            if((csc, salindex) not in self.remote_dict):
+                return
+            remote = self.remote_dict[(csc, salindex)]
+            evt_object = getattr(remote, "evt_{}".format(event_name))
+            try:
+                # check latest seen data, if not available then "request" it
+                evt_data = evt_object.get(flush=False)
+                if evt_data is None:
+                    evt_data = await evt_object.next(flush=False, timeout=60)
+            except Exception as e:
+                print('InitialStateProducer failed to obtain data from {}-{}-{}'.format(csc, salindex, event_name))
+                print(e)
+                return
+            result = {}
+            for parameter_name in evt_data._member_attributes:
+                result[parameter_name] = getattr(evt_data, parameter_name)
+                parameter_data = getattr(evt_data, parameter_name)
+                result[parameter_name] = {
+                    'value': parameter_data,
+                    'dataType': getDataType(parameter_data)
+                }
+
+            message = {
+                "category": "event",
+                "data": [{
+                    "csc": csc,
+                    "salindex": salindex,
+                    "data": {event_name: [result]}
+                }]
+            }
+            return message
