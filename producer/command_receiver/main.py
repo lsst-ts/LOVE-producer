@@ -3,7 +3,7 @@ import asyncio
 import json
 import websockets
 from lsst.ts import salobj
-from receiver import Receiver
+from .receiver import Receiver
 import os
 import utils
 

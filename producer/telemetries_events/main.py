@@ -3,7 +3,7 @@ import asyncio
 import json
 import websockets
 from lsst.ts import salobj
-from producer import Producer
+from .producer import Producer
 import os
 import utils
 
