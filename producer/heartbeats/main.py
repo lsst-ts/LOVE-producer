@@ -23,10 +23,8 @@ class CSCHeartbeatsWSClient():
         self.producer.start()
         print(f'### Telemetry&Events | subscribed initial state')
 
-    def send_heartbeat(self, message):
-        import pprint
-        pprint.pprint(message)
-        asyncio.create_task(self.websocket.send(json.dumps(message)) )
+    async def send_heartbeat(self, message):
+        await self.websocket.send(json.dumps(message))
 
 async def main():
     print('***** Starting Telemetry&Event Producers *****')
