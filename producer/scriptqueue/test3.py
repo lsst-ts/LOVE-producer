@@ -82,16 +82,20 @@ class MyTestCase(asynctest.TestCase):
     #     with self.assertRaises(asyncio.TimeoutError):
     #         message = await asyncio.wait_for(message_queue.get(), timeout=10)
 
-    async def test_update2(self):
+    async def test_late_joiner_update(self):
+        """Test that a late joiner producer can be updated properly with an awaitable"""
+
+        # Arrange:
+        #   Get one-time-shown script info from the DDS
         self.remote.evt_script.flush()
         await self.remote.cmd_showScript.set_start(salIndex=self.script_index)
         evt_script_data = await self.remote.evt_script.next(flush=False)
         metadata = await self.script_remote.evt_metadata.next(flush=False)
         # state = await helper_evt_state(self.script_remote, expected_evt_state) if expected_evt_state is not None else None
         description = await self.script_remote.evt_description.next(flush=False)
-
         print('\033[92mgot descriptionf\u001b[0m')
-        # Configure a callback for the producer
+
+        #   Configure a callback for the producer
         message_queue = asyncio.Queue()
 
         def callback(msg):
@@ -101,18 +105,20 @@ class MyTestCase(asynctest.TestCase):
         producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=callback, index=1)
         await producer.setup()
 
-        # make sure no more events are triggered
+        #   Make sure no more events are triggered 
         with self.assertRaises(asyncio.TimeoutError): 
             print('waiting 10s for message')
             message = await asyncio.wait_for(message_queue.get(), timeout=5)
 
 
-        # update
+        # Act: run update
         print('\n\n will update \n\n\n\n\n\n')
         self.remote.evt_script.flush()
         await producer.update()
-        await self.remote.evt_script.next(flush=False)
         # await producer.queue.cmd_showQueue.start(timeout=10)
+        
+        #   wait for the producer to be updated
+        await self.remote.evt_script.next(flush=False)
         print('\033[92m\n\nqsize',message_queue.qsize(),'\u001b[0m')
         while not message_queue.empty():
             message = await message_queue.get()
