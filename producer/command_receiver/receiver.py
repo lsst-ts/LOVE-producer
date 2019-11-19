@@ -20,8 +20,7 @@ class Receiver:
                 print('CSC', name, 'raised exception on Receiver:', e)
                 
 
-    async def process_message(self, message):
-        data = json.loads(message)
+    async def process_message(self, data):
         try:
             if data['category'] != 'cmd':
                 return
