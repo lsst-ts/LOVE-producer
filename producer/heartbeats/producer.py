@@ -120,7 +120,7 @@ class HeartbeatProducer:
                     timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp)
-                    self.send_heartbeat(msg)
+                    await self.send_heartbeat(msg)
                     await asyncio.sleep(2)
                     continue
                 await remote.evt_heartbeat.next(flush=False, timeout=timeout)
@@ -130,7 +130,7 @@ class HeartbeatProducer:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp)
-            self.send_heartbeat(msg)
+            await self.send_heartbeat(msg)
 
 
 if __name__ == '__main__':
