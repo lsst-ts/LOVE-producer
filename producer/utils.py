@@ -3,8 +3,14 @@ import json
 import os
 
 CONFIG_PATH = 'config/config.json'
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+WS_HOST = ""
+if "WEBSOCKET_HOST" in os.environ:
+    WS_HOST = os.environ["WEBSOCKET_HOST"]
+
+WS_PASS = ""
+if "PROCESS_CONNECTION_PASS" in os.environ:
+    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+
 
 
 class NumpyEncoder(json.JSONEncoder):
