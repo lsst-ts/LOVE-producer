@@ -221,7 +221,7 @@ class ScriptQueueProducer:
             'waitingIndices': self.state['waitingIndices'],
             'finishedIndices': self.state['finishedIndices'],
             'currentIndex': self.state['currentIndex'],
-            'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
+            # 'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
             'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']],
             'waiting_scripts': [self.parse_script(self.scripts[index]) for index in self.state['waitingIndices']],
             'current': self.parse_script(self.scripts[self.state['currentIndex']]) if self.state['currentIndex'] > 0 else 'None',
