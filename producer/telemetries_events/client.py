@@ -41,9 +41,7 @@ class TelemetryEventsWSClient():
         while True:
             for get_message in self.message_getters:
                 message = get_message()
-                print('send before 2', message, 'asdf')
                 await self.websocket.send(json.dumps(message))
-                print('wait 2')
             await asyncio.sleep(2)
 
     async def handle_message_reception(self):

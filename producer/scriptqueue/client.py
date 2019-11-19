@@ -37,7 +37,6 @@ class ScriptQueueWSClient():
 
     def send_message_callback(self, message):
         """Sends messages through websockets. Called after each scriptqueue event """
-        print(f'### ScriptQueue-{self.salindex} | ### sending message')
         asyncio.create_task(self.websocket.send(json.dumps(message)))
 
     async def handle_message_reception(self):
