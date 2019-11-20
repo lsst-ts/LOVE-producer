@@ -8,7 +8,7 @@ from command_receiver.client import main as command_receiver
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.create_task(telemetries_events())
-    loop.create_task(scriptqueue())
     loop.create_task(heartbeats())
-    # loop.create_task(command_receiver())
+    loop.create_task(scriptqueue())
+    loop.create_task(command_receiver())
     loop.run_forever()

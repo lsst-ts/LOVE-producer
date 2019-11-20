@@ -44,12 +44,9 @@ class TelemetryEventsWSClient(BaseWSClient):
             return
         dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
         asyncio.create_task(self.websocket.send(dumped_answer))
-        print(f'### Telemetry&Events | found it!!')
 
 
 async def main():
-
-
     telev_client = TelemetryEventsWSClient()
     await telev_client.start_ws_client()
 

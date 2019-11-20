@@ -55,6 +55,9 @@ class BaseWSClient():
     async def process_one_message(self, message):
         pass
     
+    async def on_start_client(self):
+        pass
+
     @staticmethod
     def read_config(path, key=None):
         """ Reads a given config file and returns the lists of CSCs to listen to.
