@@ -7,33 +7,29 @@ from .producer import HeartbeatProducer
 import os
 import utils
 
+from base_ws_client import BaseWSClient
 
-class CSCHeartbeatsWSClient():
+
+class CSCHeartbeatsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Heartbeatss Producer and the LOVE-manager."""
 
-    def __init__(self, csc_list):
-        self.domain = salobj.Domain()
-        self.url = "ws://{}/?password={}".format(utils.WS_HOST, utils.WS_PASS)
-        self.producer = HeartbeatProducer(self.domain, self.send_heartbeat, csc_list)
+    def __init__(self):
+        super().__init__(name='CSCHeartbeats')
 
-    async def start_ws_client(self):
-        """ Initializes the websocket client and producer callbacks """
+        self.producer = HeartbeatProducer(self.domain, self.send_heartbeat, self.csc_list)
 
-        self.websocket = await websockets.client.connect(self.url)
+    async def on_start_client(self):
+        """ Initializes producer's callbacks """
         self.producer.start()
-        print(f'### Telemetry&Events | subscribed initial state')
 
     async def send_heartbeat(self, message):
+        """Callback used by self.producer to send messages with the websocket client"""
         await self.websocket.send(json.dumps(message))
 
-async def main():
-    print('***** Starting Telemetry&Event Producers *****')
-    path = os.path.join(os.path.dirname(__file__), '..', utils.CONFIG_PATH)
-    csc_list = utils.read_config(path)
-    print('List of CSCs to listen:', csc_list)
 
-    telev_client = CSCHeartbeatsWSClient(csc_list)
-    await telev_client.start_ws_client()
+async def main():
+    heartbeats_client = CSCHeartbeatsWSClient()
+    await heartbeats_client.start_ws_client()
 
 
 if __name__ == '__main__':
