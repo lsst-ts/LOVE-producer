@@ -46,7 +46,6 @@ class CommandWSClient():
                         continue
                     dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
                     asyncio.create_task(self.websocket.send(dumped_answer))
-                print(f'### Receiver | found it!!')
             except Exception as e:
                 print(f'### Receiver | exception\n', e)
                 print(f'### Receiver | message:', message)

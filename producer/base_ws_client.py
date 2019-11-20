@@ -52,6 +52,9 @@ class BaseWSClient():
         asyncio.create_task(self.handle_message_reception())
         await self.on_start_client()
 
+    async def process_one_message(self, message):
+        pass
+    
     @staticmethod
     def read_config(path, key=None):
         """ Reads a given config file and returns the lists of CSCs to listen to.

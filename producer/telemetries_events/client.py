@@ -34,7 +34,6 @@ class TelemetryEventsWSClient(BaseWSClient):
             await asyncio.sleep(2)
 
     async def process_one_message(self, message):
-        print(message)
         if 'data' not in message:
             return
         if len(message['data']) == 0:
