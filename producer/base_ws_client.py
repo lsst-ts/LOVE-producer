@@ -10,14 +10,14 @@ CONFIG_PATH = 'config/config.json'
 
 
 class BaseWSClient():
+    path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
     def __init__(self, name):
         self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
         self.domain = salobj.Domain()
         self.name = name
         self.ws_task = asyncio.create_task(self.connect())
         print(f'***** Starting {self.name} Producers *****')
-        path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
-        self.csc_list = self.read_config(path)
+        self.csc_list = self.read_config(self.path)
         print('List of CSCs to listen:', self.csc_list)
 
     async def connect(self):
@@ -32,8 +32,8 @@ class BaseWSClient():
             try:
                 await self.process_one_message(message)
             except Exception as e:
-                print(f'### f{self.name} | exception\n', e)
-                print(f'### f{self.name} | message:', message)
+                print(f'### {self.name} | exception\n', e)
+                print(f'### {self.name} | message:', message)
 
     async def start_ws_client(self):
         self.websocket = await self.ws_task

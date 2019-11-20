@@ -10,5 +10,5 @@ if __name__ == '__main__':
     loop.create_task(telemetries_events())
     loop.create_task(scriptqueue())
     loop.create_task(heartbeats())
-    loop.create_task(command_receiver())
+    # loop.create_task(command_receiver())
     loop.run_forever()
