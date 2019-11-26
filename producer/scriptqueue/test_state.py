@@ -24,20 +24,12 @@ class TestScriptqueueState(asynctest.TestCase):
         while True:
             message = await self.message_queue.get()
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
-            print('\nfinished', stream['finishedIndices'],
-                    stream['finishedIndices'] != finished_indices, finished_indices)
-            print('current', stream['currentIndex'], stream['currentIndex'] != current_index, current_index)
-            print('waiting', stream['waitingIndices'], stream['waitingIndices'] != waiting_indices, waiting_indices)
             if stream['finishedIndices'] != finished_indices:
-                print('finished noteq')
                 continue
             if stream['waitingIndices'] != waiting_indices:
-                print('waiting noteq')
                 continue
             if stream['currentIndex'] != current_index:
-                print('current noteq')
                 continue
-            print('all eq')
             break
         return stream
 
@@ -54,11 +46,8 @@ class TestScriptqueueState(asynctest.TestCase):
                         script = s 
                         break
 
-            print('\n',script, script["process_state"] == process_state and script["script_state"] == script_state)
-            
             if script["process_state"] == process_state and script["script_state"] == script_state:
                 return stream
-
 
     async def get_last_not_none_value_from_event_parameter(self, evt, parameter):
         value = None
@@ -67,7 +56,6 @@ class TestScriptqueueState(asynctest.TestCase):
             if last_data is None:
                 return value
             value = getattr(last_data, parameter)
-            print('new value', value)
         
         return value
 
@@ -104,7 +92,10 @@ class TestScriptqueueState(asynctest.TestCase):
 
 
         }
+    
     async def test_state(self):
+        # ARRANGE
+
         # Create the CSC
         salobj.set_random_lsst_dds_domain()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
@@ -115,28 +106,26 @@ class TestScriptqueueState(asynctest.TestCase):
                                              externalpath=externalpath,
                                              verbose=True)
         await self.queue.start_task
-        print('queue ready')
+        
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
         await self.remote.start_task
         await self.remote.cmd_start.start(timeout=30)
         await self.remote.cmd_enable.start(timeout=30)
 
-        print('remote ready')
         # Create the producer
         self.message_queue = asyncio.Queue()
 
         def callback(msg):
-            print('writing with callback\u001b[0m')
-
             asyncio.get_event_loop().create_task(self.message_queue.put(msg))
 
         producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=callback, index=1)
         await producer.setup()
 
-        print('producersetup')
+        # ACT
 
-        # Add 5 scripts, third one is longer, the idea is to freeze the queue in the third script
+        # Add 5 scripts, third one has longer duration
+        # the idea is to freeze the queue in the third script
         durations = [0.1, 0.1, 3600, 0.1, 0.1]
         self.scripts_remotes = {}
         for duration in durations:
@@ -149,18 +138,27 @@ class TestScriptqueueState(asynctest.TestCase):
             index = int(ack.result)
             self.scripts_remotes[index] = salobj.Remote(domain=self.queue.domain, name='Script', index=index)
 
-        #
-        # # Wait for the third script to be the current script
-        # wait for the queue to get scripts in desired states
+        # Wait for the third script to be the current script
         waiting_indices = [100003, 100004]
         current_index = 100002
         finished_indices = [100001, 100000]
         stream = await asyncio.wait_for(self.wait_until_state_indices_match(waiting_indices, current_index, finished_indices), timeout=LONG_TIMEOUT)
         stream = await asyncio.wait_for( self.wait_for_script_state_to_match(index, 'current', 'RUNNING', 'RUNNING'), timeout=LONG_TIMEOUT)
 
-        # --- current script ---
-        index = current_index
-        expected_script = await self.make_expected_script(self.scripts_remotes[index])
-        self.maxDiff = None
+        # ASSERT
+
+        # assert current script
+        expected_script = await self.make_expected_script(self.scripts_remotes[current_index])
         self.assertEqual(expected_script, stream['current'])
-        print('asdf')
+        
+        # assert waiting scripts
+        for script_index in waiting_indices:
+            expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
+            produced_script = next(s for s in stream['waiting_scripts'] if s['index'] == script_index)
+            self.assertEqual(expected_script, produced_script)
+
+        # assert finished scripts
+        for script_index in finished_indices:
+            expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
+            produced_script = next(s for s in stream['finished_scripts'] if s['index'] == script_index)
+            self.assertEqual(expected_script, produced_script)
