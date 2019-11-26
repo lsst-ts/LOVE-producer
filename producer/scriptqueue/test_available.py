@@ -30,7 +30,7 @@ class TestScriptqueueState(asynctest.TestCase):
 
                 return [
                     {
-                        'type': s['type'], 'path': s['path'], 'configSchema': yaml.load(s['configSchema'], Loader=yaml.Loader)
+                        'type': s['type'], 'path': s['path'], 'configSchema': yaml.load(s['configSchema'], Loader=yaml.SafeLoader)
                         if s['configSchema'] != '' and s['path'] != 'subdir/subsubdir/script4' else ''
                     }
                     for s in available_scripts]
