@@ -99,6 +99,5 @@ class TestScriptqueueState(asynctest.TestCase):
             } for path in availableScripts.external.split(':')
         ]
 
-        self.maxDiff = None
         expected_available = expected_standard + expected_external
         self.assertEqual(received_available, expected_available)
