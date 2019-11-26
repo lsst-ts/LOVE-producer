@@ -3,6 +3,10 @@ from lsst.ts import salobj
 from utils import onemsg_generator
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
+from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
+import json
+import utils
+HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
 
 class ScriptQueueProducer:
@@ -47,9 +51,14 @@ class ScriptQueueProducer:
         self.scripts[salindex]["remote_update"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["setup"] = True
 
-        self.set_callback(self.scripts[salindex]["remote"].evt_metadata, lambda ev: self.callback_script_metadata(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_state, lambda ev: self.callback_script_state(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_description, lambda ev: self.callback_script_description(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_metadata,
+                          lambda ev: self.callback_script_metadata(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_state,
+                          lambda ev: self.callback_script_state(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_description,
+                          lambda ev: self.callback_script_description(salindex, ev))
+        
+        asyncio.create_task(self.monitor_script_heartbeat(salindex))
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -147,7 +156,6 @@ class ScriptQueueProducer:
         """
             Callback for the queue.evt_script event
         """
-        # print('CALLBACK SCRIPT')
         if(event.salIndex not in self.scripts):
             self.scripts[event.salIndex] = self.new_empty_script()
 
@@ -261,26 +269,49 @@ class ScriptQueueProducer:
         """
 
         try:
-            # print('-------show queue')
             await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
-            # print('-------show available')
             await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
             for script_index in self.scripts:
-                # print('-------show script', script_index)
-                # print('show script')
                 await self.queue.cmd_showScript.set_start(salIndex=script_index)
-                # print('exit show script')
-                # # print('---------------------------1')
-                # remote = self.scripts[script_index]["remote_update"]
-                # # print('---------------------------2')
-                # await self.scripts[script_index]["remote_update"].start_task
-                # # print('---------------------------3')
-                # import pdb;pdb.set_trace()
-                # evt_description_data = await remote.evt_description.next(flush=False)
-                # import pdb; pdb.set_trace()
-
 
             return True
         except Exception as e:
             print(e)
             return False
+
+    # ----------HEARTBEATS---------
+
+    def get_heartbeat_message(self, salindex):
+        heartbeat = {
+            'script_heartbeat': {
+                'salindex': salindex,
+                'lost': self.scripts[salindex]["lost_heartbeats"],
+                "last_heartbeat_timestamp": self.scripts[salindex]["last_heartbeat_timestamp"]
+            }
+        }
+        message = {
+            'category': 'event',
+            'data': [
+                {
+                    'csc': 'ScriptHeartbeats',
+                    'salindex': self.salindex,
+                    'data': json.loads(json.dumps({'stream': heartbeat}, cls=utils.NumpyEncoder))
+                }
+            ]
+        }
+        return message
+
+    async def monitor_script_heartbeat(self, salindex):
+        nlost_subsequent = 0
+        while True:
+            if self.scripts[salindex]['process_state'] in ['DONE', 'STOPPED', 'FAILED']:
+                break
+            try:
+                script_data = await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
+                nlost_subsequent = 0
+                self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
+
+            except asyncio.TimeoutError:
+                nlost_subsequent += 1
+            self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
+            self.send_message_callback(self.get_heartbeat_message(salindex))
