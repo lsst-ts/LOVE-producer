@@ -327,6 +327,7 @@ class ScriptQueueStateTestCase(asynctest.TestCase):
             metadata = await remote.evt_metadata.next(flush=False)
             state = await helper_evt_state(remote, expected_evt_state) if expected_evt_state is not None else None
             description = await remote.evt_description.next(flush=False)
+            import pdb; pdb.set_trace()
 
             # build it
             expected_last_checkpoint = '' if expected_evt_state is None else state.lastCheckpoint

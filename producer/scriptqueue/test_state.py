@@ -37,13 +37,13 @@ class TestScriptqueueState(asynctest.TestCase):
         while True:
             message = await self.message_queue.get()
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
-            
+
             if queue_position == "current":
                 script = stream[queue_position]
             else:
                 for s in stream[queue_position]:
-                    if s["index"] == salindex: 
-                        script = s 
+                    if s["index"] == salindex:
+                        script = s
                         break
 
             if script["process_state"] == process_state and script["script_state"] == script_state:
@@ -56,7 +56,7 @@ class TestScriptqueueState(asynctest.TestCase):
             if last_data is None:
                 return value
             value = getattr(last_data, parameter)
-        
+
         return value
 
     async def make_expected_script(self, script_remote):
@@ -89,11 +89,13 @@ class TestScriptqueueState(asynctest.TestCase):
             "description": description.description,
             "classname": description.classname,
             "remotes": description.remotes,
-
-
         }
-    
+
     async def test_state(self):
+        """
+            Asserts the produced message contains the right content after moving the queue
+            to a certain state (1 running script, 2 waiting, 2 finished)
+        """
         # ARRANGE
 
         # Create the CSC
@@ -106,7 +108,7 @@ class TestScriptqueueState(asynctest.TestCase):
                                              externalpath=externalpath,
                                              verbose=True)
         await self.queue.start_task
-        
+
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
         await self.remote.start_task
@@ -143,21 +145,28 @@ class TestScriptqueueState(asynctest.TestCase):
         current_index = 100002
         finished_indices = [100001, 100000]
         stream = await asyncio.wait_for(self.wait_until_state_indices_match(waiting_indices, current_index, finished_indices), timeout=LONG_TIMEOUT)
-        stream = await asyncio.wait_for( self.wait_for_script_state_to_match(index, 'current', 'RUNNING', 'RUNNING'), timeout=LONG_TIMEOUT)
+        stream = await asyncio.wait_for(self.wait_for_script_state_to_match(index, 'current', 'RUNNING', 'RUNNING'), timeout=LONG_TIMEOUT)
 
         # ASSERT
 
-        # assert current script
+        # queue
+        self.remote.evt_queue.flush()
+        await self.remote.cmd_showQueue.start()
+        queue_data = await self.remote.evt_queue.next(flush=False)
+        self.assertEqual(stream["running"], queue_data.running)
+        self.assertEqual(stream["enabled"], queue_data.enabled)
+
+        # current script
         expected_script = await self.make_expected_script(self.scripts_remotes[current_index])
         self.assertEqual(expected_script, stream['current'])
-        
-        # assert waiting scripts
+
+        # waiting scripts
         for script_index in waiting_indices:
             expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
             produced_script = next(s for s in stream['waiting_scripts'] if s['index'] == script_index)
             self.assertEqual(expected_script, produced_script)
 
-        # assert finished scripts
+        # finished scripts
         for script_index in finished_indices:
             expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
             produced_script = next(s for s in stream['finished_scripts'] if s['index'] == script_index)
