@@ -3,21 +3,13 @@ import logging
 from .producer import Producer
 import asyncio
 from lsst.ts import salobj
-from utils import getDataType
+import utils
 
 STD_TIMEOUT = 5  # timeout for command ack
 SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
 
-
-
-def get_event_stream(message, category, csc, salindex, stream_name):
-    data_generator = (d for d in message['data'] if d["csc"] == csc and d['salindex'] == salindex)
-    data = next(data_generator)
-    stream_generator = (data['data'][s] for s in data['data'] if s == stream_name)
-    stream = next(stream_generator)
-    return stream
 
 
 class TestEventsMessages(asynctest.TestCase):
@@ -47,14 +39,14 @@ class TestEventsMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 'value': getattr(evt_scalars, p),
-                'dataType': getDataType(getattr(evt_scalars, p))
+                'dataType': utils.getDataType(getattr(evt_scalars, p))
             }
             for p in evt_parameters if p != "private_rcvStamp"
         }
 
         # extracting the message should be made synchronously
         message = self.telemetry_events_producer.get_events_message()
-        stream = get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'scalars')[0]
+        stream = utils.get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'scalars')[0]
 
         # private_rcvStamp apparently is different from one remote to another
         del stream['private_rcvStamp']
@@ -78,13 +70,13 @@ class TestEventsMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 'value': getattr(evt_arrays, p),
-                'dataType': getDataType(getattr(evt_arrays, p))
+                'dataType': utils.getDataType(getattr(evt_arrays, p))
             } for p in evt_parameters if p != "private_rcvStamp"
         }
 
         # extracting the message should be made synchronously
         message = self.telemetry_events_producer.get_events_message()
-        stream = get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'arrays')[0]
+        stream = utils.get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'arrays')[0]
 
         # private_rcvStamp apparently is different from one remote to another
         del stream["private_rcvStamp"]
