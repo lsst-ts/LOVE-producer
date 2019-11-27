@@ -24,6 +24,11 @@ class BaseWSClient():
     async def connect(self):
         return await websockets.client.connect(self.url)
 
+    async def reconnect(self):
+        await asyncio.sleep(1)
+        await self.connect()
+        await self.start_ws_client()
+
     async def handle_message_reception(self):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
         try:
@@ -35,8 +40,7 @@ class BaseWSClient():
         except Exception as e:
             print(f'Exception {e} \n Attempting to reconnect from handle_message_reception')
             print(f'### {self.name} | message:', message)
-            await self.connect()
-            await self.start_ws_client()
+            await self.reconnect()
 
     async def start_ws_client(self):
         try:
@@ -57,8 +61,7 @@ class BaseWSClient():
             await self.on_start_client()
         except Exception as e:
             print(f'Exception {e} \n Attempting to reconnect from start_ws_client')
-            await self.connect()
-            await self.start_ws_client()
+            await self.reconnect()
 
     async def process_one_message(self, message):
         pass
