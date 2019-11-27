@@ -2,11 +2,13 @@ import asyncio
 import os
 import asynctest
 import warnings
+import datetime
+from asynctest.mock import patch
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
-from .producer import ScriptQueueProducer
+from scriptqueue.producer import ScriptQueueProducer
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 
 import utils
@@ -50,7 +52,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
             # if everything matches, return
             return stream
 
-    async def wait_for_heartbeat_to_be_received(self, sndStamp):
+    async def wait_for_heartbeat_to_be_received(self, target_stamp):
         """Waits for a heartbeat message to be produced with a specific 
         last_heartbeat_timestamp and returns its produced stream"""
         while True:
@@ -59,12 +61,15 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
                     message, 'event', 'ScriptHeartbeats', 1, 'stream'):
                 stream = utils.get_stream_from_last_message(
                     message, 'event', 'ScriptHeartbeats', 1, 'stream')
-                if sndStamp == stream['script_heartbeat']['last_heartbeat_timestamp']:
+                print('datetime:', stream['script_heartbeat']['last_heartbeat_timestamp'])
+                if stream['script_heartbeat']['last_heartbeat_timestamp'] == target_stamp:
                     return stream
 
-    async def test_heartbeats(self):
+    @patch('scriptqueue.producer.datetime')
+    async def test_heartbeats(self, mock_datetime):
         """Tests that a script heartbeat contains the right info 
         for a "healthy" current script"""
+        mock_datetime.datetime.now.return_value = datetime.datetime(2019, 1, 1)
         # ARRANGE
         # Create the CSC
         salobj.set_random_lsst_dds_domain()
@@ -119,14 +124,16 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
 
         # get the produced heartbeat message
         produced_heartbeat_stream = await asyncio.wait_for(
-            self.wait_for_heartbeat_to_be_received(heartbeat_data.private_sndStamp), HEARTBEAT_TIMEOUT)
+            self.wait_for_heartbeat_to_be_received(mock_datetime.datetime.now().timestamp()), HEARTBEAT_TIMEOUT)
 
         # ASSERT
         expected_heartbeat_stream = {
             'script_heartbeat': {
                 'salindex': index,
                 'lost': 0,
-                "last_heartbeat_timestamp": heartbeat_data.private_sndStamp
+                # https://github.com/lsst-ts/LOVE-producer/issues/53
+                # "last_heartbeat_timestamp": heartbeat_data.private_sndStamp
+                "last_heartbeat_timestamp": mock_datetime.datetime.now().timestamp()
             }
         }
 

@@ -1,10 +1,11 @@
 import asyncio
+import json
+import datetime
 from lsst.ts import salobj
 from utils import onemsg_generator
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
-import json
 import utils
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
@@ -79,7 +80,9 @@ class ScriptQueueProducer:
             "last_checkpoint": "",
             "description": "",
             "classname": "",
-            "remotes": ""
+            "remotes": "",
+            "last_heartbeat_timestamp": 0,
+            "lost_heartbeats": 0,
         }
     # --- Event callbacks ----
 
@@ -309,7 +312,11 @@ class ScriptQueueProducer:
             try:
                 script_data = await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
                 nlost_subsequent = 0
-                self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
+                # https://github.com/lsst-ts/LOVE-producer/issues/53
+                # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
+                
+                self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
+
 
             except asyncio.TimeoutError:
                 nlost_subsequent += 1
