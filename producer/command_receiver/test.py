@@ -1,5 +1,5 @@
 import logging
-from .receiver import Receiver
+from command_receiver.receiver import Receiver
 import asyncio
 from lsst.ts import salobj
 import json
