@@ -130,7 +130,7 @@ class HeartbeatProducer:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp)
-            await self.send_heartbeat(msg)
+            self.send_heartbeat(msg)
 
 
 if __name__ == '__main__':

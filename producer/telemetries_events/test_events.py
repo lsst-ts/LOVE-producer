@@ -1,9 +1,9 @@
-import unittest
+import asynctest
 import logging
 from .producer import Producer
 import asyncio
 from lsst.ts import salobj
-from utils import getDataType
+import utils
 
 STD_TIMEOUT = 5  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -11,126 +11,75 @@ SHOW_LOG_MESSAGES = False
 index_gen = salobj.index_generator()
 
 
-class Harness:
-    def __init__(self, initial_state, config_dir=None, CscClass=salobj.TestCsc):
+
+class TestEventsMessages(asynctest.TestCase):
+    async def setUp(self):
+        salobj.set_random_lsst_dds_domain()
         index = next(index_gen)
-        self.csc = CscClass(index=index, config_dir=config_dir, initial_state=initial_state)
-        if SHOW_LOG_MESSAGES:
-            handler = logging.StreamHandler()
-            self.csc.log.addHandler(handler)
+        self.csc = salobj.TestCsc(index=index, config_dir=None, initial_state=salobj.State.ENABLED)
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
 
-    async def __aenter__(self):
-        await self.csc.start_task
-        await self.remote.start_task
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.remote.close()
+    async def tearDown(self):
+        for self.remote in self.telemetry_events_producer.remote_list:
+            await self.remote.close()
         await self.csc.close()
 
+    async def test_produced_message_with_event_scalar(self):
+        # Arrange
+        # Setup the producer and the data
+        self.telemetry_events_producer = Producer(domain=self.csc.domain,
+                                                  csc_list=[('Test', self.csc.salinfo.index)])
+        cmd_data_sent = self.csc.make_random_cmd_scalars()
 
-class TestEventsMessages(unittest.TestCase):
-    def setUp(self):
-        salobj.set_random_lsst_dds_domain()
-        self.maxDiff = None
+        # Act
+        # Fill the evt with data and read it with the producer
+        await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
+        evt_scalars = await self.remote.evt_scalars.next(flush=False, timeout=STD_TIMEOUT)
+        evt_parameters = evt_scalars._member_attributes
+        expected_stream = {
+            p: {
+                'value': getattr(evt_scalars, p),
+                'dataType': utils.getDataType(getattr(evt_scalars, p))
+            }
+            for p in evt_parameters if p != "private_rcvStamp"
+        }
 
-    def test_produced_message_with_event_scalar(self):
-        async def doit():
-            async with Harness(initial_state=salobj.State.ENABLED) as harness:
-                # Arrange
-                generic_producer = Producer(loop=asyncio.get_event_loop(
-                ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
-                cmd_data_sent = harness.csc.make_random_cmd_scalars()
+        # extracting the message should be made synchronously
+        message = self.telemetry_events_producer.get_events_message()
+        stream = utils.get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'scalars')[0]
 
-                # Act
-                await harness.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
-
-                # Assert
-                evt_scalars = await harness.remote.evt_scalars.next(flush=False, timeout=STD_TIMEOUT)
-                evt_parameters = evt_scalars._member_attributes
-                expected_data = {p: {'value': getattr(evt_scalars, p), 'dataType': getDataType(
-                    getattr(evt_scalars, p))} for p in evt_parameters}
-                expected_message = {
-                    "category": "event",
-                    "data": [
-                        {
-                            "csc": "Test",
-                            "salindex": harness.csc.salinfo.index,
-                            "data": {
-                                "scalars": [expected_data]
-                            }
-                        }
-                    ]
-                }
-
-                message = generic_producer.get_events_message()
-
-                # ignore other event streams
-                for stream in list(message["data"][0]["data"]):
-                    if stream != "scalars":
-                        del message["data"][0]["data"][stream]
-
-                # ignore all private_* parameters and "priority"
-                del message["data"][0]["data"]["scalars"][0]["private_rcvStamp"]
-                del expected_message["data"][0]["data"]["scalars"][0]["private_rcvStamp"]
-
-                self.assertEqual(message, expected_message)
-
-                # clean up
-                for remote in generic_producer.remote_list:
-                    await remote.close()
-
-        asyncio.get_event_loop().run_until_complete(doit())
-
-    def test_produced_message_with_event_arrays(self):
-        async def doit():
-            async with Harness(initial_state=salobj.State.ENABLED) as harness:
-                # Arrange
-                generic_producer = Producer(loop=asyncio.get_event_loop(
-                ), domain=harness.csc.domain, csc_list=[('Test', harness.csc.salinfo.index)])
-                cmd_data_sent = harness.csc.make_random_cmd_arrays()
-
-                # Act
-                await harness.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
-
-                # Assert
-                evt_arrays = await harness.remote.evt_arrays.next(flush=False, timeout=STD_TIMEOUT)
-                evt_parameters = evt_arrays._member_attributes
-                expected_data = {p: {'value': getattr(evt_arrays, p), 'dataType': getDataType(
-                    getattr(evt_arrays, p))} for p in evt_parameters}
-                expected_message = {
-                    "category": "event",
-                    "data": [
-                        {
-                            "csc": "Test",
-                            "salindex": harness.csc.salinfo.index,
-                            "data": {
-                                "arrays": [expected_data]
-                            }
-                        }
-                    ]
-                }
-
-                message = generic_producer.get_events_message()
-
-                # ignore other event streams
-                for stream in list(message["data"][0]["data"]):
-                    if stream != "arrays":
-                        del message["data"][0]["data"][stream]
-
-                # ignore all private_* parameters and "priority"
-                del message["data"][0]["data"]["arrays"][0]["private_rcvStamp"]
-                del expected_message["data"][0]["data"]["arrays"][0]["private_rcvStamp"]
-
-                self.assertEqual(message, expected_message)
-
-                # clean up
-                for remote in generic_producer.remote_list:
-                    await remote.close()
-
-        asyncio.get_event_loop().run_until_complete(doit())
+        # private_rcvStamp apparently is different from one remote to another
+        del stream['private_rcvStamp']
 
 
-if __name__ == '__main__':
-    unittest.main()
+        # Assert
+        self.assertEqual(stream, expected_stream)
+
+    async def test_produced_message_with_event_arrays(self):
+        # Arrange
+        # Setup the producer and the data
+        self.telemetry_events_producer = Producer(domain=self.csc.domain,
+                                                  csc_list=[('Test', self.csc.salinfo.index)])
+        cmd_data_sent = self.csc.make_random_cmd_arrays()
+
+        # Act
+        # Fill the evt with data and read it with the producer
+        await self.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
+        evt_arrays = await self.remote.evt_arrays.next(flush=False, timeout=STD_TIMEOUT)
+        evt_parameters = evt_arrays._member_attributes
+        expected_stream = {
+            p: {
+                'value': getattr(evt_arrays, p),
+                'dataType': utils.getDataType(getattr(evt_arrays, p))
+            } for p in evt_parameters if p != "private_rcvStamp"
+        }
+
+        # extracting the message should be made synchronously
+        message = self.telemetry_events_producer.get_events_message()
+        stream = utils.get_event_stream(message, 'event', 'Test', self.csc.salinfo.index, 'arrays')[0]
+
+        # private_rcvStamp apparently is different from one remote to another
+        del stream["private_rcvStamp"]
+
+        # Assert
+        self.assertEqual(stream, expected_stream)

@@ -1,8 +1,10 @@
-import unittest
 import logging
-from .producer import HeartbeatProducer
+import datetime
 import asyncio
+import asynctest
+from asynctest.mock import patch
 from lsst.ts import salobj
+from heartbeats.producer import HeartbeatProducer
 
 STD_TIMEOUT = 5  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -10,125 +12,87 @@ SHOW_LOG_MESSAGES = False
 index_gen = salobj.index_generator()
 
 
-class Harness:
-    def __init__(self, initial_state, config_dir=None, CscClass=salobj.TestCsc):
+class TestHeartbeatsMessages(asynctest.TestCase):
+
+    async def setUp(self):
+        # Arrange
         index = next(index_gen)
-        self.csc = CscClass(index=index, config_dir=config_dir, initial_state=initial_state)
-        if SHOW_LOG_MESSAGES:
-            handler = logging.StreamHandler()
-            self.csc.log.addHandler(handler)
-        self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
+        self.csc = salobj.TestCsc(index=index, config_dir=None, initial_state=salobj.State.ENABLED)
 
-    async def __aenter__(self):
-        await self.csc.start_task
-        await self.remote.start_task
-        return self
+        self.message_queue = asyncio.Queue()
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.remote.close()
+        def callback(msg):
+            asyncio.create_task(self.message_queue.put(msg))
+        self.callback = callback
+        self.heartbeat_producer = None
+
+    async def tearDown(self):
+        # cleanup
+        if self.heartbeat_producer is not None:
+            for remote in self.heartbeat_producer.remotes:
+                await remote.close()
         await self.csc.close()
 
+    @patch('heartbeats.producer.datetime')
+    async def test_heartbeat_received(self, mock_datetime):
+        self.heartbeat_producer = HeartbeatProducer(domain=self.csc.domain,
+                                                    send_heartbeat=self.callback,
+                                                    csc_list=[('Test', self.csc.salinfo.index)])
+        mock_datetime.datetime.now.return_value = datetime.datetime(2019, 1, 1)
 
-class TestHeartbeatsMessages(unittest.TestCase):
-    def setUp(self):
-        salobj.set_random_lsst_dds_domain()
+        # Act
+        self.heartbeat_producer.start()
+        message = await self.message_queue.get()
 
-    def test_heartbeat_received(self):
-        """When monitoring the right (csc,salindex) it should report 0 lost heartbeat"""
-
-        callback_future = asyncio.Future()
-
-        def heartbeat_callback(message):
-            callback_future.set_result(message)
-
-        async def doit():
-            async with Harness(initial_state=salobj.State.ENABLED) as harness:
-                # Arrange
-                heartbeat_producer = HeartbeatProducer(domain=harness.csc.domain, send_heartbeat=heartbeat_callback, csc_list=[
-                                                       ('Test', harness.csc.salinfo.index)])
-
-                # Act
-                heartbeat_producer.start()
-                message = await callback_future
-
-                # Assert:
-                #
-                # Timestamp seems unpredictable so just copy it for now
-                timestamp = message["data"][0]["data"]["stream"]["last_heartbeat_timestamp"]
-                expected_message = {
-                    "category": "event",
-                    "data": [
-                        {
-                            "csc": "Heartbeat",
-                            "salindex": 0,
-                            "data": {
-                                "stream": {
-                                    "csc": "Test",
-                                    "salindex": harness.csc.salinfo.index,
-                                    "lost": 0,
-                                    "last_heartbeat_timestamp": timestamp,
-                                    "max_lost_heartbeats": 5
-                                }
-                            }
+        # Assert:
+        expected_message = {
+            "category": "event",
+            "data": [
+                {
+                    "csc": "Heartbeat",
+                    "salindex": 0,
+                    "data": {
+                        "stream": {
+                            "csc": "Test",
+                            "salindex": self.csc.salinfo.index,
+                            "lost": 0,
+                            "last_heartbeat_timestamp": mock_datetime.datetime.now().timestamp(),
+                            "max_lost_heartbeats": 5
                         }
-                    ]
+                    }
                 }
-                self.assertEqual(expected_message, message)
+            ]
+        }
+        self.assertEqual(expected_message, message)
 
-                # cleanup
-                for remote in heartbeat_producer.remotes:
-                    await remote.close()
+    async def test_heartbeat_not_received(self):
+        # Arrange
+        wrong_index = next(index_gen)
+        self.heartbeat_producer = HeartbeatProducer(domain=self.csc.domain,
+                                                    send_heartbeat=self.callback,
+                                                    csc_list=[('Test', wrong_index)])
 
-        asyncio.get_event_loop().run_until_complete(doit())
+        # Act
+        self.heartbeat_producer.start()
+        message = await self.message_queue.get()
 
-    def test_heartbeat_not_received(self):
-        """When monitoring the wrong (csc,salindex) it should report 1 lost heartbeat"""
-
-        callback_future = asyncio.Future()
-
-        def heartbeat_callback(message):
-            callback_future.set_result(message)
-
-        async def doit():
-            async with Harness(initial_state=salobj.State.ENABLED) as harness:
-                # Arrange
-                wrong_index = next(index_gen)
-                heartbeat_producer = HeartbeatProducer(domain=harness.csc.domain, send_heartbeat=heartbeat_callback, csc_list=[
-                                                       ('Test', wrong_index)])
-
-                # Act
-                heartbeat_producer.start()
-                message = await callback_future
-
-                # Assert:
-                #
-                # Timestamp seems unpredictable so just copy it for now
-                timestamp = message["data"][0]["data"]["stream"]["last_heartbeat_timestamp"]
-                expected_message = {
-                    "category": "event",
-                    "data": [
-                        {
-                            "csc": "Heartbeat",
-                            "salindex": 0,
-                            "data": {
-                                "stream": {
-                                    "csc": "Test",
-                                    "salindex": wrong_index,
-                                    "lost": 1,
-                                    "last_heartbeat_timestamp": timestamp,
-                                    "max_lost_heartbeats": 5
-                                }
-                            }
+        # Assert:
+        expected_message = {
+            "category": "event",
+            "data": [
+                {
+                    "csc": "Heartbeat",
+                    "salindex": 0,
+                    "data": {
+                        "stream": {
+                            "csc": "Test",
+                            "salindex": wrong_index,
+                            "lost": 1,
+                            "last_heartbeat_timestamp": -1,
+                            "max_lost_heartbeats": 5
                         }
-                    ]
+                    }
                 }
-                self.assertEqual(expected_message, message)
-
-                # cleanup
-                for remote in heartbeat_producer.remotes:
-                    await remote.close()
-        asyncio.get_event_loop().run_until_complete(doit())
-
-
-if __name__ == '__main__':
-    unittest.main()
+            ]
+        }
+        self.assertEqual(expected_message, message)

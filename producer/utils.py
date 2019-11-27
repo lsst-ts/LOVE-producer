@@ -3,8 +3,14 @@ import json
 import os
 
 CONFIG_PATH = 'config/config.json'
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+WS_HOST = ""
+if "WEBSOCKET_HOST" in os.environ:
+    WS_HOST = os.environ["WEBSOCKET_HOST"]
+
+WS_PASS = ""
+if "PROCESS_CONNECTION_PASS" in os.environ:
+    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -98,3 +104,12 @@ def get_all_csc_names_in_message(message):
 
 
 
+def get_event_stream(message, category, csc, salindex, stream_name):
+    """ Tries to return the first stream found in a LOVE message. 
+    Throws errors if it does not exist. """
+
+    data_generator = (d for d in message['data'] if d["csc"] == csc and d['salindex'] == salindex)
+    data = next(data_generator)
+    stream_generator = (data['data'][s] for s in data['data'] if s == stream_name)
+    stream = next(stream_generator)
+    return stream
