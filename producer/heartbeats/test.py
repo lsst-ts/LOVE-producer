@@ -21,8 +21,8 @@ class TestHeartbeatsMessages(asynctest.TestCase):
 
         self.message_queue = asyncio.Queue()
 
-        def callback(msg):
-            asyncio.create_task(self.message_queue.put(msg))
+        async def callback(msg):
+            await self.message_queue.put(msg)
         self.callback = callback
         self.heartbeat_producer = None
 
