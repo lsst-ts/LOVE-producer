@@ -23,7 +23,7 @@ class HeartbeatProducer:
         Parameters
         ----------
         domain: salobj Domain object to create salobj Remotes
-        send_heartbeat: callback that receives one argument, the message dictionary to be sent later to the LOVE-manager
+        send_heartbeat: callback coroutine that receives the message dictionary msg, to be sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
         """
         self.send_heartbeat = send_heartbeat
@@ -130,7 +130,7 @@ class HeartbeatProducer:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp)
-            self.send_heartbeat(msg)
+            await self.send_heartbeat(msg)
 
 
 if __name__ == '__main__':
