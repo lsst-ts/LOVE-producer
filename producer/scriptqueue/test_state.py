@@ -23,6 +23,8 @@ class TestScriptqueueState(asynctest.TestCase):
     async def wait_until_state_indices_match(self, waiting_indices, current_index, finished_indices):
         while True:
             message = await self.message_queue.get()
+            if not utils.check_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream'):
+                continue
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
             if stream['finishedIndices'] != finished_indices:
                 continue
@@ -36,6 +38,8 @@ class TestScriptqueueState(asynctest.TestCase):
     async def wait_for_script_state_to_match(self, salindex, queue_position, process_state, script_state):
         while True:
             message = await self.message_queue.get()
+            if not utils.check_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream'):
+                continue
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
 
             if queue_position == "current":
