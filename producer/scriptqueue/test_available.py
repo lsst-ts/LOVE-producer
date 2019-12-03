@@ -12,14 +12,14 @@ import yaml
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
-
+TIMEOUT = 15
 
 class TestScriptqueueState(asynctest.TestCase):
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:
             warnings.warn(f"Killed {nkilled} subprocesses")
-        await self.queue.close()
+        await asyncio.wait_for(self.queue.close(), TIMEOUT)
 
     async def wait_for_all_config_schema(self):
         while True:
@@ -51,13 +51,13 @@ class TestScriptqueueState(asynctest.TestCase):
                                              standardpath=standardpath,
                                              externalpath=externalpath,
                                              verbose=True)
-        await self.queue.start_task
+        await asyncio.wait_for(self.queue.start_task, TIMEOUT)
 
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
-        await self.remote.start_task
-        await self.remote.cmd_start.start(timeout=30)
-        await self.remote.cmd_enable.start(timeout=30)
+        await asyncio.wait_for(self.remote.start_task, TIMEOUT)
+        await asyncio.wait_for(self.remote.cmd_start.start(timeout=30), TIMEOUT)
+        await asyncio.wait_for(self.remote.cmd_enable.start(timeout=30), TIMEOUT)
 
         # Create the producer
         self.message_queue = asyncio.Queue()
@@ -66,12 +66,12 @@ class TestScriptqueueState(asynctest.TestCase):
             asyncio.get_event_loop().create_task(self.message_queue.put(msg))
 
         producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=callback, index=1)
-        await producer.setup()
+        await asyncio.wait_for(producer.setup(), LONG_TIMEOUT)
 
         # ACT
-        await self.remote.cmd_showAvailableScripts.start()
-        availableScripts = await self.remote.evt_availableScripts.next(flush=True)
-        received_available = await self.wait_for_all_config_schema()
+        await asyncio.wait_for(self.remote.cmd_showAvailableScripts.start(), TIMEOUT)
+        availableScripts = await asyncio.wait_for(self.remote.evt_availableScripts.next(flush=True), TIMEOUT)
+        received_available = await asyncio.wait_for(self.wait_for_all_config_schema(), LONG_TIMEOUT)
 
         # Assert
         expected_standard = [
