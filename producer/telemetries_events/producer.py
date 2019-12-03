@@ -21,15 +21,24 @@ class Producer:
             try:
                 print('- Listening to telemetries and events from CSC: ', (name, salindex))
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)
-                self.set_remote_evt_callbacks(remote)
                 self.remote_list.append(remote)
                 self.remote_dict[(name, salindex)] = remote
-                self.initial_state_remote_dict = remote = salobj.Remote(domain=domain, name=name, index=salindex)
+                self.initial_state_remote_dict[(name, salindex)] = salobj.Remote(domain=domain, name=name, index=salindex)
 
             except Exception as e:
                 print('- Could not load Telemetries&events remote for', name, salindex)
                 print(e)
 
+    def setup_callbacks(self):
+        """Configures a callback for each remote created"""
+        for (name, salindex) in self.remote_dict:
+            try:
+                remote = self.remote_dict[(name,salindex)]
+                self.set_remote_evt_callbacks(remote)
+            except Exception as e:
+                print('- Could not setup Telemetries&events  callback for', name, salindex)
+                print(e)
+        
     def set_remote_evt_callbacks(self, remote):
         evt_names = remote.salinfo.event_names
         for evt in evt_names:
