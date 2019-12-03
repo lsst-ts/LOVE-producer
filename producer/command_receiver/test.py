@@ -8,6 +8,7 @@ import utils
 
 index_gen = salobj.index_generator()
 
+TIMEOUT = 15
 
 class TestCommandsFromMessages(asynctest.TestCase):
     async def test_command_ack(self):
@@ -15,7 +16,7 @@ class TestCommandsFromMessages(asynctest.TestCase):
         index = next(index_gen)
         csc = salobj.TestCsc(index=index, config_dir=None, initial_state=salobj.State.ENABLED)
         remote = salobj.Remote(domain=csc.domain, name="Test", index=index)
-        await asyncio.gather(csc.start_task, remote.start_task)
+        await asyncio.wait_for(asyncio.gather(csc.start_task, remote.start_task), TIMEOUT)
 
         # Arrange
         cmd_data_sent = csc.make_random_cmd_scalars()
@@ -37,7 +38,7 @@ class TestCommandsFromMessages(asynctest.TestCase):
         }
 
         # Act
-        answer = await cmd_receiver.process_message(cmd_message)
+        answer = await asyncio.wait_for(cmd_receiver.process_message(cmd_message), TIMEOUT)
 
         # Assert
         expected_answer = cmd_message.copy()
@@ -45,4 +46,4 @@ class TestCommandsFromMessages(asynctest.TestCase):
         expected_answer["data"][0]["data"]["stream"]["result"] = "Done"
 
         self.assertEqual(expected_answer, answer)
-        await asyncio.gather(remote.close(), csc.close())
+        await asyncio.wait_for(asyncio.gather(remote.close(), csc.close()), TIMEOUT)
