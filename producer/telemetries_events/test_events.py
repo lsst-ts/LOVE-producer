@@ -5,7 +5,7 @@ import asyncio
 from lsst.ts import salobj
 import utils
 
-STD_TIMEOUT = 5  # timeout for command ack
+STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
@@ -21,8 +21,8 @@ class TestEventsMessages(asynctest.TestCase):
 
     async def tearDown(self):
         for self.remote in self.telemetry_events_producer.remote_list:
-            await self.remote.close()
-        await self.csc.close()
+            await asyncio.wait_for(self.remote.close(), STD_TIMEOUT)
+        await asyncio.wait_for(self.csc.close(), STD_TIMEOUT)
 
     async def test_produced_message_with_event_scalar(self):
         # Arrange

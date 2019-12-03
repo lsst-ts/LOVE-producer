@@ -5,7 +5,7 @@ import asyncio
 from lsst.ts import salobj
 import utils
 
-STD_TIMEOUT = 5  # timeout for command ack
+STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
