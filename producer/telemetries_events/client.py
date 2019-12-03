@@ -16,21 +16,21 @@ class TelemetryEventsWSClient(BaseWSClient):
     def __init__(self):
         super().__init__(name='Telemetry&Events')
 
-        self.producer = Producer(self.domain, self.csc_list)
-        self.message_getters = [
-            self.producer.get_telemetry_message,
-            self.producer.get_events_message
-        ]
+        self.producer = Producer(self.domain, self.csc_list, self.send_message_callback)
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
         asyncio.create_task(self.send_messages_after_timeout())
+        self.producer.setup_callbacks()
 
+    def send_message_callback(self, message):
+        if self.websocket is not None:
+            asyncio.create_task(self.websocket.send(json.dumps(message)))
+    
     async def send_messages_after_timeout(self):
         while True:
-            for get_message in self.message_getters:
-                message = get_message()
-                await self.websocket.send(json.dumps(message))
+            message = self.producer.get_telemetry_message()
+            await self.websocket.send(json.dumps(message))
             await asyncio.sleep(2)
 
     async def process_one_message(self, message):

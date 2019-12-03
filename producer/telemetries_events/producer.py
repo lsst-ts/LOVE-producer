@@ -3,6 +3,7 @@ import json
 import numpy as np
 from utils import NumpyEncoder, getDataType
 from lsst.ts import salobj
+import utils
 
 
 class Producer:
@@ -11,18 +12,55 @@ class Producer:
         emitting fake telemetry and event data which is then sent over with websockets
     """
 
-    def __init__(self, domain, csc_list):
+    def __init__(self, domain, csc_list, events_callback):
+        self.events_callback = events_callback
         self.remote_list = []
         self.remote_dict = {}
+        self.initial_state_remote_dict = {}
         for name, salindex in csc_list:
             try:
                 print('- Listening to telemetries and events from CSC: ', (name, salindex))
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)
                 self.remote_list.append(remote)
                 self.remote_dict[(name, salindex)] = remote
+                self.initial_state_remote_dict[(name, salindex)] = salobj.Remote(domain=domain, name=name, index=salindex)
+
             except Exception as e:
                 print('- Could not load Telemetries&events remote for', name, salindex)
                 print(e)
+
+    def setup_callbacks(self):
+        """Configures a callback for each remote created"""
+        for (name, salindex) in self.remote_dict:
+            try:
+                remote = self.remote_dict[(name,salindex)]
+                self.set_remote_evt_callbacks(remote)
+            except Exception as e:
+                print('- Could not setup Telemetries&events  callback for', name, salindex)
+                print(e)
+        
+    def set_remote_evt_callbacks(self, remote):
+        evt_names = remote.salinfo.event_names
+        for evt in evt_names:
+            evt_object = getattr(remote, "evt_" + evt)
+            evt_object.callback = self.make_callback(remote.salinfo.name, remote.salinfo.index, evt)
+
+    def make_callback(self, csc, salindex, evt_name):
+        """ Returns a callback that produces a message with the event data"""
+
+        def callback(evt_data):
+            evt_parameters = list(evt_data._member_attributes)
+            evt_result = {
+                p: {
+                    'value': getattr(evt_data, p),
+                    'dataType': utils.getDataType(getattr(evt_data, p))
+                } for p in evt_parameters
+            }
+
+            message = utils.make_stream_message('event', csc, salindex, evt_name, evt_result)
+            
+            self.events_callback(message)
+        return callback
 
     def get_remote_tel_values(self, remote):
         tel_names = remote.salinfo.telemetry_names
@@ -146,7 +184,7 @@ class Producer:
         if((csc, salindex) not in self.remote_dict):
             return
 
-        remote = self.remote_dict[(csc, salindex)]
+        remote = self.initial_state_remote_dict[(csc, salindex)]
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
             # check latest seen data, if not available then "request" it

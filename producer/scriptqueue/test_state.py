@@ -12,6 +12,8 @@ import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
+TIMEOUT = 15
+
 
 class TestScriptqueueState(asynctest.TestCase):
     async def tearDown(self):
@@ -23,6 +25,8 @@ class TestScriptqueueState(asynctest.TestCase):
     async def wait_until_state_indices_match(self, waiting_indices, current_index, finished_indices):
         while True:
             message = await self.message_queue.get()
+            if not utils.check_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream'):
+                continue
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
             if stream['finishedIndices'] != finished_indices:
                 continue
@@ -36,6 +40,8 @@ class TestScriptqueueState(asynctest.TestCase):
     async def wait_for_script_state_to_match(self, salindex, queue_position, process_state, script_state):
         while True:
             message = await self.message_queue.get()
+            if not utils.check_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream'):
+                continue
             stream = utils.get_stream_from_last_message(message, 'event', 'ScriptQueueState', 1, 'stream')
 
             if queue_position == "current":
@@ -107,7 +113,7 @@ class TestScriptqueueState(asynctest.TestCase):
                                              standardpath=standardpath,
                                              externalpath=externalpath,
                                              verbose=True)
-        await self.queue.start_task
+        await asyncio.wait_for(self.queue.start_task, TIMEOUT)
 
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
@@ -122,7 +128,7 @@ class TestScriptqueueState(asynctest.TestCase):
             asyncio.get_event_loop().create_task(self.message_queue.put(msg))
 
         producer = ScriptQueueProducer(domain=self.queue.domain, send_message_callback=callback, index=1)
-        await producer.setup()
+        await asyncio.wait_for(producer.setup(), LONG_TIMEOUT)
 
         # ACT
 
@@ -136,7 +142,8 @@ class TestScriptqueueState(asynctest.TestCase):
                                                       config=f"wait_time: {duration}",
                                                       location=Location.LAST,
                                                       locationSalIndex=0,
-                                                      descr="test_add", timeout=5)
+                                                      descr="test_add",
+                                                      timeout=TIMEOUT)
             index = int(ack.result)
             self.scripts_remotes[index] = salobj.Remote(domain=self.queue.domain, name='Script', index=index)
 
@@ -151,23 +158,23 @@ class TestScriptqueueState(asynctest.TestCase):
 
         # queue
         self.remote.evt_queue.flush()
-        await self.remote.cmd_showQueue.start()
-        queue_data = await self.remote.evt_queue.next(flush=False)
+        await self.remote.cmd_showQueue.start(timeout=TIMEOUT)
+        queue_data = await self.remote.evt_queue.next(flush=False, timeout=TIMEOUT)
         self.assertEqual(stream["running"], queue_data.running)
         self.assertEqual(stream["enabled"], queue_data.enabled)
 
         # current script
-        expected_script = await self.make_expected_script(self.scripts_remotes[current_index])
+        expected_script = await asyncio.wait_for(self.make_expected_script(self.scripts_remotes[current_index]), LONG_TIMEOUT)
         self.assertEqual(expected_script, stream['current'])
 
         # waiting scripts
         for script_index in waiting_indices:
-            expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
+            expected_script = await asyncio.wait_for(self.make_expected_script(self.scripts_remotes[script_index]), LONG_TIMEOUT)
             produced_script = next(s for s in stream['waiting_scripts'] if s['index'] == script_index)
             self.assertEqual(expected_script, produced_script)
 
         # finished scripts
         for script_index in finished_indices:
-            expected_script = await self.make_expected_script(self.scripts_remotes[script_index])
+            expected_script = await asyncio.wait_for(self.make_expected_script(self.scripts_remotes[script_index]), LONG_TIMEOUT)
             produced_script = next(s for s in stream['finished_scripts'] if s['index'] == script_index)
             self.assertEqual(expected_script, produced_script)

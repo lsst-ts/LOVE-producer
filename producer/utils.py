@@ -12,7 +12,6 @@ if "PROCESS_CONNECTION_PASS" in os.environ:
     WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
 
 
-
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, (np.bool, np.bool_)):
@@ -103,7 +102,6 @@ def get_all_csc_names_in_message(message):
     return [data['csc'] for data in message['data']]
 
 
-
 def get_event_stream(message, category, csc, salindex, stream_name):
     """ Tries to return the first stream found in a LOVE message. 
     Throws errors if it does not exist. """
@@ -113,3 +111,38 @@ def get_event_stream(message, category, csc, salindex, stream_name):
     stream_generator = (data['data'][s] for s in data['data'] if s == stream_name)
     stream = next(stream_generator)
     return stream
+
+
+def check_event_stream(message, category, csc, salindex, stream_name):
+    """ Tries to return the first stream found in a LOVE message. 
+    Throws errors if it does not exist. """
+
+    data_generator = (d for d in message['data'] if d["csc"] == csc and d['salindex'] == salindex)
+    try:
+        data = next(data_generator)
+    except StopIteration:
+        return False
+
+    stream_generator = (data['data'][s] for s in data['data'] if s == stream_name)
+
+    try:
+        next(stream_generator)
+        return True
+    except StopIteration:
+        return False
+
+
+def make_stream_message(category, csc, salindex, stream, content):
+    """Returns a message for the LOVE-manager group (category-csc-salindex-stream) with 
+    a given content """
+
+    return {
+        "category": category,
+        "data": [{
+            'csc': csc,
+            'salindex': salindex,
+            'data': {
+                stream: [content] if category == 'event' else content
+            }
+        }]
+    }

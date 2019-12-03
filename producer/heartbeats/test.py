@@ -7,8 +7,7 @@ from lsst.ts import salobj
 from heartbeats.producer import HeartbeatProducer
 
 STD_TIMEOUT = 5  # timeout for command ack
-SHOW_LOG_MESSAGES = False
-
+MSG_TIMEOUT = 20  # timeout to wait for heartbeat messages
 index_gen = salobj.index_generator()
 
 
@@ -22,7 +21,7 @@ class TestHeartbeatsMessages(asynctest.TestCase):
         self.message_queue = asyncio.Queue()
 
         async def callback(msg):
-            await self.message_queue.put(msg)
+            await asyncio.wait_for(self.message_queue.put(msg), MSG_TIMEOUT)
         self.callback = callback
         self.heartbeat_producer = None
 
@@ -30,11 +29,13 @@ class TestHeartbeatsMessages(asynctest.TestCase):
         # cleanup
         if self.heartbeat_producer is not None:
             for remote in self.heartbeat_producer.remotes:
-                await remote.close()
-        await self.csc.close()
+                await asyncio.wait_for(remote.close(), STD_TIMEOUT)
+        await asyncio.wait_for(self.csc.close(), STD_TIMEOUT)
 
     @patch('heartbeats.producer.datetime')
     async def test_heartbeat_received(self, mock_datetime):
+        """Test that heartbeats messages are generated correctly when received,
+        and with timestamp obtained from datetime.now()"""
         self.heartbeat_producer = HeartbeatProducer(domain=self.csc.domain,
                                                     send_heartbeat=self.callback,
                                                     csc_list=[('Test', self.csc.salinfo.index)])
@@ -42,7 +43,7 @@ class TestHeartbeatsMessages(asynctest.TestCase):
 
         # Act
         self.heartbeat_producer.start()
-        message = await self.message_queue.get()
+        message = await asyncio.wait_for(self.message_queue.get(), MSG_TIMEOUT)
 
         # Assert:
         expected_message = {
@@ -66,6 +67,8 @@ class TestHeartbeatsMessages(asynctest.TestCase):
         self.assertEqual(expected_message, message)
 
     async def test_heartbeat_not_received(self):
+        """Test that heartbeats messages are generated correctly when heartbeat is 
+        not received"""
         # Arrange
         wrong_index = next(index_gen)
         self.heartbeat_producer = HeartbeatProducer(domain=self.csc.domain,
@@ -74,7 +77,7 @@ class TestHeartbeatsMessages(asynctest.TestCase):
 
         # Act
         self.heartbeat_producer.start()
-        message = await self.message_queue.get()
+        message = await asyncio.wait_for(self.message_queue.get(), MSG_TIMEOUT*3)
 
         # Assert:
         expected_message = {
