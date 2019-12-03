@@ -17,7 +17,7 @@ import yaml
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
-
+TIMEOUT = 15
 
 class ScriptHeartbeatTestCase(asynctest.TestCase):
     async def tearDown(self):
@@ -80,14 +80,14 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
                                              standardpath=standardpath,
                                              externalpath=externalpath,
                                              verbose=True)
-        await self.queue.start_task
+        await asyncio.wait_for(self.queue.start_task, TIMEOUT)
 
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(
             domain=self.queue.domain, name="ScriptQueue", index=1)
-        await self.remote.start_task
-        await self.remote.cmd_start.start(timeout=30)
-        await self.remote.cmd_enable.start(timeout=30)
+        await asyncio.wait_for(self.remote.start_task, TIMEOUT)
+        await self.remote.cmd_start.start(timeout=TIMEOUT)
+        await self.remote.cmd_enable.start(timeout=TIMEOUT)
 
         # Create the producer
         self.message_queue = asyncio.Queue()
@@ -97,7 +97,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
 
         producer = ScriptQueueProducer(
             domain=self.queue.domain, send_message_callback=callback, index=1)
-        await producer.setup()
+        await asyncio.wait_for(producer.setup(), TIMEOUT)
 
         # Add a script
         ack = await self.remote.cmd_add.set_start(isStandard=True,
@@ -105,7 +105,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
                                                   config=f"wait_time: 6000000",
                                                   location=Location.LAST,
                                                   locationSalIndex=0,
-                                                  descr="test_add", timeout=5)
+                                                  descr="test_add", timeout=TIMEOUT)
         index = int(ack.result)
         script_remote = salobj.Remote(
             domain=self.queue.domain, name='Script', index=index)
