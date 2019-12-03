@@ -22,7 +22,7 @@ class Receiver:
 
     async def process_message(self, data):
         try:
-            if data['category'] != 'cmd':
+            if 'category' in data and data['category'] != 'cmd':
                 return
             csc_data = data['data'][0]
             csc = csc_data['csc']
