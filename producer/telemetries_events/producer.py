@@ -16,6 +16,7 @@ class Producer:
         self.events_callback = events_callback
         self.remote_list = []
         self.remote_dict = {}
+        self.initial_state_remote_dict = {}
         for name, salindex in csc_list:
             try:
                 print('- Listening to telemetries and events from CSC: ', (name, salindex))
@@ -23,6 +24,8 @@ class Producer:
                 self.set_remote_evt_callbacks(remote)
                 self.remote_list.append(remote)
                 self.remote_dict[(name, salindex)] = remote
+                self.initial_state_remote_dict = remote = salobj.Remote(domain=domain, name=name, index=salindex)
+
             except Exception as e:
                 print('- Could not load Telemetries&events remote for', name, salindex)
                 print(e)
@@ -172,7 +175,7 @@ class Producer:
         if((csc, salindex) not in self.remote_dict):
             return
 
-        remote = self.remote_dict[(csc, salindex)]
+        remote = self.initial_state_remote_dict[(csc, salindex)]
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
             # check latest seen data, if not available then "request" it
