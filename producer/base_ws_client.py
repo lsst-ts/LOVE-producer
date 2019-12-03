@@ -1,6 +1,7 @@
 import asyncio
 import json
 import websockets
+import traceback
 import os
 from lsst.ts import salobj
 
@@ -38,8 +39,9 @@ class BaseWSClient():
                     continue
                 await self.process_one_message(message)
         except Exception as e:
-            print(f'Exception {e} \n Attempting to reconnect from handle_message_reception')
+            print(f'### {self.name} | Exception {e} \n Attempting to reconnect from handle_message_reception')
             print(f'### {self.name} | message:', message)
+            print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
             await self.reconnect()
 
     async def start_ws_client(self):
@@ -60,7 +62,9 @@ class BaseWSClient():
             asyncio.create_task(self.handle_message_reception())
             await self.on_start_client()
         except Exception as e:
-            print(f'Exception {e} \n Attempting to reconnect from start_ws_client')
+            print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
+            print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
+
             await self.reconnect()
 
     async def process_one_message(self, message):
