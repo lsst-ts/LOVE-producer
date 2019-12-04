@@ -22,6 +22,8 @@ class Receiver:
 
     async def process_message(self, data):
         try:
+            if 'category' not in data:
+                return
             if 'category' in data and data['category'] != 'cmd':
                 return
             csc_data = data['data'][0]
