@@ -3,7 +3,7 @@ import asyncio
 import json
 import websockets
 from lsst.ts import salobj
-from .producer import Producer
+from telemetries import TelemetryProducer
 import os
 import utils
 
@@ -16,17 +16,12 @@ class TelemetryEventsWSClient(BaseWSClient):
     def __init__(self):
         super().__init__(name='Telemetry&Events')
 
-        self.producer = Producer(self.domain, self.csc_list, self.send_message_callback)
+        self.producer = TelemetryProducer(self.domain, self.csc_list, self.send_message_callback)
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
         asyncio.create_task(self.send_messages_after_timeout())
-        self.producer.setup_callbacks()
 
-    def send_message_callback(self, message):
-        if self.websocket is not None:
-            asyncio.create_task(self.websocket.send(json.dumps(message)))
-    
     async def send_messages_after_timeout(self):
         while True:
             message = self.producer.get_telemetry_message()
@@ -47,8 +42,8 @@ class TelemetryEventsWSClient(BaseWSClient):
 
 
 async def main():
-    telev_client = TelemetryEventsWSClient()
-    await telev_client.start_ws_client()
+    telemetry_client = TelemetryEventsWSClient()
+    await telemetry_client.start_ws_client()
 
 
 if __name__ == '__main__':
