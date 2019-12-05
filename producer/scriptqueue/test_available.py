@@ -14,7 +14,7 @@ LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
 TIMEOUT = 15
 
-class TestScriptqueueState(asynctest.TestCase):
+class TestScriptqueueAvailableScripts(asynctest.TestCase):
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:

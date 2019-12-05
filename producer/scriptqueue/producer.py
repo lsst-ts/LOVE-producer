@@ -60,7 +60,8 @@ class ScriptQueueProducer:
                           lambda ev: self.callback_script_description(salindex, ev))
         self.set_callback(self.scripts[salindex]["remote"].evt_checkpoints,
                           lambda ev: self.callback_script_checkpoints(salindex, ev))
-
+        self.set_callback(self.scripts[salindex]["remote"].evt_logLevel,
+                          lambda ev: self.callback_script_logLevel(salindex, ev))
         asyncio.create_task(self.monitor_script_heartbeat(salindex))
 
     def new_empty_script(self):
@@ -87,6 +88,7 @@ class ScriptQueueProducer:
             "lost_heartbeats": 0,
             "pause_checkpoints": "",
             "stop_checkpoints": "",
+            "log_level": -1
         }
     # --- Event callbacks ----
 
@@ -216,6 +218,9 @@ class ScriptQueueProducer:
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
 
+    def callback_script_logLevel(self, salindex, event):
+        """ Listens to the logLevel event"""
+        self.scripts[salindex]["log_level"] = event.level
     # ---- Message creation ------
 
     def parse_script(self, script):
@@ -236,7 +241,9 @@ class ScriptQueueProducer:
             "classname": script["classname"],
             "remotes": script["remotes"],
             "pause_checkpoints": script["pause_checkpoints"],
-            "stop_checkpoints": script["stop_checkpoints"]
+            "stop_checkpoints": script["stop_checkpoints"],
+            "log_level": script["log_level"]
+
         }
 
     def get_state_message(self):

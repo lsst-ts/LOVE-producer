@@ -44,6 +44,8 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         # extracting the message should be made synchronously
         message = self.telemetry_producer.get_telemetry_message()
+        from pprint import pprint
+        pprint(message)
         stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'scalars')
 
         # Assert
@@ -73,6 +75,8 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         # extracting the message should be made synchronously
         message = self.telemetry_producer.get_telemetry_message()
+        from pprint import pprint
+        pprint(message)
         stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'arrays')
 
         # Assert
