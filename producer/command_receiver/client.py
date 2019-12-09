@@ -16,7 +16,7 @@ class CommandWSClient(BaseWSClient):
     def __init__(self):
         super().__init__(name='CommandsReceiver')
         self.receiver = Receiver(self.domain, self.csc_list)
-    async def on_start_client(self):
+    async def on_start_client(self, websocket):
         cmd_subscribe_msg = {
             'option': 'subscribe',
             'category': 'cmd',
@@ -24,15 +24,15 @@ class CommandWSClient(BaseWSClient):
             'salindex': 'all',
             'stream': 'all'
         }
-        await self.websocket.send(json.dumps(cmd_subscribe_msg))
+        await websocket.send(json.dumps(cmd_subscribe_msg))
 
-    async def process_one_message(self, message):
+    async def on_websocket_receive(self, websocket, message):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
-        answer = await self.receiver.process_message(message)
+        answer = await self.receiver.on_message(message)
         if answer is None:
             return
         dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
-        await self.websocket.send(dumped_answer)
+        await websocket.send(dumped_answer)
 
 
 async def main():

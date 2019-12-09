@@ -18,14 +18,14 @@ class TelemetriesClient(BaseWSClient):
 
         self.producer = TelemetriesProducer(self.domain, self.csc_list)
 
-    async def on_start_client(self):
+    async def on_start_client(self, websocket):
         """ Initializes the websocket client and producer callbacks """
-        asyncio.create_task(self.send_messages_after_timeout())
+        asyncio.create_task(self.send_messages_after_timeout(websocket))
 
-    async def send_messages_after_timeout(self):
+    async def send_messages_after_timeout(self, websocket):
         while True:
             message = self.producer.get_telemetry_message()
-            await self.websocket.send(json.dumps(message))
+            await websocket.send(json.dumps(message))
             await asyncio.sleep(2)
 
 

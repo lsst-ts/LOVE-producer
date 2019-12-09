@@ -17,7 +17,6 @@ class BaseWSClient():
         self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
         self.domain = salobj.Domain()
         self.name = name
-        self.ws_task = asyncio.create_task(self.connect())
         print(f'***** Starting {self.name} Producers *****')
         self.csc_list = self.read_config(self.path)
         print('List of CSCs to listen:', self.csc_list)
@@ -25,52 +24,46 @@ class BaseWSClient():
     async def connect(self):
         return await websockets.client.connect(self.url)
 
-    async def reconnect(self):
-        await asyncio.sleep(1)
-        await self.connect()
-        await self.start_ws_client()
-
-    async def handle_message_reception(self):
+    async def handle_message_reception(self, websocket):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
-        try:
-            async for message in self.websocket:
-                message = json.loads(message)
-                if 'category' not in message:
-                    continue
-                await self.process_one_message(message)
-        except Exception as e:
-            print(f'### {self.name} | Exception {e} \n Attempting to reconnect from handle_message_reception')
-            print(f'### {self.name} | message:', message)
-            print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
-            await self.reconnect()
+        async for message in websocket:
+            message = json.loads(message)
+            if 'category' not in message:
+                continue
+            await self.on_websocket_receive(websocket, message)
 
     async def start_ws_client(self):
-        try:
-            self.websocket = await self.ws_task
-            print(f'### {self.name} | loaded ws')
+        while True:
+            try:
+                async with websockets.connect(self.url) as websocket:
+                    print(f'### {self.name} | loaded ws')
 
-            initial_state_subscribe_msg = {
-                'option': 'subscribe',
-                'category': 'initial_state',
-                'csc': 'all',
-                'salindex': 'all',
-                'stream': 'all'
-            }
-            await self.websocket.send(json.dumps(initial_state_subscribe_msg))
-            print(f'### {self.name} | subscribed to initial state')
+                    initial_state_subscribe_msg = {
+                        'option': 'subscribe',
+                        'category': 'initial_state',
+                        'csc': 'all',
+                        'salindex': 'all',
+                        'stream': 'all'
+                    }
+                    await websocket.send(json.dumps(initial_state_subscribe_msg))
+                    print(f'### {self.name} | subscribed to initial state')
 
-            asyncio.create_task(self.handle_message_reception())
-            await self.on_start_client()
-        except Exception as e:
-            print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
-            print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
+                    asyncio.create_task(self.on_start_client(websocket))
+                    await self.handle_message_reception(websocket)
+            except Exception as e:
+                print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
+                print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
+                self.on_websocket_error(e)
+                await asyncio.sleep(3)
 
-            await self.reconnect()
 
-    async def process_one_message(self, message):
+    async def on_websocket_receive(self, websocket, message):
         pass
 
     async def on_start_client(self):
+        pass
+
+    async def on_websocket_error(self):
         pass
 
     @staticmethod

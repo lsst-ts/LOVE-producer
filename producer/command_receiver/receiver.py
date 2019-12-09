@@ -20,7 +20,7 @@ class Receiver:
                 print('CSC', name, 'raised exception on Receiver:', e)
                 
 
-    async def process_message(self, data):
+    async def on_message(self, data):
         try:
             if 'category' not in data:
                 return

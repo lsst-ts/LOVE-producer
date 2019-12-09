@@ -16,12 +16,15 @@ class ScriptQueueWSClient(BaseWSClient):
     def __init__(self, salindex):
         super().__init__(name=f'ScriptQueue-{salindex}')
         self.name = f'ScriptQueue-{salindex}'
+        self.connection_error = False
         self.salindex = salindex
         self.producer = ScriptQueueProducer(self.domain, self.send_message_callback, self.salindex)
 
-    async def on_start_client(self):
+    async def on_start_client(self, websocket):
         """ Initializes the websocket client and producer callbacks """
 
+        self.connection_error = False
+        self.websocket = websocket
         await self.producer.setup()
         await self.producer.update()
 
@@ -29,7 +32,7 @@ class ScriptQueueWSClient(BaseWSClient):
         """Sends messages through websockets. Called after each scriptqueue event """
         asyncio.create_task(self.websocket.send(json.dumps(message)))
 
-    async def process_one_message(self, message):
+    async def on_websocket_receive(self, websocket, message):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
 
         stream_exists = utils.check_stream_from_last_message(
@@ -37,6 +40,8 @@ class ScriptQueueWSClient(BaseWSClient):
         if stream_exists:
             await self.producer.update()
 
+    async def on_websocket_error(self, e):
+        self.connection_error = True
 
 async def init_client(salindex):
     sqclient = ScriptQueueWSClient(salindex)
