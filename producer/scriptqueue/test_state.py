@@ -2,6 +2,7 @@ import asyncio
 import os
 import asynctest
 import warnings
+import logging
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
@@ -72,8 +73,10 @@ class TestScriptqueueState(asynctest.TestCase):
         script_data = await self.remote.evt_script.next(flush=False)
 
         # get metadata, description and state from script remote
-        metadata = await script_remote.evt_metadata.next(flush=False)
-        description = await script_remote.evt_description.next(flush=False)
+        metadata = await script_remote.evt_metadata.aget()
+        description = await script_remote.evt_description.aget()
+        checkpoints = await script_remote.evt_checkpoints.aget()
+        logLevel = await script_remote.evt_logLevel.aget()
         lastCheckpoint = await asyncio.wait_for(self.get_last_not_none_value_from_event_parameter(script_remote.evt_state, 'lastCheckpoint'), SHORT_TIMEOUT)
 
         return {
@@ -90,11 +93,12 @@ class TestScriptqueueState(asynctest.TestCase):
 
             "expected_duration": metadata.duration,
             "last_checkpoint": lastCheckpoint,
-            # TODO "pause_checkpoints": checkpoints.pause,
-            # TODO "stop_checkpoints": checkpoints.stop,
+            "pause_checkpoints": checkpoints.pause,
+            "stop_checkpoints": checkpoints.stop,
             "description": description.description,
             "classname": description.classname,
             "remotes": description.remotes,
+            "log_level": logLevel.level
         }
 
     async def test_state(self):
@@ -143,7 +147,10 @@ class TestScriptqueueState(asynctest.TestCase):
                                                       location=Location.LAST,
                                                       locationSalIndex=0,
                                                       descr="test_add",
-                                                      timeout=TIMEOUT)
+                                                      timeout=TIMEOUT,
+                                                      pauseCheckpoint="pause",
+                                                      stopCheckpoint="stop",
+                                                      logLevel=logging.ERROR)
             index = int(ack.result)
             self.scripts_remotes[index] = salobj.Remote(domain=self.queue.domain, name='Script', index=index)
 
@@ -155,7 +162,7 @@ class TestScriptqueueState(asynctest.TestCase):
         stream = await asyncio.wait_for(self.wait_for_script_state_to_match(index, 'current', 'RUNNING', 'RUNNING'), timeout=LONG_TIMEOUT)
 
         # ASSERT
-
+        self.maxDiff = None
         # queue
         self.remote.evt_queue.flush()
         await self.remote.cmd_showQueue.start(timeout=TIMEOUT)

@@ -3,35 +3,28 @@ import asyncio
 import json
 import websockets
 from lsst.ts import salobj
-from .producer import Producer
+from events.producer import EventsProducer
 import os
 import utils
 
 from base_ws_client import BaseWSClient
 
 
-class TelemetryEventsWSClient(BaseWSClient):
+class EventsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
     def __init__(self):
-        super().__init__(name='Telemetry&Events')
+        super().__init__(name='Events')
 
-        self.producer = Producer(self.domain, self.csc_list, self.send_message_callback)
+        self.producer = EventsProducer(self.domain, self.csc_list, self.send_message_callback)
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
-        asyncio.create_task(self.send_messages_after_timeout())
         self.producer.setup_callbacks()
 
     def send_message_callback(self, message):
         if self.websocket is not None:
             asyncio.create_task(self.websocket.send(json.dumps(message)))
-    
-    async def send_messages_after_timeout(self):
-        while True:
-            message = self.producer.get_telemetry_message()
-            await self.websocket.send(json.dumps(message))
-            await asyncio.sleep(2)
 
     async def process_one_message(self, message):
         if 'data' not in message:
@@ -47,7 +40,7 @@ class TelemetryEventsWSClient(BaseWSClient):
 
 
 async def main():
-    telev_client = TelemetryEventsWSClient()
+    telev_client = EventsWSClient()
     await telev_client.start_ws_client()
 
 

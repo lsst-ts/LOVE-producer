@@ -1,6 +1,6 @@
 import asynctest
 import logging
-from .producer import Producer
+from telemetries.producer import TelemetriesProducer
 import asyncio
 from lsst.ts import salobj
 import utils
@@ -19,14 +19,15 @@ class TestTelemetryMessages(asynctest.TestCase):
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
 
     async def tearDown(self):
-        for self.remote in self.telemetry_events_producer.remote_list:
-            await self.remote.close()
+        for remote in self.telemetry_producer.remote_list:
+            await remote.close()
         await self.csc.close()
 
     async def test_produced_message_with_telemetry_scalar(self):
         # Arrange
-        self.telemetry_events_producer = Producer(domain=self.csc.domain,
+        self.telemetry_producer = TelemetriesProducer(domain=self.csc.domain,
                                                   csc_list=[('Test', self.csc.salinfo.index)])
+
         cmd_data_sent = self.csc.make_random_cmd_scalars()
 
         # Act
@@ -42,7 +43,9 @@ class TestTelemetryMessages(asynctest.TestCase):
         }
 
         # extracting the message should be made synchronously
-        message = self.telemetry_events_producer.get_telemetry_message()
+        message = self.telemetry_producer.get_telemetry_message()
+        from pprint import pprint
+        pprint(message)
         stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'scalars')
 
         # Assert
@@ -54,7 +57,7 @@ class TestTelemetryMessages(asynctest.TestCase):
 
     async def test_produced_message_with_telemetry_array(self):
         # Arrange
-        self.telemetry_events_producer = Producer(domain=self.csc.domain,
+        self.telemetry_producer = TelemetriesProducer(domain=self.csc.domain,
                                                   csc_list=[('Test', self.csc.salinfo.index)])
         cmd_data_sent = self.csc.make_random_cmd_arrays()
 
@@ -71,7 +74,9 @@ class TestTelemetryMessages(asynctest.TestCase):
         }
 
         # extracting the message should be made synchronously
-        message = self.telemetry_events_producer.get_telemetry_message()
+        message = self.telemetry_producer.get_telemetry_message()
+        from pprint import pprint
+        pprint(message)
         stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'arrays')
 
         # Assert

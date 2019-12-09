@@ -58,7 +58,10 @@ class ScriptQueueProducer:
                           lambda ev: self.callback_script_state(salindex, ev))
         self.set_callback(self.scripts[salindex]["remote"].evt_description,
                           lambda ev: self.callback_script_description(salindex, ev))
-        
+        self.set_callback(self.scripts[salindex]["remote"].evt_checkpoints,
+                          lambda ev: self.callback_script_checkpoints(salindex, ev))
+        self.set_callback(self.scripts[salindex]["remote"].evt_logLevel,
+                          lambda ev: self.callback_script_logLevel(salindex, ev))
         asyncio.create_task(self.monitor_script_heartbeat(salindex))
 
     def new_empty_script(self):
@@ -83,6 +86,9 @@ class ScriptQueueProducer:
             "remotes": "",
             "last_heartbeat_timestamp": 0,
             "lost_heartbeats": 0,
+            "pause_checkpoints": "",
+            "stop_checkpoints": "",
+            "log_level": -1
         }
     # --- Event callbacks ----
 
@@ -202,6 +208,19 @@ class ScriptQueueProducer:
         self.scripts[salindex]["classname"] = event.classname
         self.scripts[salindex]["remotes"] = event.remotes
 
+    def callback_script_checkpoints(self, salindex, event):
+        """
+            Callback for the logevent_description. Used to extract
+            the expected duration of the script.
+
+            event : SALPY_Script.Script_logevent_descriptionC
+        """
+        self.scripts[salindex]["pause_checkpoints"] = event.pause
+        self.scripts[salindex]["stop_checkpoints"] = event.stop
+
+    def callback_script_logLevel(self, salindex, event):
+        """ Listens to the logLevel event"""
+        self.scripts[salindex]["log_level"] = event.level
     # ---- Message creation ------
 
     def parse_script(self, script):
@@ -221,6 +240,10 @@ class ScriptQueueProducer:
             "description": script["description"],
             "classname": script["classname"],
             "remotes": script["remotes"],
+            "pause_checkpoints": script["pause_checkpoints"],
+            "stop_checkpoints": script["stop_checkpoints"],
+            "log_level": script["log_level"]
+
         }
 
     def get_state_message(self):
@@ -314,9 +337,8 @@ class ScriptQueueProducer:
                 nlost_subsequent = 0
                 # https://github.com/lsst-ts/LOVE-producer/issues/53
                 # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
-                
-                self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
 
+                self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
 
             except asyncio.TimeoutError:
                 nlost_subsequent += 1

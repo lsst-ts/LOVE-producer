@@ -1,6 +1,6 @@
 import asynctest
 import logging
-from .producer import Producer
+from events.producer import EventsProducer
 import asyncio
 from lsst.ts import salobj
 import utils
@@ -21,14 +21,16 @@ class TestEventsMessages(asynctest.TestCase):
         self.message_queue = asyncio.Queue()
         self.callback = lambda message: asyncio.create_task(self.message_queue.put(message))
         
-        self.telemetry_events_producer = Producer(domain=self.csc.domain,
+        self.events_producer = EventsProducer(domain=self.csc.domain,
                                                   csc_list=[('Test', self.csc.salinfo.index)],
                                                   events_callback=self.callback)
+        self.events_producer.setup_callbacks()
 
     async def tearDown(self):
-        for self.remote in self.telemetry_events_producer.remote_list:
-            await asyncio.wait_for(self.remote.close(), STD_TIMEOUT)
+        for remote in self.events_producer.remote_dict.values():
+            await asyncio.wait_for(remote.close(), STD_TIMEOUT)
         await asyncio.wait_for(self.csc.close(), STD_TIMEOUT)
+        await asyncio.wait_for(self.remote.close(), STD_TIMEOUT)
 
     async def wait_for_stream(self, stream):
         while True:
