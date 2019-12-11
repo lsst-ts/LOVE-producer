@@ -16,6 +16,8 @@ class Receiver:
             try:
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)
                 self.remote_dict[(name, salindex)] = remote
+                if(name=='ScriptQueue' and ('Script',0) not in self.remote_dict):
+                    self.remote_dict[('Script', 0)] = salobj.Remote(domain=domain, name='Script', index=0)
             except Exception as e:
                 print('CSC', name, 'raised exception on Receiver:', e)
                 
