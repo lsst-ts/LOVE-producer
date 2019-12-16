@@ -33,36 +33,32 @@ class ScriptQueueProducer:
         self.scripts = {}
         self.cmd_timeout = 60
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
+        self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
 
     async def setup(self):
+        # wait for remotes to be ready
         await self.queue.start_task
+        await self.script_remote.start_task
 
+        # Setup Queue events callbacks
         self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
         self.set_callback(self.queue.evt_queue, self.callback_queue)
         self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
         self.set_callback(self.queue.evt_script, self.callback_queue_script)
 
+        # Setup Script events callbacks
+        self.set_callback(self.script_remote.evt_metadata, self.callback_script_metadata)
+        self.set_callback(self.script_remote.evt_state, self.callback_script_state)
+        self.set_callback(self.script_remote.evt_description, self.callback_script_description)
+        self.set_callback(self.script_remote.evt_checkpoints, self.callback_script_checkpoints)
+        self.set_callback(self.script_remote.evt_logLevel, self.callback_script_logLevel)
         # --- Event callbacks ----
 
     def setup_script(self, salindex):
         self.scripts[salindex] = self.new_empty_script()
-
         self.scripts[salindex]["index"] = salindex
-        self.scripts[salindex]["remote"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
-        self.scripts[salindex]["remote_update"] = salobj.Remote(domain=self.domain, name="Script", index=salindex)
         self.scripts[salindex]["setup"] = True
-
-        self.set_callback(self.scripts[salindex]["remote"].evt_metadata,
-                          lambda ev: self.callback_script_metadata(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_state,
-                          lambda ev: self.callback_script_state(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_description,
-                          lambda ev: self.callback_script_description(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_checkpoints,
-                          lambda ev: self.callback_script_checkpoints(salindex, ev))
-        self.set_callback(self.scripts[salindex]["remote"].evt_logLevel,
-                          lambda ev: self.callback_script_logLevel(salindex, ev))
-        asyncio.create_task(self.monitor_script_heartbeat(salindex))
+        # asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -149,7 +145,6 @@ class ScriptQueueProducer:
         for salindex in scripts:
             if salindex not in self.scripts or not self.scripts[salindex]["setup"]:
                 self.setup_script(salindex)
-                # asyncio.create_task(self.query_script_info(salindex))
 
     def callback_config_schema(self, event):
         event_script_type = "external"
@@ -178,48 +173,53 @@ class ScriptQueueProducer:
         self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
-    def callback_script_metadata(self, salindex, event):
+    def callback_script_metadata(self, event):
         """
             Callback for the logevent_metadata. Used to extract
             the expected duration of the script.
 
             event : SALPY_Script.Script_logevent_metadataC
         """
+        salindex = event.ScriptID
         self.scripts[salindex]["expected_duration"] = event.duration
 
-    def callback_script_state(self, salindex, event):
+    def callback_script_state(self, event):
         """
             Callback for the Script_logevet_state event. Used to update
             the state of the script.
 
             event : SALPY_Script.Script_logevent_stateC
         """
+        salindex = event.ScriptID
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
         self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
 
-    def callback_script_description(self, salindex, event):
+    def callback_script_description(self, event):
         """
             Callback for the logevent_description. Used to extract
             the expected duration of the script.
 
             event : SALPY_Script.Script_logevent_descriptionC
         """
+        salindex = event.ScriptID
         self.scripts[salindex]["description"] = event.description
         self.scripts[salindex]["classname"] = event.classname
         self.scripts[salindex]["remotes"] = event.remotes
 
-    def callback_script_checkpoints(self, salindex, event):
+    def callback_script_checkpoints(self, event):
         """
             Callback for the logevent_description. Used to extract
             the expected duration of the script.
 
             event : SALPY_Script.Script_logevent_descriptionC
         """
+        salindex = event.ScriptID
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
 
-    def callback_script_logLevel(self, salindex, event):
+    def callback_script_logLevel(self, event):
         """ Listens to the logLevel event"""
+        salindex = event.ScriptID
         self.scripts[salindex]["log_level"] = event.level
     # ---- Message creation ------
 
@@ -327,20 +327,20 @@ class ScriptQueueProducer:
         }
         return message
 
-    async def monitor_script_heartbeat(self, salindex):
-        nlost_subsequent = 0
-        while True:
-            if self.scripts[salindex]['process_state'] in ['DONE', 'STOPPED', 'FAILED']:
-                break
-            try:
-                script_data = await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
-                nlost_subsequent = 0
-                # https://github.com/lsst-ts/LOVE-producer/issues/53
-                # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
+    # async def monitor_scripts_heartbeats(self, salindex):
+    #     nlost_subsequent = 0
+    #     while True:
+    #         if self.scripts[salindex]['process_state'] in ['DONE', 'STOPPED', 'FAILED']:
+    #             break
+    #         try:
+    #             script_data = await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
+    #             nlost_subsequent = 0
+    #             # https://github.com/lsst-ts/LOVE-producer/issues/53
+    #             # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
 
-                self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
+    #             self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
 
-            except asyncio.TimeoutError:
-                nlost_subsequent += 1
-            self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
-            self.send_message_callback(self.get_heartbeat_message(salindex))
+    #         except asyncio.TimeoutError:
+    #             nlost_subsequent += 1
+    #         self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
+    #         self.send_message_callback(self.get_heartbeat_message(salindex))
