@@ -337,14 +337,17 @@ class ScriptQueueProducer:
                     self.scripts[salindex]["lost_heartbeats"] += 1
                     self.send_message_callback(self.get_heartbeat_message(salindex))
                 continue
+            
+            received_heartbeat_salindex = script_data.ScriptID
+            if received_heartbeat_salindex not in self.scripts:
+                continue
 
             # send currently received heartbeat
             current_timestamp = datetime.datetime.now().timestamp()
-            received_heartbeat_salindex = script_data.ScriptID
             self.scripts[received_heartbeat_salindex]["last_heartbeat_timestamp"] = current_timestamp
-            # https://github.com/lsst-ts/LOVE-producer/issues/53
             self.scripts[received_heartbeat_salindex]["lost_heartbeats"] = 0
             self.send_message_callback(self.get_heartbeat_message(received_heartbeat_salindex))
+            # https://github.com/lsst-ts/LOVE-producer/issues/53
             # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
 
             # check others heartbeats
