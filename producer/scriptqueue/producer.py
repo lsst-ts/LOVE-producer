@@ -1,3 +1,4 @@
+import math
 import asyncio
 import json
 import datetime
@@ -58,7 +59,7 @@ class ScriptQueueProducer:
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["setup"] = True
-        # asyncio.create_task(self.monitor_scripts_heartbeats())
+        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
         default = "UNKNOWN"
@@ -90,7 +91,7 @@ class ScriptQueueProducer:
 
     def set_callback(self, evt, callback):
         """
-            Adds a callback to a salobj event using appending a 
+            Adds a callback to a salobj event using appending a
             send_message_callback call
         """
 
@@ -327,20 +328,36 @@ class ScriptQueueProducer:
         }
         return message
 
-    # async def monitor_scripts_heartbeats(self, salindex):
-    #     nlost_subsequent = 0
-    #     while True:
-    #         if self.scripts[salindex]['process_state'] in ['DONE', 'STOPPED', 'FAILED']:
-    #             break
-    #         try:
-    #             script_data = await self.scripts[salindex]['remote'].evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
-    #             nlost_subsequent = 0
-    #             # https://github.com/lsst-ts/LOVE-producer/issues/53
-    #             # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
+    async def monitor_scripts_heartbeats(self):
+        while True:
+            try:
+                script_data = await self.script_remote.evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
+            except asyncio.TimeoutError:
+                for salindex in self.scripts:
+                    self.scripts[salindex]["lost_heartbeats"] += 1
+                    self.send_message_callback(self.get_heartbeat_message(salindex))
+                continue
 
-    #             self.scripts[salindex]["last_heartbeat_timestamp"] = datetime.datetime.now().timestamp()
+            # send currently received heartbeat
+            current_timestamp = datetime.datetime.now().timestamp()
+            received_heartbeat_salindex = script_data.ScriptID
+            self.scripts[received_heartbeat_salindex]["last_heartbeat_timestamp"] = current_timestamp
+            # https://github.com/lsst-ts/LOVE-producer/issues/53
+            self.scripts[received_heartbeat_salindex]["lost_heartbeats"] = 0
+            self.send_message_callback(self.get_heartbeat_message(received_heartbeat_salindex))
+            # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
 
-    #         except asyncio.TimeoutError:
-    #             nlost_subsequent += 1
-    #         self.scripts[salindex]["lost_heartbeats"] = nlost_subsequent
-    #         self.send_message_callback(self.get_heartbeat_message(salindex))
+            # check others heartbeats
+            for salindex in self.scripts:
+                script = self.scripts[salindex]
+                if salindex == received_heartbeat_salindex:
+                    continue
+
+                # count how many beats were lost since last timestamp
+                nlost_heartbeats = (current_timestamp - script["last_heartbeat_timestamp"])/HEARTBEAT_TIMEOUT
+                nlost_heartbeats = math.floor(nlost_heartbeats)
+
+                # send it if nlost increased
+                if nlost_heartbeats > script["lost_heartbeats"]:
+                    self.scripts[salindex]["lost_heartbeats"]=nlost_heartbeats
+                    self.send_message_callback(self.get_heartbeat_message(salindex))
