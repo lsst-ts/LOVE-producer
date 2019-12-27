@@ -5,8 +5,7 @@ import traceback
 import os
 from lsst.ts import salobj
 
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
+
 CONFIG_PATH = 'config/config.json'
 
 
@@ -14,6 +13,8 @@ class BaseWSClient():
     path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
 
     def __init__(self, name):
+        WS_HOST = os.environ["WEBSOCKET_HOST"]
+        WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
         self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
         self.domain = salobj.Domain()
         self.name = name
