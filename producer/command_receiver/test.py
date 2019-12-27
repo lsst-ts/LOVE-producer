@@ -38,7 +38,7 @@ class TestCommandsFromMessages(asynctest.TestCase):
         }
 
         # Act
-        answer = await asyncio.wait_for(cmd_receiver.process_message(cmd_message), TIMEOUT)
+        answer = await asyncio.wait_for(cmd_receiver.on_message(cmd_message), TIMEOUT)
 
         # Assert
         expected_answer = cmd_message.copy()
