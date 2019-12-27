@@ -36,7 +36,7 @@ class ScriptQueueWSClient(BaseWSClient):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
 
         stream_exists = utils.check_stream_from_last_message(
-            message, 'initial_state', 'ScriptQueueState', f"{self.salindex}", 'event_name')
+            message, 'initial_state', 'ScriptQueueState', self.salindex, 'event_name')
         if stream_exists:
             await self.producer.update()
 
