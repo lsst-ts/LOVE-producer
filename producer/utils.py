@@ -75,7 +75,7 @@ def check_stream_from_last_message(message, category, csc, salindex, stream):
     if message['category'] != category:
         return False
     for m in message['data']:
-        if m['csc'] == csc and m['salindex'] == salindex:
+        if m['csc'] == csc and int(m['salindex']) == int(salindex):
             return True
 
     return False
