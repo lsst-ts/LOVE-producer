@@ -1,5 +1,6 @@
 #!/bin/bash
 
+. /etc/bashrc
 . .setup.sh
 pip install aiomisc websockets
 
