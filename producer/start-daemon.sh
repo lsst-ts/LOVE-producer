@@ -1,6 +1,8 @@
 #!/bin/bash
 
 source .setup.sh
+source /opt/lsst/software/stack/loadLSST.bash && setup lsst_distrib && \
+    source /home/saluser/repos/ts_sal/setup.env 
 pip install websockets
 pip install aiomisc
 export PYTHONPATH=$PYTHONPATH:/usr/src/love/producer
