@@ -21,9 +21,6 @@ class BaseWSClient():
         self.csc_list = self.read_config(self.path)
         print('List of CSCs to listen:', self.csc_list)
 
-    async def connect(self):
-        return await websockets.client.connect(self.url)
-
     async def handle_message_reception(self, websocket):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
         async for message in websocket:
@@ -48,12 +45,11 @@ class BaseWSClient():
                     await websocket.send(json.dumps(initial_state_subscribe_msg))
                     print(f'### {self.name} | subscribed to initial state')
 
-                    asyncio.create_task(self.on_start_client(websocket))
-                    await self.handle_message_reception(websocket)
+                    await asyncio.gather(self.handle_message_reception(websocket), self.on_start_client(websocket))
             except Exception as e:
                 print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
                 print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
-                self.on_websocket_error(e)
+                await self.on_websocket_error(e)
                 await asyncio.sleep(3)
 
 
