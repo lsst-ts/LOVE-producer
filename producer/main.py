@@ -7,16 +7,12 @@ from heartbeats.client import main as heartbeats
 from command_receiver.client import main as command_receiver
 
 
-from aiomisc import entrypoint
-from aiomisc.service import MemoryTracer
-
-
 if __name__ == '__main__':
-    with entrypoint(MemoryTracer(interval=10, top_results=10)) as loop:
-    #   loop = asyncio.get_event_loop()
-      loop.create_task(telemetries())
-      loop.create_task(events())
-      loop.create_task(heartbeats())
-      loop.create_task(scriptqueue())
-      loop.create_task(command_receiver())
-      loop.run_forever()
+    # with entrypoint(MemoryTracer(interval=10, top_results=10)) as loop:
+    loop = asyncio.get_event_loop()
+    loop.create_task(telemetries())
+    loop.create_task(events())
+    loop.create_task(heartbeats())
+    loop.create_task(scriptqueue())
+    loop.create_task(command_receiver())
+    loop.run_forever()

@@ -2,7 +2,6 @@
 
 . /etc/bashrc
 . .setup.sh
-pip install aiomisc websockets
 
 export PYTHONPATH=$PYTHONPATH:/usr/src/love/producer
 if [[ $LSST_DDS_IP != *"."* ]]; then
