@@ -65,7 +65,7 @@ class TestWebsocketsClient(asynctest.TestCase):
             await websocket.send(json.dumps(message))
 
             # Assert the DDS received the log message
-            result = await self.remote.evt_observingLog.next(flush=False)
+            result = await self.remote.evt_observingLog.next(flush=False, timeout=STD_TIMEOUT)
             self.assertEqual(result.user, 'an user')
             self.assertEqual(result.message, 'a message')
             test_finished.set_result(True)
