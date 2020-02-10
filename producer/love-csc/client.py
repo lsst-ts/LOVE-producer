@@ -18,13 +18,12 @@ class LOVEWSClient(BaseWSClient):
         self.connection_error = False
         self.csc = LOVECsc()
 
-    async def on_start_client(self, websocket):
+    async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
         self.connection_error = False
-        self.websocket = websocket
         await self.csc.start_task
 
-    async def on_websocket_receive(self, websocket, message):
+    async def on_websocket_receive(self, message):
         if 'category' not in message:
             return
         if message['category'] != 'love_csc':
