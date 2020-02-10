@@ -59,7 +59,7 @@ class BaseWSClient():
     async def on_start_client(self):
         pass
 
-    async def on_websocket_error(self):
+    async def on_websocket_error(self, e):
         pass
 
     @staticmethod
