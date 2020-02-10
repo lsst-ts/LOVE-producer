@@ -35,3 +35,32 @@ class TestLOVECsc(asynctest.TestCase):
         # clean up
         await self.csc.close()
         await self.remote.close()
+
+class TestWebsocketsClient(asynctest.TestCase):
+
+    async def test_response(self):
+        async def hello_server(websocket, path):
+            name = await websocket.recv()
+            print(f"< {name}")
+
+            greeting = f"Hello {name}!"
+
+            await websocket.send(greeting)
+            print(f"> {greeting}")    
+            
+        async def hello():
+            uri = "ws://0.0.0.0:9999"
+            async with websockets.connect(uri) as websocket:
+                name = 'name'
+
+                await websocket.send(name)
+                print(f"> {name}")
+
+                greeting = await websocket.recv()
+                print(f"< {greeting}")
+        
+        
+        async with websockets.serve(hello_server, '0.0.0.0', 9999) as server:
+            await hello()
+        
+        # async wi
