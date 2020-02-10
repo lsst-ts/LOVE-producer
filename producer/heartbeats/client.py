@@ -19,15 +19,14 @@ class CSCHeartbeatsWSClient(BaseWSClient):
         self.connection_error = False
         self.producer = HeartbeatProducer(self.domain, self.send_heartbeat, self.csc_list)
 
-    async def on_start_client(self, websocket):
+    async def on_start_client(self):
         """ Initializes producer's callbacks """
         self.connection_error = False
-        self.websocket = websocket
         self.producer.start()
 
     async def send_heartbeat(self, message):
         """Callback used by self.producer to send messages with the websocket client"""
-        await self.websocket.send(json.dumps(message))
+        asyncio.create_task(self.send_message(json.dumps(message)))
 
     async def on_websocket_error(self, e):
         self.connection_error = True

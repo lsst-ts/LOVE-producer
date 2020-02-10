@@ -20,19 +20,18 @@ class ScriptQueueWSClient(BaseWSClient):
         self.salindex = salindex
         self.producer = ScriptQueueProducer(self.domain, self.send_message_callback, self.salindex)
 
-    async def on_start_client(self, websocket):
+    async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
 
         self.connection_error = False
-        self.websocket = websocket
         await self.producer.setup()
         await self.producer.update()
 
     def send_message_callback(self, message):
         """Sends messages through websockets. Called after each scriptqueue event """
-        asyncio.create_task(self.websocket.send(json.dumps(message)))
+        asyncio.create_task(self.send_message(json.dumps(message)))
 
-    async def on_websocket_receive(self, websocket, message):
+    async def on_websocket_receive(self, message):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
 
         stream_exists = utils.check_stream_from_last_message(

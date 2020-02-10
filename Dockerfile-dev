@@ -1,4 +1,4 @@
-FROM lsstts/develop-env:b22
+FROM lsstts/develop-env:b31
 
 WORKDIR /usr/src/love/producer
 COPY producer/requirements.txt .
