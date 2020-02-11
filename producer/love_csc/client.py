@@ -2,19 +2,18 @@ import asyncio
 import json
 import websockets
 from lsst.ts import salobj
-from events.producer import EventsProducer
 import os
 import utils
 
 from base_ws_client import BaseWSClient
-from .csc import LOVECsc
+from love_csc.csc import LOVECsc
 
 
 class LOVEWSClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
     def __init__(self):
-        super().__init__(name='Events')
+        super().__init__(name='LOVE CSC')
         self.connection_error = False
         self.csc = LOVECsc()
 

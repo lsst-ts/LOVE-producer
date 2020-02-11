@@ -4,7 +4,7 @@ import os
 import asyncio
 from lsst.ts import salobj
 import websockets
-from .csc import LOVECsc
+from love_csc.csc import LOVECsc
 import utils 
 import json
 
