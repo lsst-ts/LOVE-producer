@@ -33,8 +33,8 @@ class LOVEWSClient(BaseWSClient):
         if len(message['data']) == 0:
             return
 
-        user = utils.get_parameter_from_last_message(message, 'love_csc', 'love', 0, 'logs', 'user' )
-        log_message = utils.get_parameter_from_last_message(message, 'love_csc', 'love', 0, 'logs', 'message' )
+        user = utils.get_parameter_from_last_message(message, 'love_csc', 'love', 0, 'observingLog', 'user' )
+        log_message = utils.get_parameter_from_last_message(message, 'love_csc', 'love', 0, 'observingLog', 'message' )
         self.csc.add_observing_log(user, log_message)
 
     async def on_websocket_error(self, e):

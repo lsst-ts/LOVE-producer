@@ -41,7 +41,7 @@ class TestLOVECsc(asynctest.TestCase):
 @mock.patch.dict(os.environ, {'WEBSOCKET_HOST': '0.0.0.0:9999', 'PROCESS_CONNECTION_PASS': ''})
 class TestWebsocketsClient(asynctest.TestCase):
     async def test_csc_client(self):
-        from .client import LOVEWSClient
+        from love_csc.client import LOVEWSClient
 
         salobj.set_random_lsst_dds_domain()
         # Arrange
@@ -57,7 +57,7 @@ class TestWebsocketsClient(asynctest.TestCase):
             # Act
             # send observing logs form the server (manager)
             self.remote.evt_observingLog.flush()
-            message = utils.make_stream_message('love_csc','love', 0, 'logs', {
+            message = utils.make_stream_message('love_csc','love', 0, 'observingLog', {
                 'user': 'an user',
                 'message': 'a message'
             })
@@ -78,7 +78,7 @@ class TestWebsocketsClient(asynctest.TestCase):
             client_task = asyncio.create_task(client.start_ws_client())                
             
             # Finished resolves after asserts are ok
-            await test_finished
+            await asyncio.wait_for(test_finished, timeout=STD_TIMEOUT*2)
 
             # cleanup
             client.retry = False
