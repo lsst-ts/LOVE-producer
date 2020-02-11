@@ -51,7 +51,6 @@ class BaseWSClient():
 
                     await asyncio.gather(self.handle_message_reception(), self.on_start_client())
             except Exception as e:
-                print(f'### {self.name} | {self.retry}')
                 self.websocket = None
                 print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
                 print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
