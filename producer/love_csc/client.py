@@ -22,6 +22,16 @@ class LOVEWSClient(BaseWSClient):
         self.connection_error = False
         await self.csc.start_task
 
+        observingLog_subscribe_msg = {
+            'option': 'subscribe',
+            'category': 'love_csc',
+            'csc': 'love',
+            'salindex': '0',
+            'stream': 'observingLog'
+        }
+        await self.send_message(json.dumps(observingLog_subscribe_msg))
+
+
     async def on_websocket_receive(self, message):
         if 'category' not in message:
             return

@@ -5,7 +5,7 @@ import asyncio
 from lsst.ts import salobj
 import websockets
 from love_csc.csc import LOVECsc
-import utils 
+import utils
 import json
 
 STD_TIMEOUT = 15  # timeout for command ack
@@ -53,11 +53,27 @@ class TestWebsocketsClient(asynctest.TestCase):
 
             # wait for the client to connect to initial_state group
             initial_subscription = await websocket.recv()
+            self.assertEqual(json.loads(initial_subscription), {
+                'option': 'subscribe',
+                'category': 'initial_state',
+                'csc': 'all',
+                'salindex': 'all',
+                'stream': 'all'})
+
+            # wait for the client to connect to the love_csc-love-0-observingLog group
+            observingLog_subscription = await websocket.recv()
+
+            self.assertEqual(json.loads(observingLog_subscription), {
+                             'option': 'subscribe',
+                             'category': 'love_csc',
+                             'csc': 'love',
+                             'salindex': '0',
+                             'stream': 'observingLog'})
 
             # Act
             # send observing logs form the server (manager)
             self.remote.evt_observingLog.flush()
-            message = utils.make_stream_message('love_csc','love', 0, 'observingLog', {
+            message = utils.make_stream_message('love_csc', 'love', 0, 'observingLog', {
                 'user': 'an user',
                 'message': 'a message'
             })
@@ -70,13 +86,12 @@ class TestWebsocketsClient(asynctest.TestCase):
             self.assertEqual(result.message, 'a message')
             test_finished.set_result(True)
 
-
         # Create server (LOVE-manager mock) and handle it with `server_callback`
         async with websockets.serve(server_callback, '0.0.0.0', 9999):
             # connect client (producer)
             client = LOVEWSClient()
-            client_task = asyncio.create_task(client.start_ws_client())                
-            
+            client_task = asyncio.create_task(client.start_ws_client())
+
             # Finished resolves after asserts are ok
             await asyncio.wait_for(test_finished, timeout=STD_TIMEOUT*2)
 
@@ -84,6 +99,6 @@ class TestWebsocketsClient(asynctest.TestCase):
             client.retry = False
             client_task.cancel()
             await client_task
-            
+
             await client.csc.close()
             await self.remote.close()
