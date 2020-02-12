@@ -46,6 +46,7 @@ pipeline {
             branch "bugfix/*"
             branch "hotfix/*"
             branch "release/*"
+            branch "pipeline"
           }
           anyOf {
             changeset "producer/love_csc/*"
