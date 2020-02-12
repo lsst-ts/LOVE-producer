@@ -1,7 +1,6 @@
 """Main executable of the LOVE-producer."""
 import asyncio
 import json
-import websockets
 from lsst.ts import salobj
 from .receiver import Receiver
 import os
