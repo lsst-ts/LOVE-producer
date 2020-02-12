@@ -44,7 +44,7 @@ pipeline {
             branch "love-csc"
           }
           anyOf {
-            changeSet "producer/love_csc/*"
+            changeset "producer/love_csc/*"
             triggeredBy "UpstreamCause"
             triggeredBy "UserIdCause"
           }
