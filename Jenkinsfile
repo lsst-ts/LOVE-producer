@@ -4,10 +4,11 @@ pipeline {
     registryCredential = "dockerhub-inriachile"
     dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
+    dockerLoveCSCImageName = "lsstts/love-csc:"
   }
 
   stages {
-    stage("Build Docker image") {
+    stage("Build Producer Docker image") {
       when {
         anyOf {
           branch "master"
@@ -32,6 +33,39 @@ pipeline {
           dockerImageName = dockerImageName + image_tag
           echo "dockerImageName: ${dockerImageName}"
           dockerImage = docker.build dockerImageName
+        }
+      }
+    }
+
+    stage("Build LOVE-CSC Docker image") {
+      // when {
+      //   allOf {
+      //     anyOf {
+      //       branch "love-csc"
+      //     }
+      //     // anyOf {
+      //     //   changeset "producer/love_csc/*"
+      //     //   triggeredBy "UpstreamCause"
+      //     //   triggeredBy "UserIdCause"
+      //     // }
+      //   }
+        
+      // }
+      steps {
+        script {
+          def git_branch = "${GIT_BRANCH}"
+          def image_tag = "develop"
+          def slashPosition = git_branch.indexOf('/')
+          if (slashPosition > 0) {
+            git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
+            git_branch = git_branch.substring(0, slashPosition)
+            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix") {
+              image_tag = git_tag
+            }
+          }
+          dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
+          echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
+          dockerLoveCSCImageName = docker.build dockerLoveCSCImageName
         }
       }
     }
@@ -65,6 +99,21 @@ pipeline {
         script {
           docker.withRegistry("", registryCredential) {
             dockerImage.push()
+          }
+        }
+      }
+    }
+
+    stage("Push LOVE-CSC Docker image") {
+      // when {
+      //   anyOf {
+      //     branch "love-csc"
+      //   }
+      // }
+      steps {
+        script {
+          docker.withRegistry("", registryCredential) {
+            dockerLoveCSCImageName.push()
           }
         }
       }

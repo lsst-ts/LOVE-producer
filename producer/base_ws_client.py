@@ -20,6 +20,7 @@ class BaseWSClient():
         print(f'***** Starting {self.name} Producers *****')
         self.csc_list = self.read_config(self.path)
         print('List of CSCs to listen:', self.csc_list)
+        self.retry = True
         self.websocket = None
 
     async def handle_message_reception(self):
@@ -32,7 +33,7 @@ class BaseWSClient():
                 await self.on_websocket_receive(message)
 
     async def start_ws_client(self):
-        while True:
+        while self.retry:
             try:
                 async with websockets.connect(self.url) as websocket:
                     self.websocket = websocket
@@ -68,7 +69,7 @@ class BaseWSClient():
     async def on_start_client(self):
         pass
 
-    async def on_websocket_error(self):
+    async def on_websocket_error(self, e):
         pass
 
     @staticmethod
