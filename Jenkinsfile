@@ -38,19 +38,22 @@ pipeline {
     }
 
     stage("Build LOVE-CSC Docker image") {
-      // when {
-      //   allOf {
-      //     anyOf {
-      //       branch "love-csc"
-      //     }
-      //     // anyOf {
-      //     //   changeset "producer/love_csc/*"
-      //     //   triggeredBy "UpstreamCause"
-      //     //   triggeredBy "UserIdCause"
-      //     // }
-      //   }
-        
-      // }
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/*"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
       steps {
         script {
           def git_branch = "${GIT_BRANCH}"
@@ -65,7 +68,7 @@ pipeline {
           }
           dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
           echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
-          dockerLoveCSCImageName = docker.build dockerLoveCSCImageName
+          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "-f ./Dockerfile-lovecsc .")
         }
       }
     }
