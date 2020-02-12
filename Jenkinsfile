@@ -43,11 +43,11 @@ pipeline {
           anyOf {
             branch "love-csc"
           }
-          anyOf {
-            changeset "producer/love_csc/*"
-            triggeredBy "UpstreamCause"
-            triggeredBy "UserIdCause"
-          }
+          // anyOf {
+          //   changeset "producer/love_csc/*"
+          //   triggeredBy "UpstreamCause"
+          //   triggeredBy "UserIdCause"
+          // }
         }
         
       }
@@ -87,17 +87,13 @@ pipeline {
     // }
     stage("Push Docker image") {
       when {
-        allOf {
-          anyOf {
-            branch "love-csc"
-          }
-          anyOf {
-            changeset "producer/love_csc/*"
-            triggeredBy "UpstreamCause"
-            triggeredBy "UserIdCause"
-          }
+        anyOf {
+          branch "master"
+          branch "develop"
+          branch "bugfix/*"
+          branch "hotfix/*"
+          branch "release/*"
         }
-        
       }
       steps {
         script {
@@ -109,11 +105,11 @@ pipeline {
     }
 
     stage("Push LOVE-CSC Docker image") {
-      // when {
-      //   anyOf {
-      //     branch "love-csc"
-      //   }
-      // }
+      when {
+        anyOf {
+          branch "love-csc"
+        }
+      }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
