@@ -38,19 +38,19 @@ pipeline {
     }
 
     stage("Build LOVE-CSC Docker image") {
-      when {
-        allOf {
-          anyOf {
-            branch "love-csc"
-          }
-          // anyOf {
-          //   changeset "producer/love_csc/*"
-          //   triggeredBy "UpstreamCause"
-          //   triggeredBy "UserIdCause"
-          // }
-        }
+      // when {
+      //   allOf {
+      //     anyOf {
+      //       branch "love-csc"
+      //     }
+      //     // anyOf {
+      //     //   changeset "producer/love_csc/*"
+      //     //   triggeredBy "UpstreamCause"
+      //     //   triggeredBy "UserIdCause"
+      //     // }
+      //   }
         
-      }
+      // }
       steps {
         script {
           def git_branch = "${GIT_BRANCH}"
@@ -105,11 +105,11 @@ pipeline {
     }
 
     stage("Push LOVE-CSC Docker image") {
-      when {
-        anyOf {
-          branch "love-csc"
-        }
-      }
+      // when {
+      //   anyOf {
+      //     branch "love-csc"
+      //   }
+      // }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
