@@ -37,7 +37,7 @@ pipeline {
       }
     }
 
-    stage("Build LOVE controller Docker image") {
+    stage("Build LOVE-CSC Docker image") {
       when {
         allOf {
           anyOf {
@@ -65,7 +65,7 @@ pipeline {
           }
           dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
           echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
-          dockerImage = docker.build dockerLoveCSCImageName
+          dockerLoveCSCImageName = docker.build dockerLoveCSCImageName
         }
       }
     }
@@ -87,18 +87,37 @@ pipeline {
     // }
     stage("Push Docker image") {
       when {
-        anyOf {
-          branch "master"
-          branch "develop"
-          branch "bugfix/*"
-          branch "hotfix/*"
-          branch "release/*"
+        allOf {
+          anyOf {
+            branch "love-csc"
+          }
+          anyOf {
+            changeset "producer/love_csc/*"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
         }
+        
       }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
             dockerImage.push()
+          }
+        }
+      }
+    }
+
+    stage("Push LOVE-CSC Docker image") {
+      when {
+        anyOf {
+          branch "love-csc"
+        }
+      }
+      steps {
+        script {
+          docker.withRegistry("", registryCredential) {
+            dockerLoveCSCImageName.push()
           }
         }
       }
