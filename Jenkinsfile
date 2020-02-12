@@ -38,23 +38,23 @@ pipeline {
     }
 
     stage("Build LOVE-CSC Docker image") {
-      when {
-        allOf {
-          anyOf {
-            branch "master"
-            branch "develop"
-            branch "bugfix/*"
-            branch "hotfix/*"
-            branch "release/*"
-            branch "pipeline"
-          }
-          anyOf {
-            changeset "producer/love_csc/*"
-            triggeredBy "UpstreamCause"
-            triggeredBy "UserIdCause"
-          }
-        }
-      }
+      // when {
+      //   allOf {
+      //     anyOf {
+      //       branch "master"
+      //       branch "develop"
+      //       branch "bugfix/*"
+      //       branch "hotfix/*"
+      //       branch "release/*"
+      //       branch "pipeline"
+      //     }
+      //     anyOf {
+      //       changeset "producer/love_csc/*"
+      //       triggeredBy "UpstreamCause"
+      //       triggeredBy "UserIdCause"
+      //     }
+      //   }
+      // }
       steps {
         script {
           def git_branch = "${GIT_BRANCH}"
