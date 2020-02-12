@@ -109,11 +109,11 @@ pipeline {
     }
 
     stage("Push LOVE-CSC Docker image") {
-      when {
-        anyOf {
-          branch "love-csc"
-        }
-      }
+      // when {
+      //   anyOf {
+      //     branch "love-csc"
+      //   }
+      // }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
