@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(exception_handler)
-    loop.set_debug(True)
+    # loop.set_debug(True)
     loop.create_task(telemetries())
     loop.create_task(events())
     loop.create_task(heartbeats())

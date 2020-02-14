@@ -35,6 +35,7 @@ class BaseWSClient():
                     await self.on_websocket_receive(msg)
 
     async def start_ws_client(self):
+        await self.on_start_client()
         while self.retry:
             try:
                 # self.websocket = await websockets.connect(self.url)
@@ -52,8 +53,7 @@ class BaseWSClient():
                     }
                     await self.send_message(json.dumps(initial_state_subscribe_msg))
                     print(f'### {self.name} | subscribed to initial state')
-
-                    await asyncio.gather(self.handle_message_reception(), self.on_start_client())
+                    await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
                 print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
