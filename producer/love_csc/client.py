@@ -1,6 +1,5 @@
 import asyncio
 import json
-import websockets
 from lsst.ts import salobj
 import os
 import utils

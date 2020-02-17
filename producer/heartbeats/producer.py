@@ -123,7 +123,7 @@ class HeartbeatProducer:
                     await self.send_heartbeat(msg)
                     await asyncio.sleep(2)
                     continue
-                await remote.evt_heartbeat.next(flush=False, timeout=timeout)
+                await remote.evt_heartbeat.next(flush=True, timeout=timeout)
                 nlost_subsequent = 0
                 timestamp = datetime.datetime.now().timestamp()
             except asyncio.TimeoutError:
