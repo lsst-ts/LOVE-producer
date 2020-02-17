@@ -38,23 +38,27 @@ pipeline {
     }
 
     stage("Build LOVE-CSC Docker image") {
-      // when {
-      //   allOf {
-      //     anyOf {
-      //       branch "love-csc"
-      //     }
-      //     // anyOf {
-      //     //   changeset "producer/love_csc/*"
-      //     //   triggeredBy "UpstreamCause"
-      //     //   triggeredBy "UserIdCause"
-      //     // }
-      //   }
-        
-      // }
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
       steps {
         script {
           def git_branch = "${GIT_BRANCH}"
-          def image_tag = "develop"
+          def image_tag = git_branch
           def slashPosition = git_branch.indexOf('/')
           if (slashPosition > 0) {
             git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
@@ -65,7 +69,7 @@ pipeline {
           }
           dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
           echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
-          dockerLoveCSCImageName = docker.build dockerLoveCSCImageName
+          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "-f ./Dockerfile-lovecsc .")
         }
       }
     }
@@ -105,11 +109,23 @@ pipeline {
     }
 
     stage("Push LOVE-CSC Docker image") {
-      // when {
-      //   anyOf {
-      //     branch "love-csc"
-      //   }
-      // }
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
