@@ -15,12 +15,12 @@ class LOVEWSClient(BaseWSClient):
         super().__init__(name='LOVE CSC')
         self.connection_error = False
         self.csc = LOVECsc()
-
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
         self.connection_error = False
         await self.csc.start_task
 
+    async def on_connected(self):
         observingLog_subscribe_msg = {
             'option': 'subscribe',
             'category': 'love_csc',

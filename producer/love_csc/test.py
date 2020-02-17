@@ -50,7 +50,6 @@ class TestWebsocketsClient(asynctest.TestCase):
 
         async def server_callback(websocket, path):
             """Server-ready callback. Runs the test actions and assertions"""
-
             # wait for the client to connect to initial_state group
             initial_subscription = await websocket.recv()
             self.assertEqual(json.loads(initial_subscription), {
@@ -62,6 +61,7 @@ class TestWebsocketsClient(asynctest.TestCase):
 
             # wait for the client to connect to the love_csc-love-0-observingLog group
             observingLog_subscription = await websocket.recv()
+            # self.client.retry = False
 
             self.assertEqual(json.loads(observingLog_subscription), {
                              'option': 'subscribe',
@@ -90,6 +90,7 @@ class TestWebsocketsClient(asynctest.TestCase):
         async with websockets.serve(server_callback, '0.0.0.0', 9999):
             # connect client (producer)
             client = LOVEWSClient()
+            self.client = client
             client_task = asyncio.create_task(client.start_ws_client())
 
             # Finished resolves after asserts are ok

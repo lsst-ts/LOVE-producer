@@ -43,7 +43,6 @@ class BaseWSClient():
                     self.websocket = await session.ws_connect(self.url)
                     # async with websockets.connect(self.url) as websocket:
                     print(f'### {self.name} | loaded ws')
-
                     initial_state_subscribe_msg = {
                         'option': 'subscribe',
                         'category': 'initial_state',
@@ -52,7 +51,9 @@ class BaseWSClient():
                         'stream': 'all'
                     }
                     await self.send_message(json.dumps(initial_state_subscribe_msg))
+
                     print(f'### {self.name} | subscribed to initial state')
+                    await self.on_connected()
                     await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
@@ -74,6 +75,9 @@ class BaseWSClient():
         pass
 
     async def on_websocket_error(self, e):
+        pass
+
+    async def on_connected(self):
         pass
 
     @staticmethod
