@@ -41,12 +41,11 @@ pipeline {
       when {
         allOf {
           anyOf {
-            // branch "master"
-            // branch "develop"
-            // branch "bugfix/*"
-            // branch "hotfix/*"
-            // branch "release/*"
-            branch "pipeline"
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
           }
           anyOf {
             changeset "producer/love_csc/**/*"
@@ -59,7 +58,7 @@ pipeline {
       steps {
         script {
           def git_branch = "${GIT_BRANCH}"
-          def image_tag = "develop"
+          def image_tag = git_branch
           def slashPosition = git_branch.indexOf('/')
           if (slashPosition > 0) {
             git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
@@ -110,11 +109,23 @@ pipeline {
     }
 
     stage("Push LOVE-CSC Docker image") {
-      // when {
-      //   anyOf {
-      //     branch "love-csc"
-      //   }
-      // }
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
       steps {
         script {
           docker.withRegistry("", registryCredential) {
