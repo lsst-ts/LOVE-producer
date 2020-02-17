@@ -50,6 +50,7 @@ pipeline {
           }
           anyOf {
             changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
             triggeredBy "UpstreamCause"
             triggeredBy "UserIdCause"
           }
