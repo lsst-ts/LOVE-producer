@@ -66,7 +66,7 @@ class BaseWSClient():
         if self.websocket:
             await self.websocket.send_str(message)
         else:
-            print('Unable to send message', flush=True)
+            print(f'{self.name} | Unable to send message {message}'[:100], flush=True)
 
     async def on_websocket_receive(self, message):
         pass
