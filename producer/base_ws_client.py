@@ -69,15 +69,18 @@ class BaseWSClient():
             print(f'{self.name} | Unable to send message {message}'[:100], flush=True)
 
     async def on_websocket_receive(self, message):
+        """ Executed every time a message is received from the LOVE-manager """
         pass
 
     async def on_start_client(self):
+        """ Executed the first time (only) when the client starts, before connecting """
         pass
 
     async def on_websocket_error(self, e):
         pass
 
     async def on_connected(self):
+        """ Executed everytime the connection is made, be it after an error or the first time, etc"""
         pass
 
     @staticmethod
