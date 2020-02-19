@@ -27,15 +27,15 @@ class CommandWSClient(BaseWSClient):
         }
         asyncio.create_task(self.send_message(json.dumps(cmd_subscribe_msg)))
 
-    async def on_start_client(self):
+    async def on_connected(self):
         self.send_subscription_msg()
         self.should_subscribe = False
 
     async def on_websocket_receive(self, message):
+        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
         if self.should_subscribe:
             self.send_subscription_msg()
             self.should_subscribe = False
-        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
         answer = await self.receiver.on_message(message)
         if answer is None:
             return
@@ -43,7 +43,7 @@ class CommandWSClient(BaseWSClient):
         asyncio.create_task(self.send_message(dumped_answer))
 
     async def on_websocket_error(self, e):
-        print("CMD CLIENT ERROR", e, flush=True)
+        print(f"{self.name} | CMD CLIENT ERROR", e, flush=True)
         self.should_subscribe = True
 
 async def main():
