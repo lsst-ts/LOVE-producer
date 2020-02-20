@@ -30,7 +30,8 @@ class EventsWSClient(BaseWSClient):
             return
         if len(message['data']) == 0:
             return
-
+        if 'event_name' not in message['data'][0]: 
+            return
         answer = await self.producer.process_message(message)
         if answer is None:
             return
