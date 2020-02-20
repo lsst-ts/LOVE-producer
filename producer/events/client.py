@@ -28,9 +28,9 @@ class EventsWSClient(BaseWSClient):
     async def on_websocket_receive(self, message):
         if 'data' not in message:
             return
+        if message['category'] != 'initial_state': return
+        
         if len(message['data']) == 0:
-            return
-        if 'event_name' not in message['data'][0]: 
             return
         answer = await self.producer.process_message(message)
         if answer is None:
