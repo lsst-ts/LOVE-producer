@@ -15,6 +15,18 @@ COMMANDS = "COMMANDS"
 
    
 def main():
+    """
+        Reads the LOVE_PRODUCERS environment variable and launches one or more
+        producers depending on its content.
+        LOVE_PRODUCERS must be a string of values separated by ":".
+        If LOVE_PRODUCERS is None or '' all producers will be launched.
+        Allowed values are:
+            - TELEMETRIES 
+            - EVENTS 
+            - CSC_HEARTBEATS 
+            - SCRIPTQUEUE 
+            - COMMANDS 
+    """
     LOVE_PRODUCERS = os.environ.get('LOVE_PRODUCERS')
     if LOVE_PRODUCERS is None:
         producers = [TELEMETRIES, EVENTS, CSC_HEARTBEATS, SCRIPTQUEUE, COMMANDS]
