@@ -13,11 +13,14 @@ CSC_HEARTBEATS = "CSC_HEARTBEATS"
 SCRIPTQUEUE = "SCRIPTQUEUE"
 COMMANDS = "COMMANDS"
 
-if __name__ == '__main__':
-    producers = os.environ.get('LOVE_PRODUCERS').split(':')
-    if len(producers) == 0:
+   
+def main():
+    LOVE_PRODUCERS = os.environ.get('LOVE_PRODUCERS')
+    if LOVE_PRODUCERS is None:
         producers = [TELEMETRIES, EVENTS, CSC_HEARTBEATS, SCRIPTQUEUE, COMMANDS]
-        
+    else:
+        producers = LOVE_PRODUCERS.split(':')
+    
     # with entrypoint(MemoryTracer(interval=10, top_results=10)) as loop:
     def exception_handler(loop, context):
         print("Caught the following exception")
@@ -42,3 +45,6 @@ if __name__ == '__main__':
         print(f'creating {COMMANDS} producer')
         loop.create_task(command_receiver())
     loop.run_forever()
+
+if __name__ == '__main__':
+    main()
