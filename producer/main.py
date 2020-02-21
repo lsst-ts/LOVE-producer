@@ -26,6 +26,11 @@ def main():
             - CSC_HEARTBEATS 
             - SCRIPTQUEUE 
             - COMMANDS 
+        Examples:
+        export LOVE_PRODUCERS=TELEMETRIES:EVENTS #loads telemetries and events producers
+        export LOVE_PRODUCERS=TELEMETRIES #loads telemetries producer
+        export LOVE_PRODUCERS= #loads all producers
+        - 
     """
     LOVE_PRODUCERS = os.environ.get('LOVE_PRODUCERS')
     if LOVE_PRODUCERS is None:
