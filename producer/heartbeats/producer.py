@@ -42,9 +42,9 @@ class HeartbeatProducer:
             sal_lib_params = self.csc_list[i]
             sal_lib_name = sal_lib_params[0]
             print('- Listening to heartbeats from CSC: ', sal_lib_params)
-            [sal_lib_name, index] = sal_lib_params
-
-            asyncio.get_event_loop().create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
+            [sal_lib_name, index, heartbeat] = sal_lib_params
+            if heartbeat:
+                asyncio.get_event_loop().create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
         """Generates a message with the heartbeat info of a CSC in dictionary format.

@@ -11,7 +11,7 @@ class TelemetriesProducer:
 
     def __init__(self, domain, csc_list):
         self.remote_list = []
-        for name, salindex in csc_list:
+        for name, salindex, heartbeat in csc_list:
             try:
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)
                 self.remote_list.append(remote)

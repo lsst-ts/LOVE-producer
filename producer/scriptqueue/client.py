@@ -49,7 +49,7 @@ async def init_client(salindex):
 async def main():
     sq_list = BaseWSClient.read_config(BaseWSClient.path, 'ScriptQueue')
     print('List of Script Queues to listen:', sq_list)
-    for name, salindex in sq_list:
+    for name, salindex, heartbeat in sq_list:
         asyncio.create_task(init_client(salindex))
 
 

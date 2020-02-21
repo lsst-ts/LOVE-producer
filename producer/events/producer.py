@@ -13,7 +13,7 @@ class EventsProducer:
         self.events_callback = events_callback
         self.remote_dict = {}
         self.initial_state_remote_dict = {}
-        for name, salindex in csc_list:
+        for name, salindex, heartbeat in csc_list:
             try:
                 print('- Listening to events from CSC: ', (name, salindex))
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)

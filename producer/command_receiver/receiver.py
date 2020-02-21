@@ -11,7 +11,7 @@ class Receiver:
 
     def __init__(self, domain, csc_list):
         self.remote_dict = {}
-        for name, salindex in csc_list:
+        for name, salindex, heartbeat in csc_list:
             print('- Listening to commands for CSC: ', (name, salindex))
             try:
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)

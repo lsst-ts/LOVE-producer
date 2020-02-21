@@ -109,14 +109,20 @@ class BaseWSClient():
         if key:
             for csc_instance in data[key]:
                 index = 0
+                heartbeat = True
                 if 'index' in csc_instance:
                     index = csc_instance['index']
-                csc_list.append((key, index))
+                if 'heartbeat' in csc_instance:
+                    heartbeat = csc_instance['heartbeat']
+                csc_list.append((key, index, heartbeat))
         else:
             for csc_key, csc_value in data.items():
                 for csc_instance in csc_value:
                     index = 0
+                    heartbeat = True
                     if 'index' in csc_instance:
                         index = csc_instance['index']
-                    csc_list.append((csc_key, index))
+                    if 'heartbeat' in csc_instance:
+                        heartbeat = csc_instance['heartbeat']
+                    csc_list.append((csc_key, index, heartbeat))
         return csc_list
