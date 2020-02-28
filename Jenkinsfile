@@ -1,4 +1,4 @@
-pipeline {
+rpipeline {
   agent any
   environment {
     registryCredential = "dockerhub-inriachile"
@@ -73,22 +73,19 @@ pipeline {
         }
       }
     }
-    // stage("Test Docker Image") {
-    //   when {
-    //     anyOf {
-    //       branch "master"
-    //       branch "develop"
-    //       branch "bugfix/*"
-    //       branch "hotfix/*"
-    //       branch "release/*"
-    //     }
-    //   }
-    //   steps {
-    //     script {
-    //       sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
-    //     }
-    //   }
-    // }
+    stage("Test producer Docker Image") {
+      when {
+        anyOf {
+          branch "test_pipeline"
+        }
+      }
+      steps {
+        script {
+          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
+        }
+      }
+    }
+
     stage("Push Docker image") {
       when {
         anyOf {
