@@ -81,7 +81,7 @@ rpipeline {
       }
       steps {
         script {
-          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
+          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"
         }
       }
     }
