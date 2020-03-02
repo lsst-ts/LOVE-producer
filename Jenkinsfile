@@ -97,11 +97,12 @@ pipeline {
       when {
         anyOf {
           branch "develop"
+          branch "test_pipeline"
         }
       }
       steps {
         script {
-          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"	
+          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"	
         }
       }
     }
