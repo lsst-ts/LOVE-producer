@@ -74,19 +74,6 @@ pipeline {
       }
     }
 
-    stage("Run tests") {
-      when {
-        anyOf {
-          branch "test_pipeline"
-        }
-      }
-      steps {
-        script {
-          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"	
-        }
-      }
-    }
-
     stage("Push Docker image") {
       when {
         anyOf {
@@ -102,6 +89,19 @@ pipeline {
           docker.withRegistry("", registryCredential) {
             dockerImage.push()
           }
+        }
+      }
+    }
+
+    stage("Run tests") {
+      when {
+        anyOf {
+          branch "develop"
+        }
+      }
+      steps {
+        script {
+          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"	
         }
       }
     }
