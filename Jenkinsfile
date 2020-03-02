@@ -77,7 +77,7 @@ pipeline {
     stage("Run tests") {
       when {
         anyOf {
-          branch "develop"
+          branch "test_pipeline"
         }
       }
       steps {
