@@ -13,3 +13,11 @@ services:
     command: "/usr/src/love/setup.sh"
     stdin_open: true
     tty: true
+
+  tests:
+    container_name: producer-tests
+    image: producer-tests
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "/usr/src/love/producer/producer/run-tests.sh"
