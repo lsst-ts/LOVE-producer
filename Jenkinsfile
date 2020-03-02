@@ -82,7 +82,7 @@ pipeline {
       }
       steps {
         script {
-          sh "ls"
+          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"	
         }
       }
     }
