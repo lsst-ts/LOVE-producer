@@ -1,3 +1,4 @@
 #!/bin/bash
 source .setup.sh
-python -m unittest discover -s /usr/src/love/producer
+cd /usr/src/love/producer
+python -m unittest

@@ -73,22 +73,7 @@ pipeline {
         }
       }
     }
-    // stage("Test Docker Image") {
-    //   when {
-    //     anyOf {
-    //       branch "master"
-    //       branch "develop"
-    //       branch "bugfix/*"
-    //       branch "hotfix/*"
-    //       branch "release/*"
-    //     }
-    //   }
-    //   steps {
-    //     script {
-    //       sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
-    //     }
-    //   }
-    // }
+
     stage("Push Docker image") {
       when {
         anyOf {
@@ -104,6 +89,19 @@ pipeline {
           docker.withRegistry("", registryCredential) {
             dockerImage.push()
           }
+        }
+      }
+    }
+
+    stage("Run tests") {
+      when {
+        anyOf {
+          branch "develop"
+        }
+      }
+      steps {
+        script {
+          sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"	
         }
       }
     }
