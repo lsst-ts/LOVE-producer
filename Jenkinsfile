@@ -97,6 +97,7 @@ pipeline {
       when {
         anyOf {
           branch "develop"
+          branch "test_pipeline"
         }
       }
       steps {
