@@ -1,4 +1,5 @@
 """Main executable of the LOVE-producer."""
+
 import asyncio
 from telemetries.client import main as telemetries
 from events.client import main as events
