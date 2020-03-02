@@ -75,13 +75,11 @@ rpipeline {
     }
     stage("Test producer Docker Image") {
       when {
-        anyOf {
           branch "test_pipeline"
-        }
       }
       steps {
         script {
-          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"
+          sh "echo adsadsfasdfadsf"
         }
       }
     }
