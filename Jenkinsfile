@@ -73,13 +73,16 @@ rpipeline {
         }
       }
     }
-    stage("Test producer Docker Image") {
+
+    stage("Run tests") {
       when {
-          branch "test_pipeline"
+        anyOf {
+          branch "develop"
+        }
       }
       steps {
         script {
-          sh "echo adsadsfasdfadsf"
+          sh "ls"
         }
       }
     }
