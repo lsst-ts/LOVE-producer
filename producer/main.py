@@ -59,9 +59,6 @@ def main():
     if SCRIPTQUEUE in producers:
         print(f'creating {SCRIPTQUEUE} producer')
         loop.create_task(scriptqueue())
-    if COMMANDS in producers:
-        print(f'creating {COMMANDS} producer')
-        loop.create_task(command_receiver())
     loop.run_forever()
 
 if __name__ == '__main__':
