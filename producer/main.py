@@ -5,7 +5,6 @@ from telemetries.client import main as telemetries
 from events.client import main as events
 from scriptqueue.client import main as scriptqueue
 from heartbeats.client import main as heartbeats
-from command_receiver.client import main as command_receiver
 import os
 
 TELEMETRIES = "TELEMETRIES"
