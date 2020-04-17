@@ -11,6 +11,7 @@ class EventsProducer:
 
     def __init__(self, domain, csc_list, events_callback):
         self.events_callback = events_callback
+        self.domain = domain
         self.remote_dict = {}
         self.initial_state_remote_dict = {}
         for name, salindex in csc_list:
@@ -107,13 +108,19 @@ class EventsProducer:
         salindex = int(request_data["salindex"])
         event_name = request_data["data"]["event_name"]
         if((csc, salindex) not in self.remote_dict):
-            return
+            try:
+                self.remote_dict[(csc, salindex)] = salobj.Remote(self.domain, csc, salindex)
+                self.initial_state_remote_dict[(csc, salindex)] = salobj.Remote(domain=self.domain, name=csc, index=salindex)
+                self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
+            except RuntimeError:
+                return
 
         remote = self.initial_state_remote_dict[(csc, salindex)]
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
             # check latest seen data, if not available then "request" it
-            evt_data = evt_object.get(flush=False)
+            # evt_data = evt_object.get(flush=False)
+            evt_data = await evt_object.aget()
             if evt_data is None:
                 return
         except Exception as e:
