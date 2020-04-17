@@ -38,17 +38,37 @@ class TestLOVECsc(asynctest.TestCase):
         await self.remote.close()
 
 
-@mock.patch.dict(os.environ, {'WEBSOCKET_HOST': '0.0.0.0:9999', 'PROCESS_CONNECTION_PASS': ''})
 class TestWebsocketsClient(asynctest.TestCase):
-    async def test_csc_client(self):
-        from love_csc.client import LOVEWSClient
-
-        salobj.set_random_lsst_dds_domain()
-        # Arrange
+    @mock.patch.dict(os.environ, {'WEBSOCKET_HOST': '0.0.0.0:9999', 'PROCESS_CONNECTION_PASS': ''})
+    async def harness(self, act_assert, arrange, cleanup):
         test_finished = asyncio.Future()
-        self.remote = salobj.Remote(domain=salobj.Domain(), name="LOVE")
+        async def act_assert_wrapper(*args, **kwargs):
+            await act_assert(*args, **kwargs)
+            test_finished.set_result(True)
 
-        async def server_callback(websocket, path):
+        async with websockets.serve(act_assert_wrapper, '0.0.0.0', 9999):
+            await arrange()
+            await asyncio.wait_for(test_finished, timeout=STD_TIMEOUT*2)
+            await cleanup()
+
+    async def test_csc_client(self):
+        async def arrange():
+            from love_csc.client import LOVEWSClient
+            salobj.set_random_lsst_dds_domain()
+            self.remote = salobj.Remote(domain=salobj.Domain(), name="LOVE")
+            self.client = LOVEWSClient()
+            self.client_task = asyncio.create_task(self.client.start_ws_client())
+
+        async def cleanup():
+            # cleanup
+            self.client.retry = False
+            self.client_task.cancel()
+            await self.client_task
+
+            await self.client.csc.close()
+            await self.remote.close()
+
+        async def act_assert(websocket, path):
             """Server-ready callback. Runs the test actions and assertions"""
             # wait for the client to connect to initial_state group
             initial_subscription = await websocket.recv()
@@ -84,22 +104,5 @@ class TestWebsocketsClient(asynctest.TestCase):
             result = await self.remote.evt_observingLog.next(flush=False, timeout=STD_TIMEOUT)
             self.assertEqual(result.user, 'an user')
             self.assertEqual(result.message, 'a message')
-            test_finished.set_result(True)
 
-        # Create server (LOVE-manager mock) and handle it with `server_callback`
-        async with websockets.serve(server_callback, '0.0.0.0', 9999):
-            # connect client (producer)
-            client = LOVEWSClient()
-            self.client = client
-            client_task = asyncio.create_task(client.start_ws_client())
-
-            # Finished resolves after asserts are ok
-            await asyncio.wait_for(test_finished, timeout=STD_TIMEOUT*2)
-
-            # cleanup
-            client.retry = False
-            client_task.cancel()
-            await client_task
-
-            await client.csc.close()
-            await self.remote.close()
+        await self.harness(act_assert, arrange, cleanup)
