@@ -44,40 +44,7 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         # extracting the message should be made synchronously
         message = self.telemetry_producer.get_telemetry_message()
-        from pprint import pprint
-        pprint(message)
         stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'scalars')
-
-        # Assert
-
-        # private_rcvStamp is generated on read and seems unpredictable now
-        del stream['private_rcvStamp']
-
-        self.assertEqual(stream, expected_stream)
-
-    async def test_produced_message_with_telemetry_array(self):
-        # Arrange
-        self.telemetry_producer = TelemetriesProducer(domain=self.csc.domain,
-                                                  csc_list=[('Test', self.csc.salinfo.index)])
-        cmd_data_sent = self.csc.make_random_cmd_arrays()
-
-        # Act
-        await self.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
-
-        tel_arrays = await self.remote.tel_arrays.next(flush=False, timeout=STD_TIMEOUT)
-        tel_parameters = tel_arrays._member_attributes
-        expected_stream = {
-            p: {
-                'value': getattr(tel_arrays, p),
-                'dataType': utils.getDataType(getattr(tel_arrays, p))
-            } for p in tel_parameters if p != "private_rcvStamp"
-        }
-
-        # extracting the message should be made synchronously
-        message = self.telemetry_producer.get_telemetry_message()
-        from pprint import pprint
-        pprint(message)
-        stream = utils.get_event_stream(message, 'telemetry', 'Test', self.csc.salinfo.index, 'arrays')
 
         # Assert
 
