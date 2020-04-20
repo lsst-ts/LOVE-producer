@@ -52,7 +52,6 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
                     'dataType': utils.getDataType(getattr(tel_scalars, p)),
                     'units': f"{self.remote.tel_scalars.metadata.field_info[p].units}"
                 } for p in tel_parameters if p != "private_rcvStamp"
-                
             }
 
             while True:
@@ -75,5 +74,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
 
             await self.csc.close()
             await self.remote.close()
+            for remote in self.client.producer.remote_list:
+                await remote.close()
             
         await self.harness(act_assert, arrange, cleanup)

@@ -32,7 +32,8 @@ class TelemetriesProducer:
             tel_result = {
                 p: {
                     'value': getattr(data, p),
-                    'dataType': getDataType(getattr(data, p))
+                    'dataType': getDataType(getattr(data, p)),
+                    'units': f"{tel_remote.metadata.field_info[p].units}"
                 }
                 for p in tel_parameters
             }
