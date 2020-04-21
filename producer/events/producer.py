@@ -46,10 +46,12 @@ class EventsProducer:
 
         def callback(evt_data):
             evt_parameters = list(evt_data._member_attributes)
+            remote = self.remote_dict[(csc, salindex)]
             evt_result = {
                 p: {
                     'value': getattr(evt_data, p),
-                    'dataType': utils.getDataType(getattr(evt_data, p))
+                    'dataType': utils.getDataType(getattr(evt_data, p)),
+                    'units': f"{remote.evt_scalars.metadata.field_info[p].units}"
                 } for p in evt_parameters
             }
 
