@@ -12,8 +12,11 @@ from base_ws_client import BaseWSClient
 class EventsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
-    def __init__(self):
+    def __init__(self, csc_list=None):
         super().__init__(name='Events')
+        if(csc_list != None):
+            print('CSC list replaced by', csc_list)
+            self.csc_list = csc_list
         self.connection_error = False
         self.producer = EventsProducer(self.domain, self.csc_list, self.send_message_callback)
 
@@ -28,8 +31,9 @@ class EventsWSClient(BaseWSClient):
     async def on_websocket_receive(self, message):
         if 'data' not in message:
             return
-        if message['category'] != 'initial_state': return
-        
+        if message['category'] != 'initial_state':
+            return
+
         if len(message['data']) == 0:
             return
         answer = await self.producer.process_message(message)
@@ -40,6 +44,7 @@ class EventsWSClient(BaseWSClient):
 
     async def on_websocket_error(self, e):
         self.connection_error = True
+
 
 async def main():
     telev_client = EventsWSClient()
