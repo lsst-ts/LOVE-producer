@@ -65,12 +65,12 @@ class BaseWSClient():
                     print(f'### {self.name} | subscribed to initial state')
                     await self.on_connected()
                     self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
-                    await asyncio.create_task(self.handle_message_reception())
+                    await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
                 print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
                 print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
-                if self.heartbeat_task is not None:
+                if self.heartbeat_task is not None and not self.heartbeat_task.cancelled():
                     self.heartbeat_task.cancel()
                     self.heartbeat_task = None
                 await self.on_websocket_error(e)
@@ -78,7 +78,10 @@ class BaseWSClient():
 
     async def send_message(self, message):
         if self.websocket:
-            await self.websocket.send_str(message)
+            try:
+                await asyncio.shield(self.websocket.send_str(message))
+            except Exception as e:
+                print(f'Send Message Exception {e} \n')
         else:
             print(f'{self.name} | Unable to send message {message}'[:100], flush=True)
 
