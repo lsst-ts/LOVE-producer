@@ -58,7 +58,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
                 p: {
                     'value': getattr(evt_scalars, p),
                     'dataType': utils.getDataType(getattr(evt_scalars, p)),
-                    # 'units': f"{self.remote.evt_scalars.metadata.field_info[p].units}"
+                    'units': f"{self.remote.evt_scalars.metadata.field_info[p].units}"
                 } for p in evt_parameters if p != "private_rcvStamp"
             }
 
@@ -72,6 +72,10 @@ class TestEventsClient(test_utils.WSClientTestCase):
 
             await self.csc.close()
             await self.remote.close()
+
+            for (csc, salindex) in self.client.producer.remote_dict:
+                await self.client.producer.remote_dict[(csc, salindex)].close()
+                await self.client.producer.initial_state_remote_dict[(csc, salindex)].close()
 
             
         await self.harness(act_assert, arrange, cleanup)
