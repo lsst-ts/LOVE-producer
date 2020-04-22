@@ -4,10 +4,11 @@ pipeline {
     registryCredential = "dockerhub-inriachile"
     dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
+    dockerLoveCSCImageName = "lsstts/love-csc:"
   }
 
   stages {
-    stage("Build Docker image") {
+    stage("Build Producer Docker image") {
       when {
         anyOf {
           branch "master"
@@ -35,22 +36,44 @@ pipeline {
         }
       }
     }
-    // stage("Test Docker Image") {
-    //   when {
-    //     anyOf {
-    //       branch "master"
-    //       branch "develop"
-    //       branch "bugfix/*"
-    //       branch "hotfix/*"
-    //       branch "release/*"
-    //     }
-    //   }
-    //   steps {
-    //     script {
-    //       sh "docker run ${dockerImageName} /usr/src/love/producer/run-tests.sh"
-    //     }
-    //   }
-    // }
+
+    stage("Build LOVE-CSC Docker image") {
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
+      steps {
+        script {
+          def git_branch = "${GIT_BRANCH}"
+          def image_tag = git_branch
+          def slashPosition = git_branch.indexOf('/')
+          if (slashPosition > 0) {
+            git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
+            git_branch = git_branch.substring(0, slashPosition)
+            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix") {
+              image_tag = git_tag
+            }
+          }
+          dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
+          echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
+          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "-f ./Dockerfile-lovecsc .")
+        }
+      }
+    }
+
     stage("Push Docker image") {
       when {
         anyOf {
@@ -65,6 +88,47 @@ pipeline {
         script {
           docker.withRegistry("", registryCredential) {
             dockerImage.push()
+          }
+        }
+      }
+    }
+
+    stage("Run tests") {
+      when {
+        anyOf {
+          branch "develop"
+          branch "test_pipeline"
+        }
+      }
+      steps {
+        script {
+          sh "docker run lsstts/love-producer:develop /usr/src/love/producer/run-tests.sh"	
+        }
+      }
+    }
+
+    stage("Push LOVE-CSC Docker image") {
+      when {
+        allOf {
+          anyOf {
+            branch "master"
+            branch "develop"
+            branch "bugfix/*"
+            branch "hotfix/*"
+            branch "release/*"
+          }
+          anyOf {
+            changeset "producer/love_csc/**/*"
+            changeset "Jenkinsfile"
+            triggeredBy "UpstreamCause"
+            triggeredBy "UserIdCause"
+          }
+        }
+      }
+      steps {
+        script {
+          docker.withRegistry("", registryCredential) {
+            dockerLoveCSCImageName.push()
           }
         }
       }
