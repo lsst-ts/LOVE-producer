@@ -4,22 +4,30 @@ import json
 from lsst.ts import salobj
 import test_utils
 import utils
+from mock import patch, mock_open
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
 
-class TestEventsClient(test_utils.WSClientTestCase):
-    async def test_valid_remote_not_in_config(self):
+class TestTelemetriesClient(test_utils.WSClientTestCase):
+    maxDiff = None
+
+    async def test_produced_message_with_telemetry_scalar(self):
         async def arrange():
-            from events.client import EventsWSClient
+            from telemetries.client import TelemetriesClient
             salobj.set_random_lsst_dds_domain()
             self.index = next(index_gen)
             self.csc = salobj.TestCsc(index=self.index, config_dir=None, initial_state=salobj.State.ENABLED)
+            await self.csc.start_task
             self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.index)
 
-            self.client = EventsWSClient(csc_list=[("Test", self.index)])
+
+            csc_list = [("Test", self.index)]
+
+            # with patch("builtins.open", mock_open(read_data=json.dumps(config))) :
+            self.client = TelemetriesClient(csc_list=csc_list, sleepDuration=0.5)
             self.client_task = asyncio.create_task(self.client.start_ws_client())
         
         async def act_assert(websocket, path):
@@ -36,32 +44,25 @@ class TestEventsClient(test_utils.WSClientTestCase):
             # ARRANGE: fill in some data            
             cmd_data_sent = self.csc.make_random_cmd_scalars()
             await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
+            tel_scalars = await self.remote.tel_scalars.next(flush=False, timeout=STD_TIMEOUT)
+            tel_parameters = tel_scalars._member_attributes
+            expected_stream = {
+                p: {
+                    'value': getattr(tel_scalars, p),
+                    'dataType': utils.getDataType(getattr(tel_scalars, p)),
+                    'units': f"{self.remote.tel_scalars.metadata.field_info[p].units}"
+                } for p in tel_parameters if p != "private_rcvStamp"
+            }
 
-            # wait for the scalars event to be sent
             while True:
                 response = await websocket.recv()
                 message = json.loads(response)
-                if "heartbeat" in message:
-                    continue
-                stream_exists = utils.check_event_stream(message, 'event', 'Test', 1, 'scalars')
-                print('stream_exists', stream_exists, flush=True)
+                stream_exists = utils.check_event_stream(message, 'telemetry', 'Test', self.index, 'scalars')
                 if stream_exists:
-                    stream = utils.get_event_stream(message, 'event', 'Test', self.index, 'scalars')[0]
+                    stream = utils.get_event_stream(message, 'telemetry', 'Test', self.index, 'scalars')
                     break
 
             del stream['private_rcvStamp']
-
-            # build expected data
-            evt_scalars = await self.remote.evt_scalars.next(flush=False, timeout=STD_TIMEOUT)
-            evt_parameters = evt_scalars._member_attributes
-
-            expected_stream = {
-                p: {
-                    'value': getattr(evt_scalars, p),
-                    'dataType': utils.getDataType(getattr(evt_scalars, p)),
-                    'units': f"{self.remote.evt_scalars.metadata.field_info[p].units}"
-                } for p in evt_parameters if p != "private_rcvStamp"
-            }
 
             self.assertEqual(stream, expected_stream)
 
@@ -73,10 +74,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
 
             await self.csc.close()
             await self.remote.close()
-
-            for (csc, salindex) in self.client.producer.remote_dict:
-                await self.client.producer.remote_dict[(csc, salindex)].close()
-                await self.client.producer.initial_state_remote_dict[(csc, salindex)].close()
-
+            for remote in self.client.producer.remote_list:
+                await remote.close()
             
         await self.harness(act_assert, arrange, cleanup)
