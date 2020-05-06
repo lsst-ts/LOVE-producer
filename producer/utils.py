@@ -117,10 +117,12 @@ def check_event_stream(message, category, csc, salindex, stream_name):
     """ Tries to return the first stream found in a LOVE message. 
     Throws errors if it does not exist. """
 
-    data_generator = (d for d in message['data'] if d["csc"] == csc and d['salindex'] == salindex)
     try:
+        data_generator = (d for d in message['data'] if d["csc"] == csc and d['salindex'] == salindex)
         data = next(data_generator)
     except StopIteration:
+        return False
+    except KeyError:
         return False
 
     stream_generator = (data['data'][s] for s in data['data'] if s == stream_name)
