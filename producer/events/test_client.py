@@ -41,9 +41,10 @@ class TestEventsClient(test_utils.WSClientTestCase):
             while True:
                 response = await websocket.recv()
                 message = json.loads(response)
-                from pprint import pprint
-                pprint(message)
-                stream_exists = utils.check_event_stream(message, 'event', 'Test', self.index, 'scalars')
+                if "heartbeat" in message:
+                    continue
+                stream_exists = utils.check_event_stream(message, 'event', 'Test', 1, 'scalars')
+                print('stream_exists', stream_exists, flush=True)
                 if stream_exists:
                     stream = utils.get_event_stream(message, 'event', 'Test', self.index, 'scalars')[0]
                     break

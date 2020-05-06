@@ -2,6 +2,7 @@ import asyncio
 import json
 import websockets
 import aiohttp
+import datetime
 import traceback
 import os
 from lsst.ts import salobj
@@ -23,6 +24,7 @@ class BaseWSClient():
         print('List of CSCs to listen:', self.csc_list)
         self.retry = True
         self.websocket = None
+        self.heartbeat_task = None
 
     async def handle_message_reception(self):
         """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
@@ -33,6 +35,14 @@ class BaseWSClient():
                     if 'category' not in msg:
                         continue
                     await self.on_websocket_receive(msg)
+
+    async def start_heartbeat(self):
+        while True:
+            await self.send_message(json.dumps({
+                "heartbeat": self.name,
+                "timestamp": datetime.datetime.now().timestamp()
+            }))
+            await asyncio.sleep(3)
 
     async def start_ws_client(self):
         await self.on_start_client()
@@ -54,17 +64,24 @@ class BaseWSClient():
 
                     print(f'### {self.name} | subscribed to initial state')
                     await self.on_connected()
+                    self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
                     await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
                 print(f'### {self.name} | Exception {e} \n Attempting to reconnect from start_ws_client')
                 print(f'### {self.name} | traceback:', traceback.print_tb(e.__traceback__))
+                if self.heartbeat_task is not None and not self.heartbeat_task.cancelled():
+                    self.heartbeat_task.cancel()
+                    self.heartbeat_task = None
                 await self.on_websocket_error(e)
                 await asyncio.sleep(3)
 
     async def send_message(self, message):
         if self.websocket:
-            await self.websocket.send_str(message)
+            try:
+                await asyncio.shield(self.websocket.send_str(message))
+            except Exception as e:
+                print(f'Send Message Exception {e} \n')
         else:
             print(f'{self.name} | Unable to send message {message}'[:100], flush=True)
 
