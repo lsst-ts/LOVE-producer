@@ -4,7 +4,7 @@ import asyncio
 import websockets
 import os
 
-STD_TIMEOUT = 15  # timeout for command ack
+STD_TIMEOUT = 30  # timeout for command ack
 
 
 class WSClientTestCase(asynctest.TestCase):
