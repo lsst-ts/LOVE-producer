@@ -12,7 +12,7 @@ import yaml
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
-TIMEOUT = 15
+TIMEOUT = 30
 
 class TestScriptqueueAvailableScripts(asynctest.TestCase):
     async def tearDown(self):
