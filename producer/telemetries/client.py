@@ -25,6 +25,8 @@ class TelemetriesClient(BaseWSClient):
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
+        for remote in self.producer.remote_list:
+            await remote.start_task
         asyncio.create_task(self.send_messages_after_timeout())
 
     async def send_messages_after_timeout(self):
