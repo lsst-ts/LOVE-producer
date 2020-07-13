@@ -17,6 +17,7 @@ class TestEventsMessages(asynctest.TestCase):
         index = next(index_gen)
         self.csc = salobj.TestCsc(index=index, config_dir=None, initial_state=salobj.State.ENABLED)
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
+        await self.remote.start_task
         
         self.message_queue = asyncio.Queue()
         self.callback = lambda message: asyncio.create_task(self.message_queue.put(message))

@@ -101,6 +101,7 @@ class HeartbeatProducer:
         domain = self.domain
         remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
         self.remotes.append(remote)
+        await remote.start_task
         nlost_subsequent = 0
 
         # find the first element that matches the csc/salindex and use it instead of the default value

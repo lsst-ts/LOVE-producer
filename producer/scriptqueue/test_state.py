@@ -153,6 +153,7 @@ class TestScriptqueueState(asynctest.TestCase):
                                                       logLevel=logging.ERROR)
             index = int(ack.result)
             self.scripts_remotes[index] = salobj.Remote(domain=self.queue.domain, name='Script', index=index)
+            # await self.scripts_remotes[index].start_task
 
         # Wait for the third script to be the current script
         waiting_indices = [100003, 100004]

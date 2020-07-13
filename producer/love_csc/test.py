@@ -41,6 +41,7 @@ class TestWebsocketsClient(WSClientTestCase):
             from love_csc.client import LOVEWSClient
             salobj.set_random_lsst_dds_domain()
             self.remote = salobj.Remote(domain=salobj.Domain(), name="LOVE")
+            # await self.remote.start_task
             self.client = LOVEWSClient()
             self.client_task = asyncio.create_task(self.client.start_ws_client())
 

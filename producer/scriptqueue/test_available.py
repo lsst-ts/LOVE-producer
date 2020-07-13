@@ -55,6 +55,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
 
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
+        # await self.remote.start_task
         await asyncio.wait_for(self.remote.start_task, TIMEOUT)
         await asyncio.wait_for(self.remote.cmd_start.start(timeout=30), TIMEOUT)
         await asyncio.wait_for(self.remote.cmd_enable.start(timeout=30), TIMEOUT)

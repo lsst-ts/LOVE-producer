@@ -22,6 +22,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             self.csc = salobj.TestCsc(index=self.index, config_dir=None, initial_state=salobj.State.ENABLED)
             await self.csc.start_task
             self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.index)
+            # await self.remote.start_task
 
 
             csc_list = [("Test", self.index)]
