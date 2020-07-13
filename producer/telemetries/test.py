@@ -17,6 +17,7 @@ class TestTelemetryMessages(asynctest.TestCase):
         index = next(index_gen)
         self.csc = salobj.TestCsc(index=index, config_dir=None, initial_state=salobj.State.ENABLED)
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
+        # await self.remote.start_task
 
     async def tearDown(self):
         for remote in self.telemetry_producer.remote_list:

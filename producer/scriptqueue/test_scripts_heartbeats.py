@@ -85,6 +85,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         # Create a remote and send the csc to enabled state
         self.remote = salobj.Remote(
             domain=self.queue.domain, name="ScriptQueue", index=1)
+        # await self.remote.start_task
         await asyncio.wait_for(self.remote.start_task, TIMEOUT)
         await self.remote.cmd_start.start(timeout=TIMEOUT)
         await self.remote.cmd_enable.start(timeout=TIMEOUT)
@@ -109,6 +110,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         index = int(ack.result)
         script_remote = salobj.Remote(
             domain=self.queue.domain, name='Script', index=index)
+        await script_remote.start_task
 
         # Wait for the script to be the current script
         waiting_indices = []
