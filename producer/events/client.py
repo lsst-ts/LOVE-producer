@@ -33,6 +33,13 @@ class EventsWSClient(BaseWSClient):
     def send_message_callback(self, message):
         asyncio.create_task(self.send_message(json.dumps(message)))
 
+    async def make_and_send_response(self, message):
+        answer = await self.producer.process_message(message)
+        if answer is None:
+            return
+        dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
+        await self.send_message(dumped_answer)
+
     async def on_websocket_receive(self, message):
         if 'data' not in message:
             return
@@ -41,11 +48,9 @@ class EventsWSClient(BaseWSClient):
 
         if len(message['data']) == 0:
             return
-        answer = await self.producer.process_message(message)
-        if answer is None:
-            return
-        dumped_answer = json.dumps(answer, cls=utils.NumpyEncoder)
-        asyncio.create_task(self.send_message(dumped_answer))
+
+        asyncio.create_task(self.make_and_send_response(message))
+
 
     async def on_websocket_error(self, e):
         self.connection_error = True
