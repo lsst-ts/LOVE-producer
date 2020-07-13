@@ -27,7 +27,8 @@ class TelemetriesProducer:
         for tel in tel_names:
             tel_remote = getattr(remote, "tel_" + tel)
             data = tel_remote.get()
-            rcv_time = Time.now().tai.datetime.timestamp()
+            if utils.ProducerEnv.traceTimestamps():
+                rcv_time = Time.now().tai.datetime.timestamp()
             if data is None:
                 continue
             tel_parameters = list(data._member_attributes)
@@ -39,7 +40,8 @@ class TelemetriesProducer:
                 }
                 for p in tel_parameters
             }
-            tel_result["producer_rcv"] = rcv_time
+            if utils.ProducerEnv.traceTimestamps():
+                tel_result["producer_rcv"] = rcv_time
             values[tel] = tel_result
         return values
 

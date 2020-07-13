@@ -50,7 +50,8 @@ class EventsProducer:
         """ Returns a callback that produces a message with the event data"""
 
         def callback(evt_data):
-            rcv_time = Time.now().tai.datetime.timestamp()
+            if utils.ProducerEnv.traceTimestamps():
+                rcv_time = Time.now().tai.datetime.timestamp()
             evt_parameters = list(evt_data._member_attributes)
             remote = self.remote_dict[(csc, salindex)]
             evt_object = getattr(remote, f"evt_{evt_name}")
@@ -62,7 +63,8 @@ class EventsProducer:
                 }
                 for p in evt_parameters
             }
-            evt_result["producer_rcv"] = rcv_time
+            if utils.ProducerEnv.traceTimestamps():
+                evt_result["producer_rcv"] = rcv_time
             message = utils.make_stream_message(
                 "event", csc, salindex, evt_name, evt_result
             )

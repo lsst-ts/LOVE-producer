@@ -7,6 +7,7 @@ import traceback
 import os
 from astropy.time import Time
 from lsst.ts import salobj
+from utils import ProducerEnv
 
 WS_HOST = os.environ["WEBSOCKET_HOST"]
 WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
@@ -90,11 +91,13 @@ class BaseWSClient:
 
     async def send_message(self, message):
         if self.websocket:
-            try:
+            if ProducerEnv.traceTimestamps():
                 snd_time = Time.now().tai.datetime.timestamp()
-                message_dict = json.loads(message)
-                message_dict["producer_snd"] = snd_time
-                await asyncio.shield(self.websocket.send_str(json.dumps(message_dict)))
+                message = json.loads(message)
+                message["producer_snd"] = snd_time
+                message = json.dumps(message)
+            try:
+                await asyncio.shield(self.websocket.send_str(message))
             except Exception as e:
                 print(f"Send Message Exception {e} \n")
         else:
