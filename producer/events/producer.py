@@ -124,9 +124,8 @@ class EventsProducer:
         await remote.start_task
         evt_object = getattr(remote, "evt_{}".format(event_name))
         try:
-            # check latest seen data, if not available then "request" it
-            # evt_data = evt_object.get(flush=False)
-            evt_data = await evt_object.aget()
+            # get most recent data or wait TIMEOUT seconds for the first one
+            evt_data = await evt_object.aget(timeout=TIMEOUT)
             if evt_data is None:
                 return
         except Exception as e:
