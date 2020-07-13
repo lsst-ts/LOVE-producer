@@ -1,7 +1,5 @@
-#!/usr/bin/env bash
-
-. ~/.setup.sh
-. ~/.bashrc
+#!/bin/bash
+. /home/saluser/.setup_dev.sh
 
 export PYTHONPATH=$PYTHONPATH:/usr/src/love/producer/
 
