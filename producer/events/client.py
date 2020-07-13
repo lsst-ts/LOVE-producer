@@ -23,6 +23,11 @@ class EventsWSClient(BaseWSClient):
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
         self.connection_error = False
+        await asyncio.gather(*[remote.start_task
+                               for remote in self.producer.remote_dict.values()])
+
+        await asyncio.gather(*[remote.start_task
+                                    for remote in self.producer.initial_state_remote_dict.values()])
         self.producer.setup_callbacks()
 
     def send_message_callback(self, message):

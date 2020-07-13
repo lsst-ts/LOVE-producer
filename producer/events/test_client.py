@@ -18,6 +18,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
             self.index = next(index_gen)
             self.csc = salobj.TestCsc(index=self.index, config_dir=None, initial_state=salobj.State.ENABLED)
             self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.index)
+            await self.remote.start_task
 
             self.client = EventsWSClient(csc_list=[("Test", self.index)])
             self.client_task = asyncio.create_task(self.client.start_ws_client())
