@@ -18,18 +18,9 @@ This docker-compose does not copy the code into the image, but instead it mounts
 
 Follow these instructions to run the application in a docker container and get into it:
 
-1. Launch and get into the container:
-
 ```
 docker-compose up -d
 docker-exec producer bash
-```
-
-2. Inside the container:, load the setup and got to love folder
-
-```
-source .setup.sh
-cd /usr/src/love
 ```
 
 ### 2.2 Run tests
@@ -37,16 +28,17 @@ cd /usr/src/love
 Once inside the container and in the `love` folder you can run the tests as follows:
 
 ```
-cd producer
-export HIDE_TRACE_TIMESTAMPS=True
-python -m unittest
+/usr/src/love/producer/run-tests.sh
 ```
+
+Then press `Ctrl + D`
 
 ### 2.3 Build documentation
 
 Once inside the container and in the `love` folder you can build the documentation as follows:
 
 ```
-cd docsrc
+source .setup_dev.sh
+cd /usr/src/love/docsrc
 ./create_docs.sh
 ```

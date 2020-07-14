@@ -142,6 +142,8 @@ class BaseWSClient:
         # data = json.load(open(path, 'r'))
         csc_list = []
         if key:
+            if not key in data:
+                return csc_list
             for csc_instance in data[key]:
                 index = 0
                 if "index" in csc_instance:

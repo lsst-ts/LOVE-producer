@@ -1,5 +1,5 @@
 #!/bin/bash
-source .setup.sh
+. /home/saluser/.setup_dev.sh
 cd /usr/src/love/producer
 export PYTHONPATH=$PYTHONPATH:$(pwd)
 export HIDE_TRACE_TIMESTAMPS=True
