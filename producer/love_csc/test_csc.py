@@ -24,24 +24,26 @@ class TestLOVECsc(asynctest.TestCase):
 
         # Act: write down some logs and get the results from the event
         self.remote.evt_observingLog.flush()
-        self.csc.add_observing_log('an user', 'a message')
+        self.csc.add_observing_log("an user", "a message")
 
         # Assert
         result = await self.remote.evt_observingLog.next(flush=False)
-        self.assertEqual(result.user, 'an user')
-        self.assertEqual(result.message, 'a message')
+        self.assertEqual(result.user, "an user")
+        self.assertEqual(result.message, "a message")
 
         # clean up
         await self.csc.close()
         await self.remote.close()
 
+
 class TestWebsocketsClient(WSClientTestCase):
     async def test_csc_client(self):
         async def arrange():
             from love_csc.client import LOVEWSClient
+
             salobj.set_random_lsst_dds_domain()
             self.remote = salobj.Remote(domain=salobj.Domain(), name="LOVE")
-            # await self.remote.start_task
+            await self.remote.start_task
             self.client = LOVEWSClient()
             self.client_task = asyncio.create_task(self.client.start_ws_client())
 
@@ -58,37 +60,50 @@ class TestWebsocketsClient(WSClientTestCase):
             """Server-ready callback. Runs the test actions and assertions"""
             # wait for the client to connect to initial_state group
             initial_subscription = await websocket.recv()
-            self.assertEqual(json.loads(initial_subscription), {
-                'option': 'subscribe',
-                'category': 'initial_state',
-                'csc': 'all',
-                'salindex': 'all',
-                'stream': 'all'})
+            self.assertEqual(
+                json.loads(initial_subscription),
+                {
+                    "option": "subscribe",
+                    "category": "initial_state",
+                    "csc": "all",
+                    "salindex": "all",
+                    "stream": "all",
+                },
+            )
 
             # wait for the client to connect to the love_csc-love-0-observingLog group
             observingLog_subscription = await websocket.recv()
             # self.client.retry = False
 
-            self.assertEqual(json.loads(observingLog_subscription), {
-                             'option': 'subscribe',
-                             'category': 'love_csc',
-                             'csc': 'love',
-                             'salindex': '0',
-                             'stream': 'observingLog'})
+            self.assertEqual(
+                json.loads(observingLog_subscription),
+                {
+                    "option": "subscribe",
+                    "category": "love_csc",
+                    "csc": "love",
+                    "salindex": "0",
+                    "stream": "observingLog",
+                },
+            )
 
             # Act
             # send observing logs form the server (manager)
             self.remote.evt_observingLog.flush()
-            message = utils.make_stream_message('love_csc', 'love', 0, 'observingLog', {
-                'user': 'an user',
-                'message': 'a message'
-            })
+            message = utils.make_stream_message(
+                "love_csc",
+                "love",
+                0,
+                "observingLog",
+                {"user": "an user", "message": "a message"},
+            )
 
             await websocket.send(json.dumps(message))
 
             # Assert the DDS received the log message
-            result = await self.remote.evt_observingLog.next(flush=False, timeout=STD_TIMEOUT)
-            self.assertEqual(result.user, 'an user')
-            self.assertEqual(result.message, 'a message')
+            result = await self.remote.evt_observingLog.next(
+                flush=False, timeout=STD_TIMEOUT
+            )
+            self.assertEqual(result.user, "an user")
+            self.assertEqual(result.message, "a message")
 
         await self.harness(act_assert, arrange, cleanup)
