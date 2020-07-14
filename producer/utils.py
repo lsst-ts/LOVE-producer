@@ -2,33 +2,37 @@ import numpy as np
 import json
 import os
 
-CONFIG_PATH = "config/config.json"
-WS_HOST = ""
-if "WEBSOCKET_HOST" in os.environ:
-    WS_HOST = os.environ["WEBSOCKET_HOST"]
 
-WS_PASS = ""
-if "PROCESS_CONNECTION_PASS" in os.environ:
-    WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-
-
-class ProducerEnv:
+class Settings:
 
     _trace = None
+    _ws_host = None
+    _ws_pass = None
 
     @staticmethod
-    def init():
-        print("reading env", flush=True)
-        if os.environ.get("HIDE_TRACE_TIMESTAMPS", False):
-            ProducerEnv._trace = False
-        else:
-            ProducerEnv._trace = True
+    def trace_timestamps():
+        if Settings._trace is None:
+            if os.environ.get("HIDE_TRACE_TIMESTAMPS", False):
+                Settings._trace = False
+            else:
+                Settings._trace = True
+        return Settings._trace
 
     @staticmethod
-    def traceTimestamps():
-        if ProducerEnv._trace is None:
-            ProducerEnv.init()
-        return ProducerEnv._trace
+    def ws_host():
+        if Settings._ws_host is None:
+            Settings._ws_host = os.environ.get("WEBSOCKET_HOST", "")
+        return Settings._ws_host
+
+    @staticmethod
+    def ws_pass():
+        if Settings._ws_pass is None:
+            Settings._ws_pass = os.environ.get("PROCESS_CONNECTION_PASS", "")
+        return Settings._ws_pass
+
+    @staticmethod
+    def config_path():
+        return "config/config.json"
 
 
 class NumpyEncoder(json.JSONEncoder):

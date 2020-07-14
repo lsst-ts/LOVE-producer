@@ -2,9 +2,8 @@ import asyncio
 import json
 import numpy as np
 from astropy.time import Time
-from utils import NumpyEncoder, getDataType
+from utils import NumpyEncoder, getDataType, make_stream_message, Settings
 from lsst.ts import salobj
-import utils
 
 TIMEOUT = 10
 
@@ -52,7 +51,7 @@ class EventsProducer:
         """ Returns a callback that produces a message with the event data"""
 
         def callback(evt_data):
-            if utils.ProducerEnv.traceTimestamps():
+            if Settings.trace_timestamps():
                 rcv_time = Time.now().tai.datetime.timestamp()
             evt_parameters = list(evt_data._member_attributes)
             remote = self.remote_dict[(csc, salindex)]
@@ -60,16 +59,14 @@ class EventsProducer:
             evt_result = {
                 p: {
                     "value": getattr(evt_data, p),
-                    "dataType": utils.getDataType(getattr(evt_data, p)),
+                    "dataType": getDataType(getattr(evt_data, p)),
                     "units": f"{evt_object.metadata.field_info[p].units}",
                 }
                 for p in evt_parameters
             }
-            if utils.ProducerEnv.traceTimestamps():
+            if Settings.trace_timestamps():
                 evt_result["producer_rcv"] = rcv_time
-            message = utils.make_stream_message(
-                "event", csc, salindex, evt_name, evt_result
-            )
+            message = make_stream_message("event", csc, salindex, evt_name, evt_result)
             self.events_callback(message)
 
         return callback

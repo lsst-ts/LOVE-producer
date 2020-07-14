@@ -7,18 +7,14 @@ import traceback
 import os
 from astropy.time import Time
 from lsst.ts import salobj
-from utils import ProducerEnv
-
-WS_HOST = os.environ["WEBSOCKET_HOST"]
-WS_PASS = os.environ["PROCESS_CONNECTION_PASS"]
-CONFIG_PATH = "config/config.json"
+from utils import Settings
 
 
 class BaseWSClient:
-    path = os.path.join(os.path.dirname(__file__), CONFIG_PATH)
+    path = os.path.join(os.path.dirname(__file__), Settings.config_path())
 
     def __init__(self, name):
-        self.url = "ws://{}/?password={}".format(WS_HOST, WS_PASS)
+        self.url = "ws://{}/?password={}".format(Settings.ws_host(), Settings.ws_pass())
         self.domain = salobj.Domain()
         self.name = name
         print(f"***** Starting {self.name} Producers *****")
@@ -91,7 +87,7 @@ class BaseWSClient:
 
     async def send_message(self, message):
         if self.websocket:
-            if ProducerEnv.traceTimestamps():
+            if Settings.trace_timestamps():
                 snd_time = Time.now().tai.datetime.timestamp()
                 message = json.loads(message)
                 message["producer_snd"] = snd_time

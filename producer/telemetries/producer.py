@@ -2,9 +2,8 @@ import asyncio
 import json
 import numpy as np
 from astropy.time import Time
-from utils import NumpyEncoder, getDataType
+from utils import NumpyEncoder, getDataType, Settings
 from lsst.ts import salobj
-import utils
 
 
 class TelemetriesProducer:
@@ -27,7 +26,7 @@ class TelemetriesProducer:
         for tel in tel_names:
             tel_remote = getattr(remote, "tel_" + tel)
             data = tel_remote.get()
-            if utils.ProducerEnv.traceTimestamps():
+            if Settings.trace_timestamps():
                 rcv_time = Time.now().tai.datetime.timestamp()
             if data is None:
                 continue
@@ -40,7 +39,7 @@ class TelemetriesProducer:
                 }
                 for p in tel_parameters
             }
-            if utils.ProducerEnv.traceTimestamps():
+            if Settings.trace_timestamps():
                 tel_result["producer_rcv"] = rcv_time
             values[tel] = tel_result
         return values
