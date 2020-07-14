@@ -7,7 +7,7 @@ import traceback
 import os
 from astropy.time import Time
 from lsst.ts import salobj
-from utils import Settings
+from utils import Settings, NumpyEncoder
 
 
 class BaseWSClient:
@@ -37,12 +37,10 @@ class BaseWSClient:
     async def start_heartbeat(self):
         while True:
             await self.send_message(
-                json.dumps(
-                    {
-                        "heartbeat": self.name,
-                        "timestamp": datetime.datetime.now().timestamp(),
-                    }
-                )
+                {
+                    "heartbeat": self.name,
+                    "timestamp": datetime.datetime.now().timestamp(),
+                }
             )
             await asyncio.sleep(3)
 
@@ -62,7 +60,7 @@ class BaseWSClient:
                         "salindex": "all",
                         "stream": "all",
                     }
-                    await self.send_message(json.dumps(initial_state_subscribe_msg))
+                    await self.send_message(initial_state_subscribe_msg)
 
                     print(f"### {self.name} | subscribed to initial state")
                     await self.on_connected()
@@ -89,11 +87,10 @@ class BaseWSClient:
         if self.websocket:
             if Settings.trace_timestamps():
                 snd_time = Time.now().tai.datetime.timestamp()
-                message = json.loads(message)
                 message["producer_snd"] = snd_time
-                message = json.dumps(message)
+            message_str = json.dumps(message, cls=NumpyEncoder)
             try:
-                await asyncio.shield(self.websocket.send_str(message))
+                await asyncio.shield(self.websocket.send_str(message_str))
             except Exception as e:
                 print(f"Send Message Exception {e} \n")
         else:
