@@ -6,3 +6,4 @@
 **/.DS_Store
 **/pytest_session.txt
 **/.pytest_cache
+**/.vscode
