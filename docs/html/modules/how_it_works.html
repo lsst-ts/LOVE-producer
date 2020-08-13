@@ -84,12 +84,16 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How it works</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#the-main-py-file">The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#telemetries-and-events-producer">Telemetries and Events producer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#heartbeats-producer">Heartbeats producer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#scriptqueue-state-producer">ScriptQueue State producer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#commands-receiver">Commands receiver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#initial-state-producer">Initial State Producer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#producer">Producer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-main-py-file">The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#telemetries-and-events-producer">Telemetries and Events producer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heartbeats-producer">Heartbeats producer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scriptqueue-state-producer">ScriptQueue State producer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commands-receiver">Commands receiver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initial-state-producer">Initial State Producer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#love-csc">LOVE CSC</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../apidoc/modules.html">ApiDoc</a></li>
@@ -159,17 +163,19 @@
             
   <div class="section" id="how-it-works">
 <h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="producer">
+<h2>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h2>
 <img alt="../_images/Producer-details.svg" src="../_images/Producer-details.svg" /><p>The LOVE-Producer consists of several python classes (<code class="code docutils literal notranslate"><span class="pre">Telemetries</span> <span class="pre">and</span> <span class="pre">Events</span></code>, <code class="code docutils literal notranslate"><span class="pre">Heartbeats</span></code>, <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span> <span class="pre">State</span></code>, <code class="code docutils literal notranslate"><span class="pre">Command</span> <span class="pre">Receiver</span></code> and <code class="code docutils literal notranslate"><span class="pre">Initial</span> <span class="pre">State</span></code>), each refered to as “a Producer”, and a <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager.</p>
 <div class="section" id="the-main-py-file">
-<h2>The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file<a class="headerlink" href="#the-main-py-file" title="Permalink to this headline">¶</a></h2>
+<h3>The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file<a class="headerlink" href="#the-main-py-file" title="Permalink to this headline">¶</a></h3>
 <p>It uses the <code class="code docutils literal notranslate"><span class="pre">websocket</span></code> library to send messages to the <code class="code docutils literal notranslate"><span class="pre">ws://&lt;WS_HOST&gt;/?password=&lt;WS_PASS&gt;</span></code> URL, where  <code class="code docutils literal notranslate"><span class="pre">WS_HOST</span></code> and <code class="code docutils literal notranslate"><span class="pre">WS_PASS</span></code> are read from environment variables. It configures each Producer according to the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> and extracts data by either passing callbacks or making direct calls to message getters functions to send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is consistent with the what the LOVE-manager expects and has this structure:</p>
 </div>
 <div class="section" id="telemetries-and-events-producer">
-<h2>Telemetries and Events producer<a class="headerlink" href="#telemetries-and-events-producer" title="Permalink to this headline">¶</a></h2>
+<h3>Telemetries and Events producer<a class="headerlink" href="#telemetries-and-events-producer" title="Permalink to this headline">¶</a></h3>
 <p>It creates a <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> object for a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pair given as input (created in the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> from the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file). It provides a <code class="code docutils literal notranslate"><span class="pre">get_telemetry_message</span></code> that returns a dict containing the last value of each telemetry on each <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code>, and a <code class="code docutils literal notranslate"><span class="pre">get_events_message</span></code> that similarly extracts all events data a The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code>. These two methods are called by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> every two seconds.</p>
 </div>
 <div class="section" id="heartbeats-producer">
-<h2>Heartbeats producer<a class="headerlink" href="#heartbeats-producer" title="Permalink to this headline">¶</a></h2>
+<h3>Heartbeats producer<a class="headerlink" href="#heartbeats-producer" title="Permalink to this headline">¶</a></h3>
 <p>Reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> through a callback message containing info about the <code class="code docutils literal notranslate"><span class="pre">heartbeat</span></code> (generic) event of a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pairs. The information contained in a heartbeat message consists of :</p>
 <ul class="simple">
 <li><p>Number of consecutive heartbeat lost, i.e., count of times <code class="code docutils literal notranslate"><span class="pre">remote.evt_heartbeat.next</span></code> throws a <code class="code docutils literal notranslate"><span class="pre">Timeout</span></code> error.</p></li>
@@ -178,16 +184,22 @@
 </ul>
 </div>
 <div class="section" id="scriptqueue-state-producer">
-<h2>ScriptQueue State producer<a class="headerlink" href="#scriptqueue-state-producer" title="Permalink to this headline">¶</a></h2>
+<h3>ScriptQueue State producer<a class="headerlink" href="#scriptqueue-state-producer" title="Permalink to this headline">¶</a></h3>
 <p>Monitors the <code class="code docutils literal notranslate"><span class="pre">queue</span></code> state, creating instances of the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and <code class="code docutils literal notranslate"><span class="pre">Script</span></code> <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> objects, storing their states. It configures several callbacks that allow to update the stored state, and reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> with a callback that sends a message with the state whenever any of these are called. It also monitors heartbeats of each script similarly to the <code class="code docutils literal notranslate"><span class="pre">heartbeats</span></code> Producer. Finally, additional to callbacks, it provides an <code class="code docutils literal notranslate"><span class="pre">update</span></code> method that sends <code class="code docutils literal notranslate"><span class="pre">show</span></code> commands to the SAL for the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and each <cite>Script</cite> remote, triggering updates of the queue state. This <code class="code docutils literal notranslate"><span class="pre">update</span></code> method is called every 2 seconds by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script.</p>
 </div>
 <div class="section" id="commands-receiver">
-<h2>Commands receiver<a class="headerlink" href="#commands-receiver" title="Permalink to this headline">¶</a></h2>
+<h3>Commands receiver<a class="headerlink" href="#commands-receiver" title="Permalink to this headline">¶</a></h3>
 <p>It provides a <code class="code docutils literal notranslate"><span class="pre">process_message</span></code> function that the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script calls whenever it receives a command message from the <cite>LOVE-manager</cite>. This method uses this information to produce a command with <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> and then returns back to the manager an acknowledgment message if the command runs succesfuly.</p>
 </div>
 <div class="section" id="initial-state-producer">
-<h2>Initial State Producer<a class="headerlink" href="#initial-state-producer" title="Permalink to this headline">¶</a></h2>
+<h3>Initial State Producer<a class="headerlink" href="#initial-state-producer" title="Permalink to this headline">¶</a></h3>
 <p>Produces LOVE messages with the latest info of an event. It first loads several remotes in the constructor and then produces messages for the LOVE-manager through the process_message function everytime a request is received in the websocket <code class="code docutils literal notranslate"><span class="pre">on_message</span></code> event.</p>
+</div>
+</div>
+<div class="section" id="love-csc">
+<h2>LOVE CSC<a class="headerlink" href="#love-csc" title="Permalink to this headline">¶</a></h2>
+<p>The LOVE CSC module is split into a client and a CSC <code class="code docutils literal notranslate"><span class="pre">controller</span></code>. The client opens a websocket connection to the LOVE manager and listens to incoming observing log messages. The websocket connection is kept alive via a reconnection protocol as well as kept monitored via a heartbeat message every 3 seconds.</p>
+<p>The LOVE <code class="code docutils literal notranslate"><span class="pre">controller</span></code> inherits from <code class="code docutils literal notranslate"><span class="pre">salobj.Controller</span></code> and uses its <code class="code docutils literal notranslate"><span class="pre">evt_observingLog</span></code> field to publish the observing logs to SAL. The controller is called by the client whenever it receives a new observing log message.</p>
 </div>
 </div>
 

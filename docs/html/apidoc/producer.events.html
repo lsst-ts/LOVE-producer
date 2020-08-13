@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>producer.telemetries_events package &mdash; LOVE-producer 0.2.1 documentation</title>
+  <title>producer.events package &mdash; LOVE-producer 0.2.1 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="producer.scriptqueue package" href="producer.scriptqueue.html" /> 
+    <link rel="next" title="producer.heartbeats package" href="producer.heartbeats.html" />
+    <link rel="prev" title="producer package" href="producer.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -86,15 +87,17 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="producer.command_receiver.html">producer.command_receiver package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.events package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.heartbeats.html">producer.heartbeats package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="producer.initial_state.html">producer.initial_state package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.love_csc.html">producer.love_csc package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="producer.scriptqueue.html">producer.scriptqueue package</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">producer.telemetries_events package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="producer.telemetries.html">producer.telemetries package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="producer.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.base_ws_client">producer.base_ws_client module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.main">producer.main module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.test_utils">producer.test_utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer.utils">producer.utils module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="producer.html#module-producer">Module contents</a></li>
 </ul>
@@ -150,13 +153,13 @@
         
           <li><a href="producer.html">producer package</a> &raquo;</li>
         
-      <li>producer.telemetries_events package</li>
+      <li>producer.events package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/apidoc/producer.telemetries_events.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/apidoc/producer.events.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -169,75 +172,223 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="producer-telemetries-events-package">
-<h1>producer.telemetries_events package<a class="headerlink" href="#producer-telemetries-events-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="producer-events-package">
+<h1>producer.events package<a class="headerlink" href="#producer-events-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-producer.telemetries_events.producer">
-<span id="producer-telemetries-events-producer-module"></span><h2>producer.telemetries_events.producer module<a class="headerlink" href="#module-producer.telemetries_events.producer" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.events.client">
+<span id="producer-events-client-module"></span><h2>producer.events.client module<a class="headerlink" href="#module-producer.events.client" title="Permalink to this headline">¶</a></h2>
+<p>Main executable of the LOVE-producer.</p>
 <dl class="class">
-<dt id="producer.telemetries_events.producer.Producer">
-<em class="property">class </em><code class="sig-prename descclassname">producer.telemetries_events.producer.</code><code class="sig-name descname">Producer</code><span class="sig-paren">(</span><em class="sig-param">loop</em>, <em class="sig-param">domain</em>, <em class="sig-param">csc_list</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.producer.Producer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class that creates remote objects using the salobj library
-emitting fake telemetry and event data which is then sent over with websockets</p>
+<dt id="producer.events.client.EventsWSClient">
+<em class="property">class </em><code class="sig-prename descclassname">producer.events.client.</code><code class="sig-name descname">EventsWSClient</code><span class="sig-paren">(</span><em class="sig-param">csc_list=None</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">base_ws_client.BaseWSClient</span></code></p>
+<p>Handles the websocket client connection between the Telemetries&amp;Events Producer and the LOVE-manager.</p>
 <p class="rubric">Methods</p>
-<table class="docutils align-default">
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 73%" />
-<col style="width: 27%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><strong>get_events_message</strong></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_message_reception</span></code>()</p></td>
+<td><p>Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_connected</span></code>()</p></td>
+<td><p>Executed everytime the connection is made, be it after an error or the first time, etc</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_start_client" title="producer.events.client.EventsWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
+<td><p>Initializes the websocket client and producer callbacks</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_websocket_receive" title="producer.events.client.EventsWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
+<td><p>Executed every time a message is received from the LOVE-manager</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
+<td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 72%" />
+<col style="width: 28%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>make_and_send_response</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>get_remote_event_values</strong></p></td>
+<tr class="row-even"><td><p><strong>on_websocket_error</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>get_remote_tel_values</strong></p></td>
+<tr class="row-odd"><td><p><strong>send_message</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>get_telemetry_message</strong></p></td>
+<tr class="row-even"><td><p><strong>send_message_callback</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="producer.telemetries_events.producer.Producer.get_events_message">
-<code class="sig-name descname">get_events_message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.producer.Producer.get_events_message" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.client.EventsWSClient.make_and_send_response">
+<em class="property">async </em><code class="sig-name descname">make_and_send_response</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.make_and_send_response" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="producer.telemetries_events.producer.Producer.get_remote_event_values">
-<code class="sig-name descname">get_remote_event_values</code><span class="sig-paren">(</span><em class="sig-param">remote</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.producer.Producer.get_remote_event_values" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.client.EventsWSClient.on_start_client">
+<em class="property">async </em><code class="sig-name descname">on_start_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.on_start_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the websocket client and producer callbacks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.events.client.EventsWSClient.on_websocket_error">
+<em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="producer.telemetries_events.producer.Producer.get_remote_tel_values">
-<code class="sig-name descname">get_remote_tel_values</code><span class="sig-paren">(</span><em class="sig-param">remote</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.producer.Producer.get_remote_tel_values" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.client.EventsWSClient.on_websocket_receive">
+<em class="property">async </em><code class="sig-name descname">on_websocket_receive</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.on_websocket_receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executed every time a message is received from the LOVE-manager</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.events.client.EventsWSClient.send_message_callback">
+<code class="sig-name descname">send_message_callback</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.send_message_callback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="producer.events.client.main">
+<em class="property">async </em><code class="sig-prename descclassname">producer.events.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-producer.events.producer">
+<span id="producer-events-producer-module"></span><h2>producer.events.producer module<a class="headerlink" href="#module-producer.events.producer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="producer.events.producer.EventsProducer">
+<em class="property">class </em><code class="sig-prename descclassname">producer.events.producer.</code><code class="sig-name descname">EventsProducer</code><span class="sig-paren">(</span><em class="sig-param">domain</em>, <em class="sig-param">csc_list</em>, <em class="sig-param">events_callback</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Produces messages with events coming from several CSCs</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.make_callback" title="producer.events.producer.EventsProducer.make_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_callback</span></code></a>(csc, salindex, evt_name)</p></td>
+<td><p>Returns a callback that produces a message with the event data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.process_message" title="producer.events.producer.EventsProducer.process_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_message</span></code></a>(message)</p></td>
+<td><p>Tries to obtain the current data for an event with salobj.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.setup_callbacks" title="producer.events.producer.EventsProducer.setup_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_callbacks</span></code></a>()</p></td>
+<td><p>Configures a callback for each remote created</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 74%" />
+<col style="width: 26%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>set_remote_evt_callbacks</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="producer.events.producer.EventsProducer.make_callback">
+<code class="sig-name descname">make_callback</code><span class="sig-paren">(</span><em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">evt_name</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.make_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a callback that produces a message with the event data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.events.producer.EventsProducer.process_message">
+<em class="property">async </em><code class="sig-name descname">process_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.process_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to obtain the current data for an event with salobj.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>message: dictionary with the LOVE-schema see example:</strong></dt><dd></dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl>
+<dt><strong>answer: a dictionary such as those delivered by the Telemetries_Events producer</strong></dt><dd></dd>
+<dt><strong>Example</strong></dt><dd></dd>
+<dt><strong>——</strong></dt><dd></dd>
+<dt><strong>message = {</strong></dt><dd><p>“category”: “initial_state”,
+“data”: [{</p>
+<blockquote>
+<div><p>“csc”: “Test”,
+“salindex”: 1,
+“stream”: {</p>
+<blockquote>
+<div><p>“event_name”: “summaryState”</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}]</p>
+</dd>
+<dt><strong>}</strong></dt><dd></dd>
+<dt><strong>answer = await producer.process_message(message)</strong></dt><dd></dd>
+<dt><strong># {</strong></dt><dd></dd>
+<dt><strong>#     “category”: “event”,</strong></dt><dd></dd>
+<dt><strong>#     “data”: [{</strong></dt><dd></dd>
+<dt><strong>#         “csc”: “Test”,</strong></dt><dd></dd>
+<dt><strong>#         “salindex”: 1,</strong></dt><dd></dd>
+<dt><strong>#         “data”: {</strong></dt><dd></dd>
+<dt><strong>#             “summaryState”: [{</strong></dt><dd></dd>
+<dt><strong>#                 “summaryState”: {</strong></dt><dd></dd>
+<dt><strong>#                     “value”: 1,</strong></dt><dd></dd>
+<dt><strong>#                     “dataType”: “Int”</strong></dt><dd></dd>
+<dt><strong>#                 }</strong></dt><dd></dd>
+<dt><strong>#             }]</strong></dt><dd></dd>
+<dt><strong>#         }</strong></dt><dd></dd>
+<dt><strong>#     }]</strong></dt><dd></dd>
+<dt><strong># }</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.events.producer.EventsProducer.set_remote_evt_callbacks">
+<code class="sig-name descname">set_remote_evt_callbacks</code><span class="sig-paren">(</span><em class="sig-param">remote</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.set_remote_evt_callbacks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="producer.telemetries_events.producer.Producer.get_telemetry_message">
-<code class="sig-name descname">get_telemetry_message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.producer.Producer.get_telemetry_message" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt id="producer.events.producer.EventsProducer.setup_callbacks">
+<code class="sig-name descname">setup_callbacks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.setup_callbacks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configures a callback for each remote created</p>
+</dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-producer.telemetries_events.test_events">
-<span id="producer-telemetries-events-test-events-module"></span><h2>producer.telemetries_events.test_events module<a class="headerlink" href="#module-producer.telemetries_events.test_events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.events.test_client">
+<span id="producer-events-test-client-module"></span><h2>producer.events.test_client module<a class="headerlink" href="#module-producer.events.test_client" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="producer.telemetries_events.test_events.Harness">
-<em class="property">class </em><code class="sig-prename descclassname">producer.telemetries_events.test_events.</code><code class="sig-name descname">Harness</code><span class="sig-paren">(</span><em class="sig-param">initial_state</em>, <em class="sig-param">config_dir=None</em>, <em class="sig-param">CscClass=&lt;class 'lsst.ts.salobj.test_csc.TestCsc'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_events.Harness" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="class">
-<dt id="producer.telemetries_events.test_events.TestEventsMessages">
-<em class="property">class </em><code class="sig-prename descclassname">producer.telemetries_events.test_events.</code><code class="sig-name descname">TestEventsMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_events.TestEventsMessages" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
+<dt id="producer.events.test_client.TestEventsClient">
+<em class="property">class </em><code class="sig-prename descclassname">producer.events.test_client.</code><code class="sig-name descname">TestEventsClient</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_client.TestEventsClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">test_utils.WSClientTestCase</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>loop</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -248,7 +399,7 @@ emitting fake telemetry and event data which is then sent over with websockets</
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(*args, **kwds)</p></td>
 <td><p>Call self as a function.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanup</span></code>(**kwargs)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanup</span></code>(function, *args, **kwargs)</p></td>
 <td><p>Add a function, with arguments, to be called when the test is completed.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addTypeEqualityFunc</span></code>(typeobj, function)</p></td>
@@ -256,6 +407,18 @@ emitting fake telemetry and event data which is then sent over with websockets</
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAlmostEqual</span></code>(first, second[, places, …])</p></td>
 <td><p>Fail if the two objects are unequal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is more than the given delta.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncRaises</span></code>(exception, awaitable)</p></td>
+<td><p>Test that an exception of type <code class="docutils literal notranslate"><span class="pre">exception</span></code> is raised when an exception is raised when awaiting <code class="docutils literal notranslate"><span class="pre">awaitable</span></code>, a future or coroutine.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncRaisesRegex</span></code>(exception, regex, …)</p></td>
+<td><p>Like <code class="xref py py-meth docutils literal notranslate"><span class="pre">assertAsyncRaises()</span></code> but also tests that <code class="docutils literal notranslate"><span class="pre">regex</span></code> matches on the string representation of the raised exception.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncWarns</span></code>(warning, awaitable)</p></td>
+<td><p>Test that a warning is triggered when awaiting <code class="docutils literal notranslate"><span class="pre">awaitable</span></code>, a future or a coroutine.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncWarnsRegex</span></code>(warning, regex, awaitable)</p></td>
+<td><p>Like <code class="xref py py-meth docutils literal notranslate"><span class="pre">assertAsyncWarns()</span></code> but also tests that <code class="docutils literal notranslate"><span class="pre">regex</span></code> matches on the message of the triggered warning.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertCountEqual</span></code>(first, second[, msg])</p></td>
 <td><p>An unordered sequence comparison asserting that the same elements, regardless of order.</p></td>
@@ -362,7 +525,13 @@ emitting fake telemetry and event data which is then sent over with websockets</
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">failureException</span></code></p></td>
 <td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.AssertionError</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.telemetries_events.test_events.TestEventsMessages.setUp" title="producer.telemetries_events.test_events.TestEventsMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">harness</span></code>([act_assert, arrange, cleanup])</p></td>
+<td><p>Runs the <cite>act_assert</cite> coroutine callback after starting a websockets server.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code>([result])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code>()</p></td>
 <td><p>Hook method for setting up the test fixture before exercising it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpClass</span></code>()</p></td>
@@ -381,6 +550,257 @@ emitting fake telemetry and event data which is then sent over with websockets</
 <td><p>Hook method for deconstructing the test fixture after testing it.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDownClass</span></code>()</p></td>
+<td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 78%" />
+<col style="width: 22%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>assertAlmostEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertDictEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertNotAlmostEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertNotEquals</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertNotRegexpMatches</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assertRaisesRegexp</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>assertRegexpMatches</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>assert_</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>countTestCases</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>defaultTestResult</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failIf</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failIfAlmostEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failIfEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failUnless</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failUnlessAlmostEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>failUnlessEqual</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>failUnlessRaises</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>id</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>test_valid_remote_not_in_config</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="producer.events.test_client.TestEventsClient.test_valid_remote_not_in_config">
+<em class="property">async </em><code class="sig-name descname">test_valid_remote_not_in_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_client.TestEventsClient.test_valid_remote_not_in_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-producer.events.test_producer">
+<span id="producer-events-test-producer-module"></span><h2>producer.events.test_producer module<a class="headerlink" href="#module-producer.events.test_producer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="producer.events.test_producer.TestEventsMessages">
+<em class="property">class </em><code class="sig-prename descclassname">producer.events.test_producer.</code><code class="sig-name descname">TestEventsMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">asynctest.case.TestCase</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>loop</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(*args, **kwds)</p></td>
+<td><p>Call self as a function.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanup</span></code>(function, *args, **kwargs)</p></td>
+<td><p>Add a function, with arguments, to be called when the test is completed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addTypeEqualityFunc</span></code>(typeobj, function)</p></td>
+<td><p>Add a type specific assertEqual style function to compare a type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAlmostEqual</span></code>(first, second[, places, …])</p></td>
+<td><p>Fail if the two objects are unequal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is more than the given delta.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncRaises</span></code>(exception, awaitable)</p></td>
+<td><p>Test that an exception of type <code class="docutils literal notranslate"><span class="pre">exception</span></code> is raised when an exception is raised when awaiting <code class="docutils literal notranslate"><span class="pre">awaitable</span></code>, a future or coroutine.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncRaisesRegex</span></code>(exception, regex, …)</p></td>
+<td><p>Like <code class="xref py py-meth docutils literal notranslate"><span class="pre">assertAsyncRaises()</span></code> but also tests that <code class="docutils literal notranslate"><span class="pre">regex</span></code> matches on the string representation of the raised exception.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncWarns</span></code>(warning, awaitable)</p></td>
+<td><p>Test that a warning is triggered when awaiting <code class="docutils literal notranslate"><span class="pre">awaitable</span></code>, a future or a coroutine.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAsyncWarnsRegex</span></code>(warning, regex, awaitable)</p></td>
+<td><p>Like <code class="xref py py-meth docutils literal notranslate"><span class="pre">assertAsyncWarns()</span></code> but also tests that <code class="docutils literal notranslate"><span class="pre">regex</span></code> matches on the message of the triggered warning.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertCountEqual</span></code>(first, second[, msg])</p></td>
+<td><p>An unordered sequence comparison asserting that the same elements, regardless of order.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertDictContainsSubset</span></code>(subset, dictionary)</p></td>
+<td><p>Checks whether dictionary is a superset of subset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Fail if the two objects are unequal as determined by the ‘==’ operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertFalse</span></code>(expr[, msg])</p></td>
+<td><p>Check that the expression is false.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreater</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreaterEqual</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIn</span></code>(member, container[, msg])</p></td>
+<td><p>Just like self.assertTrue(a in b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIs</span></code>(expr1, expr2[, msg])</p></td>
+<td><p>Just like self.assertTrue(a is b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsInstance</span></code>(obj, cls[, msg])</p></td>
+<td><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNone</span></code>(obj[, msg])</p></td>
+<td><p>Same as self.assertTrue(obj is None), with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNot</span></code>(expr1, expr2[, msg])</p></td>
+<td><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNotNone</span></code>(obj[, msg])</p></td>
+<td><p>Included for symmetry with assertIsNone.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLess</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLessEqual</span></code>(a, b[, msg])</p></td>
+<td><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertListEqual</span></code>(list1, list2[, msg])</p></td>
+<td><p>A list-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLogs</span></code>([logger, level])</p></td>
+<td><p>Fail unless a log message of level <em>level</em> or higher is emitted on <em>logger_name</em> or its children.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertMultiLineEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Assert that two multi-line strings are equal.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotAlmostEqual</span></code>(first, second[, …])</p></td>
+<td><p>Fail if the two objects are equal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is less than the given delta.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotEqual</span></code>(first, second[, msg])</p></td>
+<td><p>Fail if the two objects are equal as determined by the ‘!=’ operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIn</span></code>(member, container[, msg])</p></td>
+<td><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIsInstance</span></code>(obj, cls[, msg])</p></td>
+<td><p>Included for symmetry with assertIsInstance.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotRegex</span></code>(text, unexpected_regex[, msg])</p></td>
+<td><p>Fail the test if the text matches the regular expression.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaises</span></code>(expected_exception, *args, **kwargs)</p></td>
+<td><p>Fail unless an exception of class expected_exception is raised by the callable when invoked with specified positional and keyword arguments.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaisesRegex</span></code>(expected_exception, …)</p></td>
+<td><p>Asserts that the message in a raised exception matches a regex.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRegex</span></code>(text, expected_regex[, msg])</p></td>
+<td><p>Fail the test unless the text matches the regular expression.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSequenceEqual</span></code>(seq1, seq2[, msg, seq_type])</p></td>
+<td><p>An equality assertion for ordered sequences (like lists and tuples).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSetEqual</span></code>(set1, set2[, msg])</p></td>
+<td><p>A set-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTrue</span></code>(expr[, msg])</p></td>
+<td><p>Check that the expression is true.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTupleEqual</span></code>(tuple1, tuple2[, msg])</p></td>
+<td><p>A tuple-specific equality assertion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarns</span></code>(expected_warning, *args, **kwargs)</p></td>
+<td><p>Fail unless a warning of class warnClass is triggered by the callable when invoked with specified positional and keyword arguments.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarnsRegex</span></code>(expected_warning, …)</p></td>
+<td><p>Asserts that the message in a triggered warning matches a regexp.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">debug</span></code>()</p></td>
+<td><p>Run the test without collecting errors in a TestResult</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doCleanups</span></code>()</p></td>
+<td><p>Execute all cleanup functions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>([msg])</p></td>
+<td><p>Fail immediately, with the given message.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">failureException</span></code></p></td>
+<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.AssertionError</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">run</span></code>([result])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.test_producer.TestEventsMessages.setUp" title="producer.events.test_producer.TestEventsMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
+<td><p>Hook method for setting up the test fixture before exercising it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpClass</span></code>()</p></td>
+<td><p>Hook method for setting up class fixture before running tests in the class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortDescription</span></code>()</p></td>
+<td><p>Returns a one-line description of the test, or None if no description has been provided.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code>(reason)</p></td>
+<td><p>Skip this test.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subTest</span></code>([msg])</p></td>
+<td><p>Return a context manager that will return the enclosed block of code in a subtest identified by the optional message and keyword parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.test_producer.TestEventsMessages.tearDown" title="producer.events.test_producer.TestEventsMessages.tearDown"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDown</span></code></a>()</p></td>
+<td><p>Hook method for deconstructing the test fixture after testing it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDownClass</span></code>()</p></td>
 <td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
 </tr>
 </tbody>
@@ -448,290 +868,49 @@ emitting fake telemetry and event data which is then sent over with websockets</
 <tr class="row-odd"><td><p><strong>id</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>run</strong></p></td>
+<tr class="row-even"><td><p><strong>test_produced_message_with_event_arrays</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>test_produced_message_with_event_arrays</strong></p></td>
+<tr class="row-odd"><td><p><strong>test_produced_message_with_event_scalar</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>test_produced_message_with_event_scalar</strong></p></td>
+<tr class="row-even"><td><p><strong>wait_for_stream</strong></p></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="producer.telemetries_events.test_events.TestEventsMessages.setUp">
-<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_events.TestEventsMessages.setUp" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.test_producer.TestEventsMessages.setUp">
+<em class="property">async </em><code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages.setUp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hook method for setting up the test fixture before exercising it.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="producer.telemetries_events.test_events.TestEventsMessages.test_produced_message_with_event_arrays">
-<code class="sig-name descname">test_produced_message_with_event_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_events.TestEventsMessages.test_produced_message_with_event_arrays" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.test_producer.TestEventsMessages.tearDown">
+<em class="property">async </em><code class="sig-name descname">tearDown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages.tearDown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hook method for deconstructing the test fixture after testing it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="producer.events.test_producer.TestEventsMessages.test_produced_message_with_event_arrays">
+<em class="property">async </em><code class="sig-name descname">test_produced_message_with_event_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages.test_produced_message_with_event_arrays" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="producer.telemetries_events.test_events.TestEventsMessages.test_produced_message_with_event_scalar">
-<code class="sig-name descname">test_produced_message_with_event_scalar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_events.TestEventsMessages.test_produced_message_with_event_scalar" title="Permalink to this definition">¶</a></dt>
+<dt id="producer.events.test_producer.TestEventsMessages.test_produced_message_with_event_scalar">
+<em class="property">async </em><code class="sig-name descname">test_produced_message_with_event_scalar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages.test_produced_message_with_event_scalar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="producer.events.test_producer.TestEventsMessages.wait_for_stream">
+<em class="property">async </em><code class="sig-name descname">wait_for_stream</code><span class="sig-paren">(</span><em class="sig-param">stream</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages.wait_for_stream" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-producer.telemetries_events.test_telemetry">
-<span id="producer-telemetries-events-test-telemetry-module"></span><h2>producer.telemetries_events.test_telemetry module<a class="headerlink" href="#module-producer.telemetries_events.test_telemetry" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="producer.telemetries_events.test_telemetry.Harness">
-<em class="property">class </em><code class="sig-prename descclassname">producer.telemetries_events.test_telemetry.</code><code class="sig-name descname">Harness</code><span class="sig-paren">(</span><em class="sig-param">initial_state</em>, <em class="sig-param">config_dir=None</em>, <em class="sig-param">CscClass=&lt;class 'lsst.ts.salobj.test_csc.TestCsc'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_telemetry.Harness" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-</dd></dl>
-
-<dl class="class">
-<dt id="producer.telemetries_events.test_telemetry.TestTelemetryMessages">
-<em class="property">class </em><code class="sig-prename descclassname">producer.telemetries_events.test_telemetry.</code><code class="sig-name descname">TestTelemetryMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_telemetry.TestTelemetryMessages" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">unittest.case.TestCase</span></code></p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">__call__</span></code>(*args, **kwds)</p></td>
-<td><p>Call self as a function.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addCleanup</span></code>(**kwargs)</p></td>
-<td><p>Add a function, with arguments, to be called when the test is completed.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">addTypeEqualityFunc</span></code>(typeobj, function)</p></td>
-<td><p>Add a type specific assertEqual style function to compare a type.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertAlmostEqual</span></code>(first, second[, places, …])</p></td>
-<td><p>Fail if the two objects are unequal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is more than the given delta.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertCountEqual</span></code>(first, second[, msg])</p></td>
-<td><p>An unordered sequence comparison asserting that the same elements, regardless of order.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertDictContainsSubset</span></code>(subset, dictionary)</p></td>
-<td><p>Checks whether dictionary is a superset of subset.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertEqual</span></code>(first, second[, msg])</p></td>
-<td><p>Fail if the two objects are unequal as determined by the ‘==’ operator.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertFalse</span></code>(expr[, msg])</p></td>
-<td><p>Check that the expression is false.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreater</span></code>(a, b[, msg])</p></td>
-<td><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertGreaterEqual</span></code>(a, b[, msg])</p></td>
-<td><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIn</span></code>(member, container[, msg])</p></td>
-<td><p>Just like self.assertTrue(a in b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIs</span></code>(expr1, expr2[, msg])</p></td>
-<td><p>Just like self.assertTrue(a is b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsInstance</span></code>(obj, cls[, msg])</p></td>
-<td><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer default message.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNone</span></code>(obj[, msg])</p></td>
-<td><p>Same as self.assertTrue(obj is None), with a nicer default message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNot</span></code>(expr1, expr2[, msg])</p></td>
-<td><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertIsNotNone</span></code>(obj[, msg])</p></td>
-<td><p>Included for symmetry with assertIsNone.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLess</span></code>(a, b[, msg])</p></td>
-<td><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLessEqual</span></code>(a, b[, msg])</p></td>
-<td><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertListEqual</span></code>(list1, list2[, msg])</p></td>
-<td><p>A list-specific equality assertion.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertLogs</span></code>([logger, level])</p></td>
-<td><p>Fail unless a log message of level <em>level</em> or higher is emitted on <em>logger_name</em> or its children.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertMultiLineEqual</span></code>(first, second[, msg])</p></td>
-<td><p>Assert that two multi-line strings are equal.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotAlmostEqual</span></code>(first, second[, …])</p></td>
-<td><p>Fail if the two objects are equal as determined by their difference rounded to the given number of decimal places (default 7) and comparing to zero, or by comparing that the difference between the two objects is less than the given delta.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotEqual</span></code>(first, second[, msg])</p></td>
-<td><p>Fail if the two objects are equal as determined by the ‘!=’ operator.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIn</span></code>(member, container[, msg])</p></td>
-<td><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotIsInstance</span></code>(obj, cls[, msg])</p></td>
-<td><p>Included for symmetry with assertIsInstance.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertNotRegex</span></code>(text, unexpected_regex[, msg])</p></td>
-<td><p>Fail the test if the text matches the regular expression.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaises</span></code>(expected_exception, *args, **kwargs)</p></td>
-<td><p>Fail unless an exception of class expected_exception is raised by the callable when invoked with specified positional and keyword arguments.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRaisesRegex</span></code>(expected_exception, …)</p></td>
-<td><p>Asserts that the message in a raised exception matches a regex.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertRegex</span></code>(text, expected_regex[, msg])</p></td>
-<td><p>Fail the test unless the text matches the regular expression.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSequenceEqual</span></code>(seq1, seq2[, msg, seq_type])</p></td>
-<td><p>An equality assertion for ordered sequences (like lists and tuples).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertSetEqual</span></code>(set1, set2[, msg])</p></td>
-<td><p>A set-specific equality assertion.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTrue</span></code>(expr[, msg])</p></td>
-<td><p>Check that the expression is true.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertTupleEqual</span></code>(tuple1, tuple2[, msg])</p></td>
-<td><p>A tuple-specific equality assertion.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarns</span></code>(expected_warning, *args, **kwargs)</p></td>
-<td><p>Fail unless a warning of class warnClass is triggered by the callable when invoked with specified positional and keyword arguments.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">assertWarnsRegex</span></code>(expected_warning, …)</p></td>
-<td><p>Asserts that the message in a triggered warning matches a regexp.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">debug</span></code>()</p></td>
-<td><p>Run the test without collecting errors in a TestResult</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">doCleanups</span></code>()</p></td>
-<td><p>Execute all cleanup functions.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fail</span></code>([msg])</p></td>
-<td><p>Fail immediately, with the given message.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">failureException</span></code></p></td>
-<td><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">builtins.AssertionError</span></code></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.telemetries_events.test_telemetry.TestTelemetryMessages.setUp" title="producer.telemetries_events.test_telemetry.TestTelemetryMessages.setUp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUp</span></code></a>()</p></td>
-<td><p>Hook method for setting up the test fixture before exercising it.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">setUpClass</span></code>()</p></td>
-<td><p>Hook method for setting up class fixture before running tests in the class.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shortDescription</span></code>()</p></td>
-<td><p>Returns a one-line description of the test, or None if no description has been provided.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">skipTest</span></code>(reason)</p></td>
-<td><p>Skip this test.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subTest</span></code>([msg])</p></td>
-<td><p>Return a context manager that will return the enclosed block of code in a subtest identified by the optional message and keyword parameters.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDown</span></code>()</p></td>
-<td><p>Hook method for deconstructing the test fixture after testing it.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tearDownClass</span></code>()</p></td>
-<td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 82%" />
-<col style="width: 18%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>assertAlmostEquals</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>assertDictEqual</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>assertEquals</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>assertNotAlmostEquals</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>assertNotEquals</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>assertNotRegexpMatches</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>assertRaisesRegexp</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>assertRegexpMatches</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>assert_</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>countTestCases</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>defaultTestResult</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>failIf</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>failIfAlmostEqual</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>failIfEqual</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>failUnless</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>failUnlessAlmostEqual</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>failUnlessEqual</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>failUnlessRaises</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>id</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>run</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>test_produced_message_with_telemetry_arrays</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>test_produced_message_with_telemetry_scalar</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="producer.telemetries_events.test_telemetry.TestTelemetryMessages.setUp">
-<code class="sig-name descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_telemetry.TestTelemetryMessages.setUp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hook method for setting up the test fixture before exercising it.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_arrays">
-<code class="sig-name descname">test_produced_message_with_telemetry_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_arrays" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_scalar">
-<code class="sig-name descname">test_produced_message_with_telemetry_scalar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries_events.test_telemetry.TestTelemetryMessages.test_produced_message_with_telemetry_scalar" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-producer.telemetries_events">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.telemetries_events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-producer.events">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-producer.events" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -743,8 +922,10 @@ emitting fake telemetry and event data which is then sent over with websockets</
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="producer.heartbeats.html" class="btn btn-neutral float-right" title="producer.heartbeats package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="producer.scriptqueue.html" class="btn btn-neutral float-left" title="producer.scriptqueue package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="producer.html" class="btn btn-neutral float-left" title="producer package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -83,8 +83,12 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview and configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#choosing-sal-topics-with-config-json">Choosing SAL topics with <code class="code docutils literal notranslate"><span class="pre">config.json</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#configuring-communications-with-environment-variables">Configuring communications with environment variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#producer">Producer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#choosing-sal-topics-with-config-json">Choosing SAL topics with <code class="code docutils literal notranslate"><span class="pre">config.json</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#configuring-communications-with-environment-variables">Configuring communications with environment variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#love-csc">LOVE CSC</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
@@ -155,10 +159,13 @@
             
   <div class="section" id="overview-and-configuration">
 <h1>Overview and configuration<a class="headerlink" href="#overview-and-configuration" title="Permalink to this headline">¶</a></h1>
-<img alt="../_images/Producer-overview.svg" src="../_images/Producer-overview.svg" /><p>The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. “Messages” can be understood without distinction as events, telemetries or commands parameters and their acknowledgements. The LOVE-producer (or just the Producer) is part of the LSST Operators Visualization Environment (L.O.V.E).</p>
+<p>This repository contains two software components: the LOVE Producer and the LOVE CSC. Both of these components are part of the LSST Operators Visualization Environment (L.O.V.E) and provide the necessary communication between the LOVE Manager and SAL.</p>
+<div class="section" id="producer">
+<h2>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h2>
+<img alt="../_images/Producer-overview.svg" src="../_images/Producer-overview.svg" /><p>The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. “Messages” can be understood without distinction as events, telemetries or commands parameters and their acknowledgements.</p>
 <p>As shown in the figure, the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> gives information of which SAL topics (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. Environment variables are also read to configure the communication with the SAL and the LOVE-manager. At the same time, the LOVE-manager can send commands parameters to execute commands with <code class="code docutils literal notranslate"><span class="pre">salobj</span></code>, returning a message acknowledging the successful reception of said command or an error message.</p>
 <div class="section" id="choosing-sal-topics-with-config-json">
-<h2>Choosing SAL topics with <code class="code docutils literal notranslate"><span class="pre">config.json</span></code><a class="headerlink" href="#choosing-sal-topics-with-config-json" title="Permalink to this headline">¶</a></h2>
+<h3>Choosing SAL topics with <code class="code docutils literal notranslate"><span class="pre">config.json</span></code><a class="headerlink" href="#choosing-sal-topics-with-config-json" title="Permalink to this headline">¶</a></h3>
 <p>The LOVE-producer reads a <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file (located in the <code class="code docutils literal notranslate"><span class="pre">producer/config/</span></code> folder) to create the instances of the <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> class that are used to read SAL data and send commands. This file specifies each topic name and the SAL index for which messages will be produced. For example:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;Test&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -174,13 +181,18 @@
 <p>configures the Producer to produce messages from/to the <code class="code docutils literal notranslate"><span class="pre">Test</span></code> CSC with index <code class="code docutils literal notranslate"><span class="pre">1</span></code> and the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> CSCs with indices <code class="code docutils literal notranslate"><span class="pre">1</span></code> and <code class="code docutils literal notranslate"><span class="pre">2</span></code>. The <cite>source</cite> parameter is ignored but kept for consistency in the integration with the <cite>LOVE-simulator</cite>.</p>
 </div>
 <div class="section" id="configuring-communications-with-environment-variables">
-<h2>Configuring communications with environment variables<a class="headerlink" href="#configuring-communications-with-environment-variables" title="Permalink to this headline">¶</a></h2>
+<h3>Configuring communications with environment variables<a class="headerlink" href="#configuring-communications-with-environment-variables" title="Permalink to this headline">¶</a></h3>
 <p>Three environment variables must be set to allow the producer communicate with the SAL and the LOVE-manager:</p>
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">LSST_DDS_DOMAIN</span></code>: Used by <code class="code docutils literal notranslate"><span class="pre">salobj</span></code> to filter SAL messages in the network.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">WS_HOST</span></code>: Hostname or IP adcress of the LOVE-manager.</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">WS_PASS</span></code>: Password used by the LOVE-manager to allow the reception of messages from the LOVE-producer.</p></li>
 </ul>
+</div>
+</div>
+<div class="section" id="love-csc">
+<h2>LOVE CSC<a class="headerlink" href="#love-csc" title="Permalink to this headline">¶</a></h2>
+<img alt="../_images/LOVE-CSC.svg" src="../_images/LOVE-CSC.svg" /><p>The LOVE CSC component is a python module that listens to messages (currently limited to observation logs) sent from the LOVE Manager and publishes them to SAL through <code class="code docutils literal notranslate"><span class="pre">salobj</span></code>.</p>
 </div>
 </div>
 
