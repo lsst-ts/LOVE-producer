@@ -1,0 +1,55 @@
+<mxfile host="9dbf4895-3126-45b7-b0ac-4e1ea6dbf1fe" modified="2020-08-13T16:17:49.918Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.47.3 Chrome/78.0.3904.130 Electron/7.3.2 Safari/537.36" etag="CPKZ1eWaIcHIkl76Dk_B" version="13.1.3">
+    <diagram id="6hGFLwfOUW9BJ-s0fimq" name="Page-1">
+        <mxGraphModel dx="1016" dy="1640" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="5" target="30" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="Puts data &lt;br&gt;through salobj&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="40" vertex="1" connectable="0">
+                    <mxGeometry x="0.3226" relative="1" as="geometry">
+                        <mxPoint x="-15" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <UserObject label="SAL" lucidchartObjectId="G4LMOLdaqRaX" id="5">
+                    <mxCell style="html=1;whiteSpace=wrap;;fontSize=11;fontColor=#000000;spacing=3;strokeOpacity=100;fillColor=#FFFFFF;" parent="1" vertex="1" zOrder="1">
+                        <mxGeometry x="30" y="-1010" width="96" height="59" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <UserObject label="LOVE CSC" lucidchartObjectId="G4LMOLdaqRaX" id="30">
+                    <mxCell style="html=1;whiteSpace=wrap;;fontSize=11;fontColor=#000000;spacing=3;strokeOpacity=100;fillColor=#FFFFFF;" parent="1" vertex="1" zOrder="1">
+                        <mxGeometry x="230" y="-1010" width="96" height="59" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <UserObject label="Manager" lucidchartObjectId=".g3MWFg-sE8c" id="56">
+                    <mxCell style="html=1;whiteSpace=wrap;;fontSize=11;fontColor=#000000;spacing=3;strokeOpacity=100;fillColor=#FFFFFF;" vertex="1" zOrder="4" parent="1">
+                        <mxGeometry x="470" y="-1010" width="96" height="59" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <mxCell id="57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" target="56" source="30">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="350" y="-980"/>
+                            <mxPoint x="350" y="-980"/>
+                        </Array>
+                        <mxPoint x="310" y="-1010" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="58" value="Sends observing log&amp;nbsp;&lt;br&gt;data to&lt;br&gt;(websockets)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="57">
+                    <mxGeometry x="-0.3782" y="-4" relative="1" as="geometry">
+                        <mxPoint x="24" y="-4" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;dashed=1;" edge="1" parent="1" source="67" target="5">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <UserObject label="LOVE &lt;br&gt;Producer(s)" lucidchartObjectId="G4LMOLdaqRaX" id="67">
+                    <mxCell style="html=1;whiteSpace=wrap;;fontSize=11;fontColor=#000000;spacing=3;strokeOpacity=100;fillColor=#FFFFFF;" vertex="1" zOrder="1" parent="1">
+                        <mxGeometry x="30" y="-1110" width="96" height="59" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
