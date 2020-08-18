@@ -1,13 +1,17 @@
+*****************************
 Overview and configuration
-===============
+*****************************
+This repository contains two software components: the LOVE Producer and the LOVE CSC. Both of these components are part of the LSST Operators Visualization Environment (L.O.V.E) and provide the necessary communication between the LOVE Manager and SAL. 
+
+################
+Producer
+################
 
 .. image:: ../assets/Producer-overview.svg
 
-The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. "Messages" can be understood without distinction as events, telemetries or commands parameters and their acknowledgements. The LOVE-producer (or just the Producer) is part of the LSST Operators Visualization Environment (L.O.V.E).
+The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. "Messages" can be understood without distinction as events, telemetries or commands parameters and their acknowledgements.
 
 As shown in the figure, the :code:`config.json` gives information of which SAL topics (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. Environment variables are also read to configure the communication with the SAL and the LOVE-manager. At the same time, the LOVE-manager can send commands parameters to execute commands with :code:`salobj`, returning a message acknowledging the successful reception of said command or an error message. 
-
-
 
 
 Choosing SAL topics with :code:`config.json`
@@ -36,3 +40,13 @@ Three environment variables must be set to allow the producer communicate with t
 - :code:`LSST_DDS_DOMAIN`: Used by :code:`salobj` to filter SAL messages in the network.
 - :code:`WS_HOST`: Hostname or IP adcress of the LOVE-manager.
 - :code:`WS_PASS`: Password used by the LOVE-manager to allow the reception of messages from the LOVE-producer.
+
+
+################
+LOVE CSC
+################
+
+.. image:: ../assets/LOVE-CSC.svg
+
+The LOVE CSC component is a python module that listens to messages (currently limited to observation logs) sent from the LOVE Manager and publishes them to SAL through :code:`salobj`.
+

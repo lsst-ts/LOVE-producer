@@ -1,12 +1,17 @@
+*****************************
 How it works
-===============
+*****************************
+
+################################
+Producer
+################################
 
 .. image:: ../assets/Producer-details.svg
 The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State`, :code:`Command Receiver` and :code:`Initial State`), each refered to as "a Producer", and a :code:`main.py` python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager. 
 
 
 The :code:`main.py` file
-------------------
+--------------------------------------------
 
 It uses the :code:`websocket` library to send messages to the :code:`ws://<WS_HOST>/?password=<WS_PASS>` URL, where  :code:`WS_HOST` and :code:`WS_PASS` are read from environment variables. It configures each Producer according to the :code:`config.json` and extracts data by either passing callbacks or making direct calls to message getters functions to send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is consistent with the what the LOVE-manager expects and has this structure:
 
@@ -64,3 +69,33 @@ Initial State Producer
 --------------------------------------------
 
 Produces LOVE messages with the latest info of an event. It first loads several remotes in the constructor and then produces messages for the LOVE-manager through the process_message function everytime a request is received in the websocket :code:`on_message` event.
+
+
+################################
+LOVE CSC
+################################
+The LOVE CSC module is split into a client and a CSC :code:`controller`. The client opens a websocket connection to the LOVE manager and listens to incoming observing log messages. The websocket connection is kept alive via a reconnection protocol as well as kept monitored via a heartbeat message every 3 seconds.
+
+The LOVE :code:`controller` inherits from :code:`salobj.Controller` and uses its :code:`evt_observingLog` field to publish the observing logs to SAL. The controller is called by the client whenever it receives a new observing log message.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -21,6 +21,18 @@ class TelemetriesProducer:
                 print(e)
 
     def get_remote_tel_values(self, remote):
+        """Get telemetries from the Remote
+
+        Parameters
+        ----------
+        remote: object
+            The Remote
+
+        Returns
+        -------
+        dict
+            A dictionary of telemetry values indexed by telemetry
+        """
         tel_names = remote.salinfo.telemetry_names
         values = {}
         for tel in tel_names:
@@ -45,6 +57,13 @@ class TelemetriesProducer:
         return values
 
     def get_telemetry_message(self):
+        """Return a formatted message with the telemetry data to be sent by the Client
+
+        Returns
+        -------
+        dict
+            The message
+        """
         output_list = []
         for remote in self.remote_list:
             values = self.get_remote_tel_values(remote)

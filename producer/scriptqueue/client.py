@@ -21,18 +21,30 @@ class ScriptQueueWSClient(BaseWSClient):
         )
 
     async def on_start_client(self):
-        """ Initializes the websocket client and producer callbacks """
+        """Initializes the websocket client and producer callbacks """
 
         self.connection_error = False
         await self.producer.setup()
         await self.producer.update()
 
     def send_message_callback(self, message):
-        """Sends messages through websockets. Called after each scriptqueue event """
+        """Sends messages through websockets. Called after each scriptqueue event
+
+        Parameters
+        ----------
+        message: dict
+            The message to send
+        """
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_receive(self, message):
-        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro"""
+        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro
+
+        Parameters
+        ----------
+        message: dict
+            The message
+        """
 
         stream_exists = utils.check_stream_from_last_message(
             message, "initial_state", "ScriptQueueState", self.salindex, "event_name"
@@ -45,11 +57,19 @@ class ScriptQueueWSClient(BaseWSClient):
 
 
 async def init_client(salindex):
+    """Initialize the client for a given ScriptQueue SAL index
+
+    Parameters
+    ----------
+    salindex: int
+        The SAL Index of the Script Queue
+    """
     sqclient = ScriptQueueWSClient(salindex)
     await sqclient.start_ws_client()
 
 
 async def main():
+    """Main function, starts the client."""
     sq_list = BaseWSClient.read_config(BaseWSClient.path, "ScriptQueue")
     print("List of Script Queues to listen:", sq_list)
     for name, salindex in sq_list:

@@ -11,7 +11,6 @@ TELEMETRIES = "TELEMETRIES"
 EVENTS = "EVENTS"
 CSC_HEARTBEATS = "CSC_HEARTBEATS"
 SCRIPTQUEUE = "SCRIPTQUEUE"
-COMMANDS = "COMMANDS"
 
    
 def main():
@@ -25,7 +24,6 @@ def main():
             - EVENTS 
             - CSC_HEARTBEATS 
             - SCRIPTQUEUE 
-            - COMMANDS 
         Examples:
         export LOVE_PRODUCERS=TELEMETRIES:EVENTS #loads telemetries and events producers
         export LOVE_PRODUCERS=TELEMETRIES #loads telemetries producer
@@ -34,7 +32,7 @@ def main():
     """
     LOVE_PRODUCERS = os.environ.get('LOVE_PRODUCERS')
     if LOVE_PRODUCERS is None:
-        producers = [TELEMETRIES, EVENTS, CSC_HEARTBEATS, SCRIPTQUEUE, COMMANDS]
+        producers = [TELEMETRIES, EVENTS, CSC_HEARTBEATS, SCRIPTQUEUE]
     else:
         producers = LOVE_PRODUCERS.split(':')
     

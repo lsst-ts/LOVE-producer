@@ -11,6 +11,8 @@ from utils import Settings, NumpyEncoder
 
 
 class BaseWSClient:
+    """The base websocket client upon which the clients of all the producers are built."""
+
     path = os.path.join(os.path.dirname(__file__), Settings.config_path())
 
     def __init__(self, name):
@@ -35,6 +37,7 @@ class BaseWSClient:
                     await self.on_websocket_receive(msg)
 
     async def start_heartbeat(self):
+        """Sends its heartbeat periodically."""
         while True:
             await self.send_message(
                 {
@@ -45,6 +48,7 @@ class BaseWSClient:
             await asyncio.sleep(3)
 
     async def start_ws_client(self):
+        """Start the websockets client."""
         await self.on_start_client()
         while self.retry:
             try:
@@ -84,6 +88,13 @@ class BaseWSClient:
                 await asyncio.sleep(3)
 
     async def send_message(self, message):
+        """Send a given message through websockets
+
+        Parameters
+        ----------
+        message: dict
+            The message to send
+        """
         if self.websocket:
             if Settings.trace_timestamps():
                 snd_time = Time.now().tai.datetime.timestamp()
@@ -105,6 +116,15 @@ class BaseWSClient:
         pass
 
     async def on_websocket_error(self, e):
+        """Handle a websocket error.
+
+        Does nothing for now
+
+        Parameters
+        ----------
+        e : object
+            The error
+        """
         pass
 
     async def on_connected(self):
