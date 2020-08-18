@@ -84,6 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../modules/introduction.html">Overview and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/how_it_works.html">How it works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/readme_link.html">Readme File</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
@@ -295,22 +296,18 @@
 <dd><p>Generates a message with the heartbeat info of a CSC in dictionary format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>remote_name: str</strong></dt><dd><p>Name of the CSC</p>
-</dd>
-<dt><strong>salindex: int</strong></dt><dd><p>Salindex of the CSC</p>
-</dd>
-<dt><strong>nlost_subsequent:</strong></dt><dd><p>Number of subsequent or consecutive lost heartbeats since last observed heartbeat</p>
-</dd>
-<dt><strong>timestamp: float</strong></dt><dd><p>Timestamp of the last observed heartbeat.</p>
-</dd>
-</dl>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remote_name</strong> (<em>str</em>) – Name of the CSC</p></li>
+<li><p><strong>salindex</strong> (<em>int</em>) – Salindex of the CSC</p></li>
+<li><p><strong>nlost_subsequent</strong> – Number of subsequent or consecutive lost heartbeats since last observed heartbeat</p></li>
+<li><p><strong>timestamp</strong> (<em>float</em>) – Timestamp of the last observed heartbeat.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>dict</strong></dt><dd><p>Dictionary that, converted to string, is compatible with the LOVE-manager message format.</p>
+<dd class="field-even"><p>Dictionary that, converted to string, is compatible with the LOVE-manager message format.</p>
 </dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -502,7 +499,7 @@
 <td><p>Hook method for deconstructing the class fixture after running all tests in the class.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_not_received" title="producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_not_received"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_heartbeat_not_received</span></code></a>()</p></td>
-<td><p>Test that heartbeats messages are generated correctly when heartbeat is  not received</p></td>
+<td><p>Test that heartbeats messages are generated correctly when heartbeat is not received</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_received" title="producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_received"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_heartbeat_received</span></code></a>(mock_datetime)</p></td>
 <td><p>Test that heartbeats messages are generated correctly when received, and with timestamp obtained from datetime.now()</p></td>
@@ -589,7 +586,7 @@
 <dl class="method">
 <dt id="producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_not_received">
 <em class="property">async </em><code class="sig-name descname">test_heartbeat_not_received</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.test_producer.TestHeartbeatsMessages.test_heartbeat_not_received" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test that heartbeats messages are generated correctly when heartbeat is 
+<dd><p>Test that heartbeats messages are generated correctly when heartbeat is
 not received</p>
 </dd></dl>
 

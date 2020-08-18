@@ -84,6 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../modules/introduction.html">Overview and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/how_it_works.html">How it works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/readme_link.html">Readme File</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">producer package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
@@ -205,9 +206,9 @@
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.client">producer.scriptqueue.client module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.producer">producer.scriptqueue.producer module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.test_available">producer.scriptqueue.test_available module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.test_scripts_heartbeats">producer.scriptqueue.test_scripts_heartbeats module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue.test_state">producer.scriptqueue.test_state module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-test-available-module">producer.scriptqueue.test_available module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-test-scripts-heartbeats-module">producer.scriptqueue.test_scripts_heartbeats module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#producer-scriptqueue-test-state-module">producer.scriptqueue.test_state module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.scriptqueue.html#module-producer.scriptqueue">Module contents</a></li>
 </ul>
 </li>
@@ -317,18 +318,16 @@
 It can read the full file (by default), or read only a specific key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>path: `string`</strong></dt><dd><p>The full path of the config file</p>
-</dd>
-<dt><strong>key: `string`</strong></dt><dd><p>optional key to read</p>
-</dd>
-</dl>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<cite>string</cite>) – The full path of the config file</p></li>
+<li><p><strong>key</strong> (<cite>string</cite>) – optional key to read</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>csc_list: `[()]`</strong></dt><dd><p>The list of CSCs to run as a tuple with the CSC name and index</p>
+<dd class="field-even"><p><strong>csc_list</strong> – The list of CSCs to run as a tuple with the CSC name and index</p>
 </dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><cite>[()]</cite></p>
 </dd>
 </dl>
 </dd></dl>
@@ -731,14 +730,14 @@ implement default like this:</p>
 <dl class="function">
 <dt id="producer.utils.check_event_stream">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">check_event_stream</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream_name</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.check_event_stream" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tries to return the first stream found in a LOVE message. 
+<dd><p>Tries to return the first stream found in a LOVE message.
 Throws errors if it does not exist.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.utils.check_stream_from_last_message">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">check_stream_from_last_message</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.check_stream_from_last_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream)
 If not found then it will throw an error</p>
 </dd></dl>
 
@@ -756,28 +755,28 @@ If not found then it will throw an error</p>
 <dl class="function">
 <dt id="producer.utils.get_event_stream">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">get_event_stream</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream_name</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.get_event_stream" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tries to return the first stream found in a LOVE message. 
+<dd><p>Tries to return the first stream found in a LOVE message.
 Throws errors if it does not exist.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.utils.get_parameter_from_last_message">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">get_parameter_from_last_message</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream</em>, <em class="sig-param">parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.get_parameter_from_last_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream)
 If not found then it will throw an error</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.utils.get_stream_from_last_message">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">get_stream_from_last_message</code><span class="sig-paren">(</span><em class="sig-param">message</em>, <em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.get_stream_from_last_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+<dd><p>Takes a message and returns a parameter for a given (category,csc,salindex,stream)
 If not found then it will throw an error</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.utils.make_stream_message">
 <code class="sig-prename descclassname">producer.utils.</code><code class="sig-name descname">make_stream_message</code><span class="sig-paren">(</span><em class="sig-param">category</em>, <em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">stream</em>, <em class="sig-param">content</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.utils.make_stream_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a message for the LOVE-manager group (category-csc-salindex-stream) with 
+<dd><p>Returns a message for the LOVE-manager group (category-csc-salindex-stream) with
 a given content</p>
 </dd></dl>
 

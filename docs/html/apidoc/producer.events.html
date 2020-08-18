@@ -84,6 +84,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../modules/introduction.html">Overview and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../modules/how_it_works.html">How it works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/readme_link.html">Readme File</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">ApiDoc</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="producer.html">producer package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="producer.html#subpackages">Subpackages</a><ul class="current">
@@ -316,18 +317,20 @@
 <dt id="producer.events.producer.EventsProducer.process_message">
 <em class="property">async </em><code class="sig-name descname">process_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.process_message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tries to obtain the current data for an event with salobj.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>message: dictionary with the LOVE-schema see example:</strong></dt><dd></dd>
-</dl>
+<dd class="field-odd"><p><strong>message</strong> (<em>dictionary with the LOVE-schema see example:</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>answer: a dictionary such as those delivered by the Telemetries_Events producer</strong></dt><dd></dd>
-<dt><strong>Example</strong></dt><dd></dd>
-<dt><strong>——</strong></dt><dd></dd>
-<dt><strong>message = {</strong></dt><dd><p>“category”: “initial_state”,
+<dd class="field-even"><p><strong>answer</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a dictionary such as those delivered by the Telemetries_Events producer</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<dl>
+<dt>message = {</dt><dd><p>“category”: “initial_state”,
 “data”: [{</p>
 <blockquote>
 <div><p>“csc”: “Test”,
@@ -340,26 +343,24 @@
 </div></blockquote>
 <p>}]</p>
 </dd>
-<dt><strong>}</strong></dt><dd></dd>
-<dt><strong>answer = await producer.process_message(message)</strong></dt><dd></dd>
-<dt><strong># {</strong></dt><dd></dd>
-<dt><strong>#     “category”: “event”,</strong></dt><dd></dd>
-<dt><strong>#     “data”: [{</strong></dt><dd></dd>
-<dt><strong>#         “csc”: “Test”,</strong></dt><dd></dd>
-<dt><strong>#         “salindex”: 1,</strong></dt><dd></dd>
-<dt><strong>#         “data”: {</strong></dt><dd></dd>
-<dt><strong>#             “summaryState”: [{</strong></dt><dd></dd>
-<dt><strong>#                 “summaryState”: {</strong></dt><dd></dd>
-<dt><strong>#                     “value”: 1,</strong></dt><dd></dd>
-<dt><strong>#                     “dataType”: “Int”</strong></dt><dd></dd>
-<dt><strong>#                 }</strong></dt><dd></dd>
-<dt><strong>#             }]</strong></dt><dd></dd>
-<dt><strong>#         }</strong></dt><dd></dd>
-<dt><strong>#     }]</strong></dt><dd></dd>
-<dt><strong># }</strong></dt><dd></dd>
 </dl>
-</dd>
-</dl>
+<p>}
+answer = await producer.process_message(message)</p>
+<p># {
+#     “category”: “event”,
+#     “data”: [{
+#         “csc”: “Test”,
+#         “salindex”: 1,
+#         “data”: {
+#             “summaryState”: [{
+#                 “summaryState”: {
+#                     “value”: 1,
+#                     “dataType”: “Int”
+#                 }
+#             }]
+#         }
+#     }]
+# }</p>
 </dd></dl>
 
 <dl class="method">
