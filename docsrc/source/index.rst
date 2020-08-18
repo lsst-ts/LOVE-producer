@@ -12,6 +12,7 @@ Welcome to LOVE-producer's documentation!
 
    modules/introduction.rst
    modules/how_it_works.rst
+   modules/readme_link.rst
    apidoc/modules.rst
 
 
