@@ -196,7 +196,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="producer.love_csc.html">producer.love_csc package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#module-producer.love_csc.client">producer.love_csc.client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#producer-love-csc-client-module">producer.love_csc.client module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#module-producer.love_csc.csc">producer.love_csc.csc module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#module-producer.love_csc.test_csc">producer.love_csc.test_csc module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="producer.love_csc.html#module-producer.love_csc">Module contents</a></li>
@@ -233,6 +233,7 @@
 <dt id="producer.base_ws_client.BaseWSClient">
 <em class="property">class </em><code class="sig-prename descclassname">producer.base_ws_client.</code><code class="sig-name descname">BaseWSClient</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.base_ws_client.BaseWSClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The base websocket client upon which the clients of all the producers are built.</p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -249,31 +250,23 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.on_start_client" title="producer.base_ws_client.BaseWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
 <td><p>Executed the first time (only) when the client starts, before connecting</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.on_websocket_receive" title="producer.base_ws_client.BaseWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.on_websocket_error" title="producer.base_ws_client.BaseWSClient.on_websocket_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_error</span></code></a>(e)</p></td>
+<td><p>Handle a websocket error.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.on_websocket_receive" title="producer.base_ws_client.BaseWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
 <td><p>Executed every time a message is received from the LOVE-manager</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.read_config" title="producer.base_ws_client.BaseWSClient.read_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code></a>(path[, key])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.read_config" title="producer.base_ws_client.BaseWSClient.read_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code></a>(path[, key])</p></td>
 <td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 69%" />
-<col style="width: 31%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.send_message" title="producer.base_ws_client.BaseWSClient.send_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code></a>(message)</p></td>
+<td><p>Send a given message through websockets</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>send_message</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.start_heartbeat" title="producer.base_ws_client.BaseWSClient.start_heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_heartbeat</span></code></a>()</p></td>
+<td><p>Sends its heartbeat periodically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.base_ws_client.BaseWSClient.start_ws_client" title="producer.base_ws_client.BaseWSClient.start_ws_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_ws_client</span></code></a>()</p></td>
+<td><p>Start the websockets client.</p></td>
 </tr>
 </tbody>
 </table>
@@ -298,7 +291,14 @@
 <dl class="method">
 <dt id="producer.base_ws_client.BaseWSClient.on_websocket_error">
 <em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.base_ws_client.BaseWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handle a websocket error.</p>
+<p>Does nothing for now</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>e</strong> (<em>object</em>) – The error</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.base_ws_client.BaseWSClient.on_websocket_receive">
@@ -335,17 +335,25 @@ It can read the full file (by default), or read only a specific key</p>
 <dl class="method">
 <dt id="producer.base_ws_client.BaseWSClient.send_message">
 <em class="property">async </em><code class="sig-name descname">send_message</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.base_ws_client.BaseWSClient.send_message" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Send a given message through websockets</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dict</em>) – The message to send</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.base_ws_client.BaseWSClient.start_heartbeat">
 <em class="property">async </em><code class="sig-name descname">start_heartbeat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.base_ws_client.BaseWSClient.start_heartbeat" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sends its heartbeat periodically.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.base_ws_client.BaseWSClient.start_ws_client">
 <em class="property">async </em><code class="sig-name descname">start_ws_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.base_ws_client.BaseWSClient.start_ws_client" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Start the websockets client.</p>
+</dd></dl>
 
 </dd></dl>
 

@@ -9,11 +9,10 @@ MAX_LOST_HEARTBEATS_DEFAULT = 5
 HEARTBEAT_TIMEOUT_DEFAULT = 15
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
-HEARTBEATS_CONFIG_PATH = 'config.json'
+HEARTBEATS_CONFIG_PATH = "config.json"
 
 
 class HeartbeatProducer:
-
     def __init__(self, domain, send_heartbeat, csc_list):
         """Monitor CSC heartbeats and produces messages for the LOVE manager.
 
@@ -38,13 +37,16 @@ class HeartbeatProducer:
         self.remotes = []  # for cleanup
 
     def start(self):
+        """Start the producer."""
         for i in range(len(self.csc_list)):
             sal_lib_params = self.csc_list[i]
             sal_lib_name = sal_lib_params[0]
-            print('- Listening to heartbeats from CSC: ', sal_lib_params)
+            print("- Listening to heartbeats from CSC: ", sal_lib_params)
             [sal_lib_name, index] = sal_lib_params
 
-            asyncio.get_event_loop().create_task(self.monitor_remote_heartbeat(sal_lib_name, index))
+            asyncio.get_event_loop().create_task(
+                self.monitor_remote_heartbeat(sal_lib_name, index)
+            )
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
         """Generates a message with the heartbeat info of a CSC in dictionary format.
@@ -70,34 +72,44 @@ class HeartbeatProducer:
         # find the first element that matches the csc/salindex and use it instead of the default value
         max_lost_heartbeats = MAX_LOST_HEARTBEATS_DEFAULT
         if remote_name in self.heartbeat_params:
-            max_lost_heartbeats = next((el["max_lost_heartbeats"]
-                                        for el in self.heartbeat_params[remote_name] if el["index"] == salindex), MAX_LOST_HEARTBEATS_DEFAULT)
+            max_lost_heartbeats = next(
+                (
+                    el["max_lost_heartbeats"]
+                    for el in self.heartbeat_params[remote_name]
+                    if el["index"] == salindex
+                ),
+                MAX_LOST_HEARTBEATS_DEFAULT,
+            )
 
         if salindex is None:
             salindex = 0
-            
+
         heartbeat = {
-            'csc': remote_name,
-            'salindex': salindex,
-            'lost': nlost_subsequent,
-            'last_heartbeat_timestamp': timestamp,
-            'max_lost_heartbeats': max_lost_heartbeats
+            "csc": remote_name,
+            "salindex": salindex,
+            "lost": nlost_subsequent,
+            "last_heartbeat_timestamp": timestamp,
+            "max_lost_heartbeats": max_lost_heartbeats,
         }
         message = {
-            'category': 'event',
-            'data': [{
-                'csc': 'Heartbeat',
-                'salindex': 0,
-                'data': {
-                    'stream': heartbeat
-                }
-
-            }]
+            "category": "event",
+            "data": [
+                {"csc": "Heartbeat", "salindex": 0, "data": {"stream": heartbeat}}
+            ],
         }
 
         return message
 
     async def monitor_remote_heartbeat(self, remote_name, salindex):
+        """Continuously monitor the heafrtbeat of a given remote
+
+        Parameters
+        ----------
+        remote_name: string
+            Name fo the remote to monitor
+        salindex: int
+            Sal index of the remote to monitor
+        """
         domain = self.domain
         remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
         self.remotes.append(remote)
@@ -107,8 +119,14 @@ class HeartbeatProducer:
         # find the first element that matches the csc/salindex and use it instead of the default value
         timeout = HEARTBEAT_TIMEOUT_DEFAULT
         if remote_name in self.heartbeat_params:
-            timeout = next((el["heartbeat_timeout"]
-                            for el in self.heartbeat_params[remote_name] if el["index"] == salindex), HEARTBEAT_TIMEOUT_DEFAULT)
+            timeout = next(
+                (
+                    el["heartbeat_timeout"]
+                    for el in self.heartbeat_params[remote_name]
+                    if el["index"] == salindex
+                ),
+                HEARTBEAT_TIMEOUT_DEFAULT,
+            )
 
         timestamp = NEVER_RECEIVED_TIMESTAMP
 
@@ -117,10 +135,11 @@ class HeartbeatProducer:
                 # if random.random() > 0.2:
                 #     await asyncio.sleep(2)
                 #     raise asyncio.TimeoutError('sadsa')
-                if not hasattr(remote, 'evt_heartbeat'):
+                if not hasattr(remote, "evt_heartbeat"):
                     timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
                     msg = self.get_heartbeat_message(
-                        remote_name, salindex, nlost_subsequent, timestamp)
+                        remote_name, salindex, nlost_subsequent, timestamp
+                    )
                     await self.send_heartbeat(msg)
                     await asyncio.sleep(2)
                     continue
@@ -130,12 +149,13 @@ class HeartbeatProducer:
             except asyncio.TimeoutError:
                 nlost_subsequent += 1
             msg = self.get_heartbeat_message(
-                remote_name, salindex, nlost_subsequent, timestamp)
+                remote_name, salindex, nlost_subsequent, timestamp
+            )
             await self.send_heartbeat(msg)
 
 
-if __name__ == '__main__':
-    csc_list = [('ATDome', 1), ('ScriptQueue', 1), ('ScriptQueue', 2)]
+if __name__ == "__main__":
+    csc_list = [("ATDome", 1), ("ScriptQueue", 1), ("ScriptQueue", 2)]
     domain = salobj.Domain()
     loop = asyncio.get_event_loop()
     hb = HeartbeatProducer(domain, lambda m: print(m), csc_list)

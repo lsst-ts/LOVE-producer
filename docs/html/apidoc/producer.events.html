@@ -196,50 +196,48 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_message_reception</span></code>()</p></td>
 <td><p>Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_connected</span></code>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.make_and_send_response" title="producer.events.client.EventsWSClient.make_and_send_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_and_send_response</span></code></a>(message)</p></td>
+<td><p>Make the Producer process a given message and send its response</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_connected</span></code>()</p></td>
 <td><p>Executed everytime the connection is made, be it after an error or the first time, etc</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_start_client" title="producer.events.client.EventsWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_start_client" title="producer.events.client.EventsWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
 <td><p>Initializes the websocket client and producer callbacks</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_websocket_error" title="producer.events.client.EventsWSClient.on_websocket_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_error</span></code></a>(e)</p></td>
+<td><p>Set the internal variable connection_error to True when an error ocurrs</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.on_websocket_receive" title="producer.events.client.EventsWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
-<td><p>Executed every time a message is received from the LOVE-manager</p></td>
+<td><p>Handle the reception of a new message and distributes to the corresponding function</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
 <td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 72%" />
-<col style="width: 28%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>make_and_send_response</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code>(message)</p></td>
+<td><p>Send a given message through websockets</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.client.EventsWSClient.send_message_callback" title="producer.events.client.EventsWSClient.send_message_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_callback</span></code></a>(message)</p></td>
+<td><p>Create a task to send a given message</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>send_message</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_heartbeat</span></code>()</p></td>
+<td><p>Sends its heartbeat periodically.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>send_message_callback</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_ws_client</span></code>()</p></td>
+<td><p>Start the websockets client.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="producer.events.client.EventsWSClient.make_and_send_response">
 <em class="property">async </em><code class="sig-name descname">make_and_send_response</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.make_and_send_response" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Make the Producer process a given message and send its response</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dictionary</em>) – The message to process</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.events.client.EventsWSClient.on_start_client">
@@ -250,25 +248,43 @@
 <dl class="method">
 <dt id="producer.events.client.EventsWSClient.on_websocket_error">
 <em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the internal variable connection_error to True when an error ocurrs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>e</strong> (<em>object</em>) – The error</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.events.client.EventsWSClient.on_websocket_receive">
 <em class="property">async </em><code class="sig-name descname">on_websocket_receive</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.on_websocket_receive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executed every time a message is received from the LOVE-manager</p>
+<dd><p>Handle the reception of a new message and distributes to the corresponding function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dictionary</em>) – The message received</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.events.client.EventsWSClient.send_message_callback">
 <code class="sig-name descname">send_message_callback</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.EventsWSClient.send_message_callback" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Create a task to send a given message</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dictionary</em>) – The object to send</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.events.client.main">
 <em class="property">async </em><code class="sig-prename descclassname">producer.events.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.client.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Main function, starts the client</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-producer.events.producer">
@@ -291,19 +307,11 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.process_message" title="producer.events.producer.EventsProducer.process_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_message</span></code></a>(message)</p></td>
 <td><p>Tries to obtain the current data for an event with salobj.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.setup_callbacks" title="producer.events.producer.EventsProducer.setup_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_callbacks</span></code></a>()</p></td>
-<td><p>Configures a callback for each remote created</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.set_remote_evt_callbacks" title="producer.events.producer.EventsProducer.set_remote_evt_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_remote_evt_callbacks</span></code></a>(remote)</p></td>
+<td><p>Set the callbacks for the events of a given remote</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 74%" />
-<col style="width: 26%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>set_remote_evt_callbacks</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.events.producer.EventsProducer.setup_callbacks" title="producer.events.producer.EventsProducer.setup_callbacks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_callbacks</span></code></a>()</p></td>
+<td><p>Configures a callback for each remote created</p></td>
 </tr>
 </tbody>
 </table>
@@ -311,6 +319,21 @@
 <dt id="producer.events.producer.EventsProducer.make_callback">
 <code class="sig-name descname">make_callback</code><span class="sig-paren">(</span><em class="sig-param">csc</em>, <em class="sig-param">salindex</em>, <em class="sig-param">evt_name</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.make_callback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a callback that produces a message with the event data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>csc</strong> (<em>string</em>) – name of the CSC</p></li>
+<li><p><strong>salindex</strong> (<em>int</em>) – SAL Index of the CSC</p></li>
+<li><p><strong>evt_name</strong> (<em>string</em>) – Name of the event</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>callback</strong> – The callback</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -366,7 +389,13 @@ answer = await producer.process_message(message)</p>
 <dl class="method">
 <dt id="producer.events.producer.EventsProducer.set_remote_evt_callbacks">
 <code class="sig-name descname">set_remote_evt_callbacks</code><span class="sig-paren">(</span><em class="sig-param">remote</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.producer.EventsProducer.set_remote_evt_callbacks" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the callbacks for the events of a given remote</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>remote</strong> (<em>object</em>) – The remote to set callbacks to</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.events.producer.EventsProducer.setup_callbacks">
@@ -379,10 +408,12 @@ answer = await producer.process_message(message)</p>
 </div>
 <div class="section" id="module-producer.events.test_client">
 <span id="producer-events-test-client-module"></span><h2>producer.events.test_client module<a class="headerlink" href="#module-producer.events.test_client" title="Permalink to this headline">¶</a></h2>
+<p>Test the Client</p>
 <dl class="class">
 <dt id="producer.events.test_client.TestEventsClient">
 <em class="property">class </em><code class="sig-prename descclassname">producer.events.test_client.</code><code class="sig-name descname">TestEventsClient</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_client.TestEventsClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">test_utils.WSClientTestCase</span></code></p>
+<p>Test suite for the Client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
 <dd class="field-odd"><dl class="simple">
@@ -633,10 +664,12 @@ answer = await producer.process_message(message)</p>
 </div>
 <div class="section" id="module-producer.events.test_producer">
 <span id="producer-events-test-producer-module"></span><h2>producer.events.test_producer module<a class="headerlink" href="#module-producer.events.test_producer" title="Permalink to this headline">¶</a></h2>
+<p>Test the Producer</p>
 <dl class="class">
 <dt id="producer.events.test_producer.TestEventsMessages">
 <em class="property">class </em><code class="sig-prename descclassname">producer.events.test_producer.</code><code class="sig-name descname">TestEventsMessages</code><span class="sig-paren">(</span><em class="sig-param">methodName='runTest'</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.events.test_producer.TestEventsMessages" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">asynctest.case.TestCase</span></code></p>
+<p>Test suite for the Producer.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
 <dd class="field-odd"><dl class="simple">

@@ -179,7 +179,7 @@
 </div>
 <div class="section" id="module-producer.telemetries.client">
 <span id="producer-telemetries-client-module"></span><h2>producer.telemetries.client module<a class="headerlink" href="#module-producer.telemetries.client" title="Permalink to this headline">¶</a></h2>
-<p>Main executable of the LOVE-producer.</p>
+<p>Main executable of the Events Producer.</p>
 <dl class="class">
 <dt id="producer.telemetries.client.TelemetriesClient">
 <em class="property">class </em><code class="sig-prename descclassname">producer.telemetries.client.</code><code class="sig-name descname">TelemetriesClient</code><span class="sig-paren">(</span><em class="sig-param">sleepDuration=2</em>, <em class="sig-param">csc_list=None</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries.client.TelemetriesClient" title="Permalink to this definition">¶</a></dt>
@@ -201,34 +201,26 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.telemetries.client.TelemetriesClient.on_start_client" title="producer.telemetries.client.TelemetriesClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
 <td><p>Initializes the websocket client and producer callbacks</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code>(message)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_error</span></code>(e)</p></td>
+<td><p>Handle a websocket error.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code>(message)</p></td>
 <td><p>Executed every time a message is received from the LOVE-manager</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
 <td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 76%" />
-<col style="width: 24%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code>(message)</p></td>
+<td><p>Send a given message through websockets</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>send_message</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.telemetries.client.TelemetriesClient.send_messages_after_timeout" title="producer.telemetries.client.TelemetriesClient.send_messages_after_timeout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_messages_after_timeout</span></code></a>()</p></td>
+<td><p>Send the telemetries periodically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>send_messages_after_timeout</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_heartbeat</span></code>()</p></td>
+<td><p>Sends its heartbeat periodically.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_ws_client</span></code>()</p></td>
+<td><p>Start the websockets client.</p></td>
 </tr>
 </tbody>
 </table>
@@ -241,14 +233,16 @@
 <dl class="method">
 <dt id="producer.telemetries.client.TelemetriesClient.send_messages_after_timeout">
 <em class="property">async </em><code class="sig-name descname">send_messages_after_timeout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries.client.TelemetriesClient.send_messages_after_timeout" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Send the telemetries periodically.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="function">
 <dt id="producer.telemetries.client.main">
 <em class="property">async </em><code class="sig-prename descclassname">producer.telemetries.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries.client.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The main function, starts the Client.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-producer.telemetries.producer">
@@ -259,29 +253,50 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Produces messages with telemetries coming from several CSCs</p>
 <p class="rubric">Methods</p>
-<table class="docutils align-default">
+<table class="longtable docutils align-default">
 <colgroup>
-<col style="width: 71%" />
-<col style="width: 29%" />
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><strong>get_remote_tel_values</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.telemetries.producer.TelemetriesProducer.get_remote_tel_values" title="producer.telemetries.producer.TelemetriesProducer.get_remote_tel_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_remote_tel_values</span></code></a>(remote)</p></td>
+<td><p>Get telemetries from the Remote</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>get_telemetry_message</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.telemetries.producer.TelemetriesProducer.get_telemetry_message" title="producer.telemetries.producer.TelemetriesProducer.get_telemetry_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_telemetry_message</span></code></a>()</p></td>
+<td><p>Return a formatted message with the telemetry data to be sent by the Client</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="producer.telemetries.producer.TelemetriesProducer.get_remote_tel_values">
 <code class="sig-name descname">get_remote_tel_values</code><span class="sig-paren">(</span><em class="sig-param">remote</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries.producer.TelemetriesProducer.get_remote_tel_values" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get telemetries from the Remote</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>remote</strong> (<em>object</em>) – The Remote</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary of telemetry values indexed by telemetry</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.telemetries.producer.TelemetriesProducer.get_telemetry_message">
 <code class="sig-name descname">get_telemetry_message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.telemetries.producer.TelemetriesProducer.get_telemetry_message" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return a formatted message with the telemetry data to be sent by the Client</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The message</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

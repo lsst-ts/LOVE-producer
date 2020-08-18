@@ -202,34 +202,26 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_start_client" title="producer.scriptqueue.client.ScriptQueueWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
 <td><p>Initializes the websocket client and producer callbacks</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive" title="producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_error" title="producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_error</span></code></a>(e)</p></td>
+<td><p>Handle a websocket error.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive" title="producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
 <td><p>Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
 <td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code>(message)</p></td>
+<td><p>Send a given message through websockets</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.client.ScriptQueueWSClient.send_message_callback" title="producer.scriptqueue.client.ScriptQueueWSClient.send_message_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message_callback</span></code></a>(message)</p></td>
 <td><p>Sends messages through websockets.</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 69%" />
-<col style="width: 31%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_heartbeat</span></code>()</p></td>
+<td><p>Sends its heartbeat periodically.</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>send_message</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_ws_client</span></code>()</p></td>
+<td><p>Start the websockets client.</p></td>
 </tr>
 </tbody>
 </table>
@@ -242,18 +234,35 @@
 <dl class="method">
 <dt id="producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_error">
 <em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Handle a websocket error.</p>
+<p>Does nothing for now</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>e</strong> (<em>object</em>) – The error</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive">
 <em class="property">async </em><code class="sig-name descname">on_websocket_receive</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.client.ScriptQueueWSClient.on_websocket_receive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dict</em>) – The message</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.client.ScriptQueueWSClient.send_message_callback">
 <code class="sig-name descname">send_message_callback</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.client.ScriptQueueWSClient.send_message_callback" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends messages through websockets. Called after each scriptqueue event</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dict</em>) – The message to send</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -261,12 +270,19 @@
 <dl class="function">
 <dt id="producer.scriptqueue.client.init_client">
 <em class="property">async </em><code class="sig-prename descclassname">producer.scriptqueue.client.</code><code class="sig-name descname">init_client</code><span class="sig-paren">(</span><em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.client.init_client" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the client for a given ScriptQueue SAL index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>salindex</strong> (<em>int</em>) – The SAL Index of the Script Queue</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="function">
 <dt id="producer.scriptqueue.client.main">
 <em class="property">async </em><code class="sig-prename descclassname">producer.scriptqueue.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.client.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Main function, starts the client.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-producer.scriptqueue.producer">
@@ -288,139 +304,180 @@ in the ‘event-ScriptQueueState-salindex-stream’ group.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_available_scripts" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_available_scripts"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_available_scripts</span></code></a>(event)</p></td>
 <td><p>Updates the list of available_scripts in the state according to the availableScripts event info</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_queue</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_config_schema" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_config_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_config_schema</span></code></a>(event)</p></td>
+<td><p>Append the config schema to a script</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_queue</span></code></a>(event)</p></td>
 <td><p>Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_queue_script</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_queue_script</span></code></a>(event)</p></td>
 <td><p>Callback for the queue.evt_script event</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_checkpoints</span></code></a>(event)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_checkpoints</span></code></a>(event)</p></td>
 <td><p>Callback for the logevent_description.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_description</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_description</span></code></a>(event)</p></td>
 <td><p>Callback for the logevent_description.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_logLevel</span></code></a>(event)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_logLevel</span></code></a>(event)</p></td>
 <td><p>Listens to the logLevel event</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_metadata</span></code></a>(event)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_metadata</span></code></a>(event)</p></td>
 <td><p>Callback for the logevent_metadata.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_state</span></code></a>(event)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state" title="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state"><code class="xref py py-obj docutils literal notranslate"><span class="pre">callback_script_state</span></code></a>(event)</p></td>
 <td><p>Callback for the Script_logevet_state event.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.get_heartbeat_message" title="producer.scriptqueue.producer.ScriptQueueProducer.get_heartbeat_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_heartbeat_message</span></code></a>(salindex)</p></td>
+<td><p>Returns a message with the heartbeats of the scripts</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.get_state_message" title="producer.scriptqueue.producer.ScriptQueueProducer.get_state_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_state_message</span></code></a>()</p></td>
 <td><p>Parses the current state into a LOVE friendly format</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_config" title="producer.scriptqueue.producer.ScriptQueueProducer.query_script_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_script_config</span></code></a>(isStandard, script_path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.monitor_scripts_heartbeats" title="producer.scriptqueue.producer.ScriptQueueProducer.monitor_scripts_heartbeats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">monitor_scripts_heartbeats</span></code></a>()</p></td>
+<td><p>Cntinuously monitor the script heartbeats.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.new_empty_script" title="producer.scriptqueue.producer.ScriptQueueProducer.new_empty_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_empty_script</span></code></a>()</p></td>
+<td><p>Return an empty script</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.parse_script" title="producer.scriptqueue.producer.ScriptQueueProducer.parse_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_script</span></code></a>(script)</p></td>
+<td><p>Parse a script to a dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_config" title="producer.scriptqueue.producer.ScriptQueueProducer.query_script_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_script_config</span></code></a>(isStandard, script_path)</p></td>
 <td><p>Send command to the queue to trigger the script config event</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_info" title="producer.scriptqueue.producer.ScriptQueueProducer.query_script_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_script_info</span></code></a>(salindex)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_info" title="producer.scriptqueue.producer.ScriptQueueProducer.query_script_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">query_script_info</span></code></a>(salindex)</p></td>
 <td><p>Send commands to the queue to trigger the script events of each script</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.set_callback" title="producer.scriptqueue.producer.ScriptQueueProducer.set_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_callback</span></code></a>(evt, callback)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.set_callback" title="producer.scriptqueue.producer.ScriptQueueProducer.set_callback"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_callback</span></code></a>(evt, callback)</p></td>
 <td><p>Adds a callback to a salobj event using appending a send_message_callback call</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.update" title="producer.scriptqueue.producer.ScriptQueueProducer.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.setup" title="producer.scriptqueue.producer.ScriptQueueProducer.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>()</p></td>
+<td><p>Initialize the Producer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.setup_script" title="producer.scriptqueue.producer.ScriptQueueProducer.setup_script"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_script</span></code></a>(salindex)</p></td>
+<td><p>Creates tasks to monitor the heartbeats of the scripts</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.scriptqueue.producer.ScriptQueueProducer.update" title="producer.scriptqueue.producer.ScriptQueueProducer.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>()</p></td>
 <td><p>Tries to trigger the queue event which will update all the info in the queue and its scripts if succeeds.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 75%" />
-<col style="width: 25%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>callback_config_schema</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>get_heartbeat_message</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>monitor_scripts_heartbeats</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>new_empty_script</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>parse_script</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>setup</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>setup_script</strong></p></td>
-<td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_available_scripts">
 <code class="sig-name descname">callback_available_scripts</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_available_scripts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates the list of available_scripts in the state according
-to the availableScripts event info</p>
+<dd><p>Updates the list of available_scripts in the state according to the availableScripts event info</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_config_schema">
 <code class="sig-name descname">callback_config_schema</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_config_schema" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Append the config schema to a script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue">
 <code class="sig-name descname">callback_queue</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script">
 <code class="sig-name descname">callback_queue_script</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_queue_script" title="Permalink to this definition">¶</a></dt>
 <dd><p>Callback for the queue.evt_script event</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints">
 <code class="sig-name descname">callback_script_checkpoints</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_checkpoints" title="Permalink to this definition">¶</a></dt>
-<dd><p>Callback for the logevent_description. Used to extract
-the expected duration of the script.</p>
-<p>event : SALPY_Script.Script_logevent_descriptionC</p>
+<dd><p>Callback for the logevent_description. Used to extract the expected duration of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description">
 <code class="sig-name descname">callback_script_description</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_description" title="Permalink to this definition">¶</a></dt>
-<dd><p>Callback for the logevent_description. Used to extract
-the expected duration of the script.</p>
-<p>event : SALPY_Script.Script_logevent_descriptionC</p>
+<dd><p>Callback for the logevent_description. Used to extract the expected duration of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel">
 <code class="sig-name descname">callback_script_logLevel</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_logLevel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Listens to the logLevel event</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata">
 <code class="sig-name descname">callback_script_metadata</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_metadata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Callback for the logevent_metadata. Used to extract
-the expected duration of the script.</p>
-<p>event : SALPY_Script.Script_logevent_metadataC</p>
+<dd><p>Callback for the logevent_metadata. Used to extract the expected duration of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state">
 <code class="sig-name descname">callback_script_state</code><span class="sig-paren">(</span><em class="sig-param">event</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.callback_script_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>Callback for the Script_logevet_state event. Used to update
-the state of the script.</p>
-<p>event : SALPY_Script.Script_logevent_stateC</p>
+<dd><p>Callback for the Script_logevet_state event. Used to update the state of the script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>event</strong> (<em>SALPY_Script.Script_logevent_metadataC</em>) – The SAL Event</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.get_heartbeat_message">
 <code class="sig-name descname">get_heartbeat_message</code><span class="sig-paren">(</span><em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.get_heartbeat_message" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns a message with the heartbeats of the scripts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>salindex</strong> (<em>int</em>) – The SAL Index of the scripts</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The message</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.get_state_message">
@@ -431,46 +488,96 @@ the state of the script.</p>
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.monitor_scripts_heartbeats">
 <em class="property">async </em><code class="sig-name descname">monitor_scripts_heartbeats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.monitor_scripts_heartbeats" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Cntinuously monitor the script heartbeats.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.new_empty_script">
 <code class="sig-name descname">new_empty_script</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.new_empty_script" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Return an empty script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The empty, default, script</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.parse_script">
 <code class="sig-name descname">parse_script</code><span class="sig-paren">(</span><em class="sig-param">script</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.parse_script" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Parse a script to a dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>script</strong> (<em>object</em>) – The script</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The script parsed in a dict</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.query_script_config">
 <code class="sig-name descname">query_script_config</code><span class="sig-paren">(</span><em class="sig-param">isStandard</em>, <em class="sig-param">script_path</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send command to the queue to trigger the script config event</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>isStandard</strong> (<em>bool</em>) – True of it is a Standard script, False if not</p></li>
+<li><p><strong>script_path</strong> (<em>string</em>) – The path where the script is located</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.query_script_info">
 <em class="property">async </em><code class="sig-name descname">query_script_info</code><span class="sig-paren">(</span><em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.query_script_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send commands to the queue to trigger the script events of each script</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>salindex</strong> (<em>int</em>) – The salindex of the script</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.set_callback">
 <code class="sig-name descname">set_callback</code><span class="sig-paren">(</span><em class="sig-param">evt</em>, <em class="sig-param">callback</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.set_callback" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a callback to a salobj event using appending a
-send_message_callback call</p>
+<dd><p>Adds a callback to a salobj event using appending a send_message_callback call</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evt</strong> (<em>object</em>) – The SAL event</p></li>
+<li><p><strong>callback</strong> (<em>function</em>) – The callback to run for each ocurrence of the event</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.setup">
 <em class="property">async </em><code class="sig-name descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.setup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Initialize the Producer.</p>
+<p>Sets callbacks for all the events necessary to construct the Script Queue state</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.setup_script">
 <code class="sig-name descname">setup_script</code><span class="sig-paren">(</span><em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.scriptqueue.producer.ScriptQueueProducer.setup_script" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Creates tasks to monitor the heartbeats of the scripts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>salindex</strong> (<em>int</em>) – The SAL index of the stript</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.scriptqueue.producer.ScriptQueueProducer.update">

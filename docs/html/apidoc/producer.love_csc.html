@@ -178,94 +178,17 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-producer.love_csc.client">
-<span id="producer-love-csc-client-module"></span><h2>producer.love_csc.client module<a class="headerlink" href="#module-producer.love_csc.client" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="producer.love_csc.client.LOVEWSClient">
-<em class="property">class </em><code class="sig-prename descclassname">producer.love_csc.client.</code><code class="sig-name descname">LOVEWSClient</code><a class="headerlink" href="#producer.love_csc.client.LOVEWSClient" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">base_ws_client.BaseWSClient</span></code></p>
-<p>Handles the websocket client connection between the Telemetries&amp;Events Producer and the LOVE-manager.</p>
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_message_reception</span></code>()</p></td>
-<td><p>Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.love_csc.client.LOVEWSClient.on_connected" title="producer.love_csc.client.LOVEWSClient.on_connected"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_connected</span></code></a>()</p></td>
-<td><p>Executed everytime the connection is made, be it after an error or the first time, etc</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#producer.love_csc.client.LOVEWSClient.on_start_client" title="producer.love_csc.client.LOVEWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
-<td><p>Initializes the websocket client and producer callbacks</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.love_csc.client.LOVEWSClient.on_websocket_receive" title="producer.love_csc.client.LOVEWSClient.on_websocket_receive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code></a>(message)</p></td>
-<td><p>Executed every time a message is received from the LOVE-manager</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
-<td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
-</tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 69%" />
-<col style="width: 31%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>send_message</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<dl class="method">
-<dt id="producer.love_csc.client.LOVEWSClient.on_connected">
-<em class="property">async </em><code class="sig-name descname">on_connected</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.client.LOVEWSClient.on_connected" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executed everytime the connection is made, be it after an error or the first time, etc</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="producer.love_csc.client.LOVEWSClient.on_start_client">
-<em class="property">async </em><code class="sig-name descname">on_start_client</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.client.LOVEWSClient.on_start_client" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes the websocket client and producer callbacks</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="producer.love_csc.client.LOVEWSClient.on_websocket_error">
-<em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.client.LOVEWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="producer.love_csc.client.LOVEWSClient.on_websocket_receive">
-<em class="property">async </em><code class="sig-name descname">on_websocket_receive</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.client.LOVEWSClient.on_websocket_receive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Executed every time a message is received from the LOVE-manager</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="producer.love_csc.client.main">
-<em class="property">async </em><code class="sig-prename descclassname">producer.love_csc.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.client.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<div class="section" id="producer-love-csc-client-module">
+<h2>producer.love_csc.client module<a class="headerlink" href="#producer-love-csc-client-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-producer.love_csc.csc">
 <span id="producer-love-csc-csc-module"></span><h2>producer.love_csc.csc module<a class="headerlink" href="#module-producer.love_csc.csc" title="Permalink to this headline">¶</a></h2>
+<p>The LOVE CSC.</p>
 <dl class="class">
 <dt id="producer.love_csc.csc.LOVECsc">
 <em class="property">class </em><code class="sig-prename descclassname">producer.love_csc.csc.</code><code class="sig-name descname">LOVECsc</code><a class="headerlink" href="#producer.love_csc.csc.LOVECsc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lsst.ts.salobj.controller.Controller</span></code></p>
+<p>Define the LOVE CSC as a SAL CSC</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes</dt>
 <dd class="field-odd"><dl class="simple">
@@ -304,6 +227,14 @@
 <dt id="producer.love_csc.csc.LOVECsc.add_observing_log">
 <code class="sig-name descname">add_observing_log</code><span class="sig-paren">(</span><em class="sig-param">user</em>, <em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.love_csc.csc.LOVECsc.add_observing_log" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add message to observing log</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>string</em>) – The name of the user who sent the observing log</p></li>
+<li><p><strong>message</strong> (<em>string</em>) – The observing log</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

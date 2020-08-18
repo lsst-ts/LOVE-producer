@@ -40,6 +40,13 @@ class EventsProducer:
                 print(e)
 
     def set_remote_evt_callbacks(self, remote):
+        """Set the callbacks for the events of a given remote
+
+        Parameters
+        ----------
+        remote: object
+            The remote to set callbacks to
+        """
         evt_names = remote.salinfo.event_names
         for evt in evt_names:
             evt_object = getattr(remote, "evt_" + evt)
@@ -48,7 +55,22 @@ class EventsProducer:
             )
 
     def make_callback(self, csc, salindex, evt_name):
-        """ Returns a callback that produces a message with the event data"""
+        """Returns a callback that produces a message with the event data
+
+        Parameters
+        ----------
+        csc: string
+            name of the CSC
+        salindex: int
+            SAL Index of the CSC
+        evt_name: string
+            Name of the event
+
+        Returns
+        -------
+        callback: function
+            The callback
+        """
 
         def callback(evt_data):
             if Settings.trace_timestamps():

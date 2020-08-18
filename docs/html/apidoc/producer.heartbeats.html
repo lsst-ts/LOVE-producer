@@ -180,12 +180,12 @@
 </div>
 <div class="section" id="module-producer.heartbeats.client">
 <span id="producer-heartbeats-client-module"></span><h2>producer.heartbeats.client module<a class="headerlink" href="#module-producer.heartbeats.client" title="Permalink to this headline">¶</a></h2>
-<p>Main executable of the LOVE-producer.</p>
+<p>The client for the Heartbeats Producer.</p>
 <dl class="class">
 <dt id="producer.heartbeats.client.CSCHeartbeatsWSClient">
 <em class="property">class </em><code class="sig-prename descclassname">producer.heartbeats.client.</code><code class="sig-name descname">CSCHeartbeatsWSClient</code><a class="headerlink" href="#producer.heartbeats.client.CSCHeartbeatsWSClient" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">base_ws_client.BaseWSClient</span></code></p>
-<p>Handles the websocket client connection between the Heartbeatss Producer and the LOVE-manager.</p>
+<p>Handles the websocket client connection between the Heartbeats Producer and the LOVE-manager.</p>
 <p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -202,34 +202,26 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.on_start_client" title="producer.heartbeats.client.CSCHeartbeatsWSClient.on_start_client"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_start_client</span></code></a>()</p></td>
 <td><p>Initializes producer’s callbacks</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code>(message)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.on_websocket_error" title="producer.heartbeats.client.CSCHeartbeatsWSClient.on_websocket_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_error</span></code></a>(e)</p></td>
+<td><p>Set the internal variable connection_error to True when an error ocurrs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_websocket_receive</span></code>(message)</p></td>
 <td><p>Executed every time a message is received from the LOVE-manager</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_config</span></code>(path[, key])</p></td>
 <td><p>Reads a given config file and returns the lists of CSCs to listen to.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat" title="producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_heartbeat</span></code></a>(message)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat" title="producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_heartbeat</span></code></a>(message)</p></td>
 <td><p>Callback used by self.producer to send messages with the websocket client</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 69%" />
-<col style="width: 31%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>on_websocket_error</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">send_message</span></code>(message)</p></td>
+<td><p>Send a given message through websockets</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>send_message</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_heartbeat</span></code>()</p></td>
+<td><p>Sends its heartbeat periodically.</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>start_heartbeat</strong></p></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><strong>start_ws_client</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">start_ws_client</span></code>()</p></td>
+<td><p>Start the websockets client.</p></td>
 </tr>
 </tbody>
 </table>
@@ -242,12 +234,23 @@
 <dl class="method">
 <dt id="producer.heartbeats.client.CSCHeartbeatsWSClient.on_websocket_error">
 <em class="property">async </em><code class="sig-name descname">on_websocket_error</code><span class="sig-paren">(</span><em class="sig-param">e</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.on_websocket_error" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Set the internal variable connection_error to True when an error ocurrs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>e</strong> (<em>object</em>) – The error</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat">
 <em class="property">async </em><code class="sig-name descname">send_heartbeat</code><span class="sig-paren">(</span><em class="sig-param">message</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.client.CSCHeartbeatsWSClient.send_heartbeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Callback used by self.producer to send messages with the websocket client</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>dictionmary</em>) – Message to send</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -255,7 +258,8 @@
 <dl class="function">
 <dt id="producer.heartbeats.client.main">
 <em class="property">async </em><code class="sig-prename descclassname">producer.heartbeats.client.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.client.main" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Main function, starts the client</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-producer.heartbeats.producer">
@@ -274,19 +278,11 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message" title="producer.heartbeats.producer.HeartbeatProducer.get_heartbeat_message"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_heartbeat_message</span></code></a>(remote_name, salindex, …)</p></td>
 <td><p>Generates a message with the heartbeat info of a CSC in dictionary format.</p></td>
 </tr>
-</tbody>
-</table>
-<table class="docutils align-default">
-<colgroup>
-<col style="width: 74%" />
-<col style="width: 26%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><strong>monitor_remote_heartbeat</strong></p></td>
-<td></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat" title="producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">monitor_remote_heartbeat</span></code></a>(remote_name, salindex)</p></td>
+<td><p>Continuously monitor the heafrtbeat of a given remote</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>start</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#producer.heartbeats.producer.HeartbeatProducer.start" title="producer.heartbeats.producer.HeartbeatProducer.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
+<td><p>Start the producer.</p></td>
 </tr>
 </tbody>
 </table>
@@ -315,12 +311,22 @@
 <dl class="method">
 <dt id="producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat">
 <em class="property">async </em><code class="sig-name descname">monitor_remote_heartbeat</code><span class="sig-paren">(</span><em class="sig-param">remote_name</em>, <em class="sig-param">salindex</em><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer.monitor_remote_heartbeat" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Continuously monitor the heafrtbeat of a given remote</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>remote_name</strong> (<em>string</em>) – Name fo the remote to monitor</p></li>
+<li><p><strong>salindex</strong> (<em>int</em>) – Sal index of the remote to monitor</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="method">
 <dt id="producer.heartbeats.producer.HeartbeatProducer.start">
 <code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#producer.heartbeats.producer.HeartbeatProducer.start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Start the producer.</p>
+</dd></dl>
 
 </dd></dl>
 

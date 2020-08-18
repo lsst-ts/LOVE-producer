@@ -1,4 +1,4 @@
-"""Main executable of the LOVE-producer."""
+"""The client for the Heartbeats Producer."""
 import asyncio
 from lsst.ts import salobj
 from .producer import HeartbeatProducer
@@ -9,7 +9,7 @@ from base_ws_client import BaseWSClient
 
 
 class CSCHeartbeatsWSClient(BaseWSClient):
-    """Handles the websocket client connection between the Heartbeatss Producer and the LOVE-manager."""
+    """Handles the websocket client connection between the Heartbeats Producer and the LOVE-manager."""
 
     def __init__(self):
         super().__init__(name="CSCHeartbeats")
@@ -25,14 +25,28 @@ class CSCHeartbeatsWSClient(BaseWSClient):
         self.producer.start()
 
     async def send_heartbeat(self, message):
-        """Callback used by self.producer to send messages with the websocket client"""
+        """Callback used by self.producer to send messages with the websocket client
+
+        Parameters
+        ----------
+        message: dictionmary
+            Message to send
+        """
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_error(self, e):
+        """Set the internal variable connection_error to True when an error ocurrs
+
+        Parameters
+        ----------
+        e: object
+            The error
+        """
         self.connection_error = True
 
 
 async def main():
+    """Main function, starts the client"""
     heartbeats_client = CSCHeartbeatsWSClient()
     await heartbeats_client.start_ws_client()
 
