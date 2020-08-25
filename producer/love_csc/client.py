@@ -31,7 +31,7 @@ class LOVEWSClient(BaseWSClient):
         await self.send_message(observingLog_subscribe_msg)
 
     async def on_websocket_receive(self, message):
-         """Handle the reception of a new message and distributes to the corresponding function
+        """Handle the reception of a new message and distributes to the corresponding function
 
         Parameters
         ----------
