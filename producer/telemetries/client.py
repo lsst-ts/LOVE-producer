@@ -11,14 +11,14 @@ from base_ws_client import BaseWSClient
 class TelemetriesClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
-    def __init__(self, sleepDuration=2, csc_list=None):
+    def __init__(self, sleepDuration=2, csc_list=None, remote=None):
         super().__init__(name="Telemetries")
 
         if csc_list != None:
             self.csc_list = csc_list
             print("CSCs to listen replaced by", csc_list)
 
-        self.producer = TelemetriesProducer(self.domain, self.csc_list)
+        self.producer = TelemetriesProducer(self.domain, self.csc_list, remote)
 
         self.sleepDuration = sleepDuration
 

@@ -64,3 +64,43 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         self.assertEqual(stream, expected_stream)
 
+
+    async def test_produced_message_with_telemetry_scalar_with_existing_remote(self):
+        # Arrange
+        remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.csc.salinfo.index)
+        self.telemetry_producer = TelemetriesProducer(
+            domain=None, csc_list=[], remote=remote
+        )
+
+        cmd_data_sent = self.csc.make_random_cmd_scalars()
+
+        # Act
+        await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
+
+        tel_scalars = await self.remote.tel_scalars.next(
+            flush=False, timeout=STD_TIMEOUT
+        )
+        tel_parameters = tel_scalars._member_attributes
+        expected_stream = {
+            p: {
+                "value": getattr(tel_scalars, p),
+                "dataType": utils.getDataType(getattr(tel_scalars, p)),
+                "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
+            }
+            for p in tel_parameters
+            if p != "private_rcvStamp"
+        }
+
+        # extracting the message should be made synchronously
+        message = self.telemetry_producer.get_telemetry_message()
+        stream = utils.get_event_stream(
+            message, "telemetry", "Test", self.csc.salinfo.index, "scalars"
+        )
+
+        # Assert
+
+        # private_rcvStamp is generated on read and seems unpredictable now
+        del stream["private_rcvStamp"]
+
+        self.assertEqual(stream, expected_stream)
+

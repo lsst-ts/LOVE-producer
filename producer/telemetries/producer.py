@@ -9,16 +9,19 @@ from lsst.ts import salobj
 class TelemetriesProducer:
     """  Produces messages with telemetries coming from several CSCs """
 
-    def __init__(self, domain, csc_list):
+    def __init__(self, domain, csc_list, remote=None):
         self.remote_list = []
-        for name, salindex in csc_list:
-            try:
-                remote = salobj.Remote(domain=domain, name=name, index=salindex)
-                self.remote_list.append(remote)
+        if not remote:
+            for name, salindex in csc_list:
+                try:
+                    new_remote = salobj.Remote(domain=domain, name=name, index=salindex)
+                    self.remote_list.append(new_remote)
 
-            except Exception as e:
-                print("- Could not load telemetries remote for", name, salindex)
-                print(e)
+                except Exception as e:
+                    print("- Could not load telemetries remote for", name, salindex)
+                    print(e)
+        else:
+            self.remote_list.append(remote)
 
     def get_remote_tel_values(self, remote):
         """Get telemetries from the Remote
