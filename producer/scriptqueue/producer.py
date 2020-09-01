@@ -97,7 +97,6 @@ class ScriptQueueProducer:
         """
 
         def do_callback_and_send(event):
-            print('got callback', evt)
             callback(event)
             m = self.get_state_message()
             self.send_message_callback(m)
@@ -157,8 +156,11 @@ class ScriptQueueProducer:
 
             if script['path'] == event.path and script['type'] == event_script_type:
                 script['configSchema'] = event.configSchema
+                print(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
                 break
 
+        print(f'summary:')
+        [print(f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}') for script in self.state["available_scripts"]]
     def callback_queue_script(self, event):
         """
             Callback for the queue.evt_script event
@@ -283,12 +285,14 @@ class ScriptQueueProducer:
         """
             Send command to the queue to trigger the script config event
         """
-        for script in self.state["available_scripts"]:
+        available_scripts =  self.state["available_scripts"]
+        print(f'Starting cmd_showSchema on {len(available_scripts)} scripts')
+        for (index, script) in enumerate(available_scripts):
             path = script["path"]
             isStandard = script["type"] == "standard"
             
             try:
-                print(f'will showSchema to {isStandard}.{path}')
+                print(f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}')
                 await self.queue.cmd_showSchema.set_start(
                     isStandard=isStandard, 
                     path=path,
@@ -298,7 +302,7 @@ class ScriptQueueProducer:
                     f"Failed with ack.result={ack_err.ack.result}")
                 print("Exception", e)
 
-    async def update(self):
+    async def update(self, showAvailable):
         """
             Tries to trigger the queue event which will
             update all the info in the queue and its scripts
@@ -313,11 +317,12 @@ class ScriptQueueProducer:
         except Exception as e:
             print('Unable to show Queue', e)
 
-        try:
-            print('will showAvailableScripts')
-            await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
-        except Exception as e:
-            print('Unable to showAvailable', e)
+        if showAvailable:
+            try:
+                print('will showAvailableScripts')
+                await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
+            except Exception as e:
+                print('Unable to showAvailable', e)
         
         for script_index in self.scripts:
             try:

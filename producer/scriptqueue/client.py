@@ -25,7 +25,7 @@ class ScriptQueueWSClient(BaseWSClient):
 
         self.connection_error = False
         await self.producer.setup()
-        await self.producer.update()
+        await self.producer.update(showAvailable=True)
 
     def send_message_callback(self, message):
         """Sends messages through websockets. Called after each scriptqueue event """
@@ -38,7 +38,7 @@ class ScriptQueueWSClient(BaseWSClient):
             message, "initial_state", "ScriptQueueState", self.salindex, "event_name"
         )
         if stream_exists:
-            await self.producer.update()
+            await self.producer.update(showAvailable=False)
 
     async def on_websocket_error(self, e):
         self.connection_error = True
