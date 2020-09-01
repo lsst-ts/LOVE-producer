@@ -155,7 +155,7 @@ class ScriptQueueProducer:
         for script in self.state["available_scripts"]:
 
             if script['path'] == event.path and script['type'] == event_script_type:
-                script['configSchema'] = event.configSchema
+                script['configSchema'] = "# empty schema" if event.configSchema == "" else event.configSchema
                 print(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
                 break
 
