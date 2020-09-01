@@ -13,7 +13,7 @@ HEARTBEATS_CONFIG_PATH = "config.json"
 
 
 class HeartbeatProducer:
-    def __init__(self, domain, send_heartbeat, csc_list):
+    def __init__(self, domain, send_heartbeat, csc_list, remote=None):
         """Monitor CSC heartbeats and produces messages for the LOVE manager.
 
         It has a default configuration for the monitoring parameters which are overriden by
@@ -24,10 +24,12 @@ class HeartbeatProducer:
         domain: salobj Domain object to create salobj Remotes
         send_heartbeat: callback coroutine that receives the message dictionary msg, to be sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
+        remote: Optional salobj.Remote object, to avoid creating duplicates
         """
         self.send_heartbeat = send_heartbeat
         self.domain = domain
         self.csc_list = csc_list
+        self.remote = remote
 
         # params to replace the defaults later
         path = os.path.join(os.path.dirname(__file__), HEARTBEATS_CONFIG_PATH)
@@ -38,14 +40,19 @@ class HeartbeatProducer:
 
     def start(self):
         """Start the producer."""
-        for i in range(len(self.csc_list)):
-            sal_lib_params = self.csc_list[i]
-            sal_lib_name = sal_lib_params[0]
-            print("- Listening to heartbeats from CSC: ", sal_lib_params)
-            [sal_lib_name, index] = sal_lib_params
+        if not self.remote:
+            for i in range(len(self.csc_list)):
+                sal_lib_params = self.csc_list[i]
+                sal_lib_name = sal_lib_params[0]
+                print("- Listening to heartbeats from CSC: ", sal_lib_params)
+                [sal_lib_name, index] = sal_lib_params
 
+                asyncio.get_event_loop().create_task(
+                    self.monitor_remote_heartbeat(sal_lib_name, index)
+                )
+        else:
             asyncio.get_event_loop().create_task(
-                self.monitor_remote_heartbeat(sal_lib_name, index)
+                self.monitor_remote_heartbeat(self.remote.salinfo.name, self.remote.salinfo.index)
             )
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
@@ -111,7 +118,10 @@ class HeartbeatProducer:
             Sal index of the remote to monitor
         """
         domain = self.domain
-        remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
+        if not self.remote:
+            remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
+        else:
+            remote = self.remote
         self.remotes.append(remote)
         await remote.start_task
         nlost_subsequent = 0

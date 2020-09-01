@@ -99,3 +99,39 @@ class TestHeartbeatsMessages(asynctest.TestCase):
             ]
         }
         self.assertEqual(expected_message, message)
+
+    @patch('heartbeats.producer.datetime')
+    async def test_heartbeat_received_with_existing_remote(self, mock_datetime):
+        """Test that heartbeats messages are generated correctly when received,
+        and with timestamp obtained from datetime.now()"""
+        remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.csc.salinfo.index)
+        self.heartbeat_producer = HeartbeatProducer(domain=self.csc.domain,
+                                                    send_heartbeat=self.callback,
+                                                    csc_list=[],
+                                                    remote=remote)
+        mock_datetime.datetime.now.return_value = datetime.datetime(2019, 1, 1)
+
+        # Act
+        self.heartbeat_producer.start()
+        message = await asyncio.wait_for(self.message_queue.get(), MSG_TIMEOUT)
+
+        # Assert:
+        expected_message = {
+            "category": "event",
+            "data": [
+                {
+                    "csc": "Heartbeat",
+                    "salindex": 0,
+                    "data": {
+                        "stream": {
+                            "csc": "Test",
+                            "salindex": self.csc.salinfo.index,
+                            "lost": 0,
+                            "last_heartbeat_timestamp": mock_datetime.datetime.now().timestamp(),
+                            "max_lost_heartbeats": 5
+                        }
+                    }
+                }
+            ]
+        }
+        self.assertEqual(expected_message, message)
