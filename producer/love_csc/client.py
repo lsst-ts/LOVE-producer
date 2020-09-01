@@ -1,8 +1,8 @@
+"""The client for the LOVE CSC."""
 import asyncio
 from lsst.ts import salobj
 import os
 import utils
-
 from base_ws_client import BaseWSClient
 from love_csc.csc import LOVECsc
 
@@ -31,6 +31,13 @@ class LOVEWSClient(BaseWSClient):
         await self.send_message(observingLog_subscribe_msg)
 
     async def on_websocket_receive(self, message):
+        """Handle the reception of a new message and distributes to the corresponding function
+
+        Parameters
+        ----------
+        message: dictionary
+            The message received
+        """
         if "category" not in message:
             return
         if message["category"] != "love_csc":
@@ -51,10 +58,18 @@ class LOVEWSClient(BaseWSClient):
         self.csc.add_observing_log(user, log_message)
 
     async def on_websocket_error(self, e):
+        """Set the internal variable connection_error to True when an error ocurrs
+
+        Parameters
+        ----------
+        e: object
+            The error
+        """
         self.connection_error = True
 
 
 async def main():
+    """Main function, starts the client"""
     telev_client = LOVEWSClient()
     await telev_client.start_ws_client()
 

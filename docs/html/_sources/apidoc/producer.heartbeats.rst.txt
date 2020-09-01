@@ -4,6 +4,14 @@ producer.heartbeats package
 Submodules
 ----------
 
+producer.heartbeats.client module
+---------------------------------
+
+.. automodule:: producer.heartbeats.client
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 producer.heartbeats.producer module
 -----------------------------------
 
@@ -12,10 +20,10 @@ producer.heartbeats.producer module
    :undoc-members:
    :show-inheritance:
 
-producer.heartbeats.test module
--------------------------------
+producer.heartbeats.test\_producer module
+-----------------------------------------
 
-.. automodule:: producer.heartbeats.test
+.. automodule:: producer.heartbeats.test_producer
    :members:
    :undoc-members:
    :show-inheritance:

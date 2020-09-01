@@ -39,11 +39,11 @@ class ScriptQueueProducer:
         self.scripts_schema_task = asyncio.create_task(asyncio.sleep(0))
         # create logger
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.INFO)
 
         # create console handler and set level to debug
         ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
+        ch.setLevel(logging.INFO)
 
         # # create formatter
         # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -56,31 +56,59 @@ class ScriptQueueProducer:
 
 
     async def setup(self):
+        """Initialize the Producer.
+
+        Sets callbacks for all the events necessary to construct the Script Queue state
+        """
         # wait for remotes to be ready
         await self.queue.start_task
         await self.script_remote.start_task
 
         # Setup Queue events callbacks
-        self.set_callback(self.queue.evt_availableScripts, self.callback_available_scripts)
+        self.set_callback(
+            self.queue.evt_availableScripts, self.callback_available_scripts
+        )
         self.set_callback(self.queue.evt_queue, self.callback_queue)
         self.set_callback(self.queue.evt_configSchema, self.callback_config_schema)
         self.set_callback(self.queue.evt_script, self.callback_queue_script)
 
         # Setup Script events callbacks
-        self.set_callback(self.script_remote.evt_metadata, self.callback_script_metadata)
+        self.set_callback(
+            self.script_remote.evt_metadata, self.callback_script_metadata
+        )
         self.set_callback(self.script_remote.evt_state, self.callback_script_state)
-        self.set_callback(self.script_remote.evt_description, self.callback_script_description)
-        self.set_callback(self.script_remote.evt_checkpoints, self.callback_script_checkpoints)
-        self.set_callback(self.script_remote.evt_logLevel, self.callback_script_logLevel)
+        self.set_callback(
+            self.script_remote.evt_description, self.callback_script_description
+        )
+        self.set_callback(
+            self.script_remote.evt_checkpoints, self.callback_script_checkpoints
+        )
+        self.set_callback(
+            self.script_remote.evt_logLevel, self.callback_script_logLevel
+        )
         # --- Event callbacks ----
 
     def setup_script(self, salindex):
+        """Creates tasks to monitor the heartbeats of the scripts
+
+        Parameters
+        ----------
+        salindex: int
+            The SAL index of the stript
+        """
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["setup"] = True
         asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
+        """Return an empty script
+
+        Returns
+        -------
+        dict
+            The empty, default, script
+        """
         default = "UNKNOWN"
         return {
             "remote": None,
@@ -104,60 +132,64 @@ class ScriptQueueProducer:
             "lost_heartbeats": 0,
             "pause_checkpoints": "",
             "stop_checkpoints": "",
-            "log_level": -1
+            "log_level": -1,
         }
+
     # --- Event callbacks ----
 
     def set_callback(self, evt, callback):
-        """
-            Adds a callback to a salobj event using appending a
-            send_message_callback call
+        """Adds a callback to a salobj event using appending a send_message_callback call
+
+        Parameters
+        ----------
+        evt: object
+            The SAL event
+        callback: function
+            The callback to run for each ocurrence of the event
         """
 
         def do_callback_and_send(event):
             callback(event)
             m = self.get_state_message()
             self.send_message_callback(m)
+
         evt.callback = do_callback_and_send
 
     def callback_available_scripts(self, event):
-        """ Updates the list of available_scripts in the state according
-        to the availableScripts event info"""
+        """Updates the list of available_scripts in the state according to the availableScripts event info
+
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL event
+        """
         self.state["available_scripts"] = []
-        for script_path in event.standard.split(':'):
+        for script_path in event.standard.split(":"):
             self.state["available_scripts"].append(
-                {
-                    "type": "standard",
-                    "path": script_path,
-                    "configSchema": ""
-                }
+                {"type": "standard", "path": script_path, "configSchema": ""}
             )
         for script_path in event.external.split(':'):
             self.state["available_scripts"].append(
-                {
-                    "type": "external",
-                    "path": script_path,
-                    "configSchema": ""
-                }
+                {"type": "external", "path": script_path, "configSchema": ""}
             )
         self.log.info('will query_scripts_config')
         self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):
-        """
-        Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
+        """Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
+
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
         self.state["running"] = event.running == 1
         self.state["currentIndex"] = event.currentSalIndex
-        self.state["finishedIndices"] = list(
-            event.pastSalIndices[:event.pastLength])
-        self.state["waitingIndices"] = list(event.salIndices[:event.length])
+        self.state["finishedIndices"] = list(event.pastSalIndices[: event.pastLength])
+        self.state["waitingIndices"] = list(event.salIndices[: event.length])
         self.state["enabled"] = event.enabled == 1
 
-        scripts = [
-            *self.state["waitingIndices"],
-            *self.state["finishedIndices"]
-        ]
+        scripts = [*self.state["waitingIndices"], *self.state["finishedIndices"]]
 
         if self.state["currentIndex"] > 0:
             scripts.append(self.state["currentIndex"])
@@ -167,11 +199,17 @@ class ScriptQueueProducer:
                 self.setup_script(salindex)
 
     def callback_config_schema(self, event):
+        """Append the config schema to a script
+
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
+        """
         event_script_type = "external"
         if event.isStandard:
             event_script_type = "standard"
         for script in self.state["available_scripts"]:
-
             if script['path'] == event.path and script['type'] == event_script_type:
                 script['configSchema'] = "# empty schema" if event.configSchema == "" else event.configSchema
                 self.log.info(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
@@ -182,49 +220,68 @@ class ScriptQueueProducer:
          for script in self.state["available_scripts"]]
 
     def callback_queue_script(self, event):
+        """Callback for the queue.evt_script event
+
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
-            Callback for the queue.evt_script event
-        """
-        if(event.salIndex not in self.scripts):
+        if event.salIndex not in self.scripts:
             self.scripts[event.salIndex] = self.new_empty_script()
 
-        self.scripts[event.salIndex]["type"] = "standard" if event.isStandard else "external"
+        self.scripts[event.salIndex]["type"] = (
+            "standard" if event.isStandard else "external"
+        )
         self.scripts[event.salIndex]["path"] = event.path
-        self.scripts[event.salIndex]["process_state"] = ScriptProcessState(event.processState).name
-        self.scripts[event.salIndex]["script_state"] = ScriptState(event.scriptState).name
-        self.scripts[event.salIndex]["timestampConfigureEnd"] = event.timestampConfigureEnd
-        self.scripts[event.salIndex]["timestampConfigureStart"] = event.timestampConfigureStart
+        self.scripts[event.salIndex]["process_state"] = ScriptProcessState(
+            event.processState
+        ).name
+        self.scripts[event.salIndex]["script_state"] = ScriptState(
+            event.scriptState
+        ).name
+        self.scripts[event.salIndex][
+            "timestampConfigureEnd"
+        ] = event.timestampConfigureEnd
+        self.scripts[event.salIndex][
+            "timestampConfigureStart"
+        ] = event.timestampConfigureStart
         self.scripts[event.salIndex]["timestampProcessEnd"] = event.timestampProcessEnd
-        self.scripts[event.salIndex]["timestampProcessStart"] = event.timestampProcessStart
+        self.scripts[event.salIndex][
+            "timestampProcessStart"
+        ] = event.timestampProcessStart
         self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
 
     def callback_script_metadata(self, event):
-        """
-            Callback for the logevent_metadata. Used to extract
-            the expected duration of the script.
+        """Callback for the logevent_metadata. Used to extract the expected duration of the script.
 
-            event : SALPY_Script.Script_logevent_metadataC
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
         salindex = event.ScriptID
         self.scripts[salindex]["expected_duration"] = event.duration
 
     def callback_script_state(self, event):
-        """
-            Callback for the Script_logevet_state event. Used to update
-            the state of the script.
+        """Callback for the Script_logevet_state event. Used to update the state of the script.
 
-            event : SALPY_Script.Script_logevent_stateC
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
         salindex = event.ScriptID
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
         self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
 
     def callback_script_description(self, event):
-        """
-            Callback for the logevent_description. Used to extract
-            the expected duration of the script.
+        """Callback for the logevent_description. Used to extract the expected duration of the script.
 
-            event : SALPY_Script.Script_logevent_descriptionC
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
         salindex = event.ScriptID
         self.scripts[salindex]["description"] = event.description
@@ -232,25 +289,45 @@ class ScriptQueueProducer:
         self.scripts[salindex]["remotes"] = event.remotes
 
     def callback_script_checkpoints(self, event):
-        """
-            Callback for the logevent_description. Used to extract
-            the expected duration of the script.
+        """Callback for the logevent_description. Used to extract the expected duration of the script.
 
-            event : SALPY_Script.Script_logevent_descriptionC
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
         """
         salindex = event.ScriptID
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
 
     def callback_script_logLevel(self, event):
-        """ Listens to the logLevel event"""
+        """Listens to the logLevel event
+    
+        Parameters
+        ----------
+        event: SALPY_Script.Script_logevent_metadataC
+            The SAL Event
+        """
         salindex = event.ScriptID
         self.scripts[salindex]["log_level"] = event.level
+
     # ---- Message creation ------
 
     def parse_script(self, script):
+        """Parse a script to a dictionary
+
+        Parameters
+        ----------
+        script: object
+            The script
+
+        Returns
+        -------
+        dict
+            The script parsed in a dict
+        """
         return {
-            "index": script['index'],
+            "index": script["index"],
             "path": script["path"],
             "type": script["type"],
             "process_state": script["process_state"],
@@ -267,26 +344,34 @@ class ScriptQueueProducer:
             "remotes": script["remotes"],
             "pause_checkpoints": script["pause_checkpoints"],
             "stop_checkpoints": script["stop_checkpoints"],
-            "log_level": script["log_level"]
-
+            "log_level": script["log_level"],
         }
 
     def get_state_message(self):
         """Parses the current state into a LOVE friendly format"""
         stream = {
-            'enabled': self.state['enabled'],
-            'running': self.state['running'],
-            'available_scripts': self.state['available_scripts'],
-            'waitingIndices': self.state['waitingIndices'],
-            'finishedIndices': self.state['finishedIndices'],
-            'currentIndex': self.state['currentIndex'],
+            "enabled": self.state["enabled"],
+            "running": self.state["running"],
+            "available_scripts": self.state["available_scripts"],
+            "waitingIndices": self.state["waitingIndices"],
+            "finishedIndices": self.state["finishedIndices"],
+            "currentIndex": self.state["currentIndex"],
             # 'scripts': [self.parse_script(self.scripts[index]) for index in self.scripts],
-            'finished_scripts': [self.parse_script(self.scripts[index]) for index in self.state['finishedIndices']],
-            'waiting_scripts': [self.parse_script(self.scripts[index]) for index in self.state['waitingIndices']],
-            'current': self.parse_script(self.scripts[self.state['currentIndex']]) if self.state['currentIndex'] > 0 else 'None',
-
+            "finished_scripts": [
+                self.parse_script(self.scripts[index])
+                for index in self.state["finishedIndices"]
+            ],
+            "waiting_scripts": [
+                self.parse_script(self.scripts[index])
+                for index in self.state["waitingIndices"]
+            ],
+            "current": self.parse_script(self.scripts[self.state["currentIndex"]])
+            if self.state["currentIndex"] > 0
+            else "None",
         }
-        message = onemsg_generator('event', 'ScriptQueueState', self.salindex, {'stream': stream})
+        message = onemsg_generator(
+            "event", "ScriptQueueState", self.salindex, {"stream": stream}
+        )
         return message
 
     # --------- SAL queries ---------
@@ -296,7 +381,9 @@ class ScriptQueueProducer:
             Send commands to the queue to trigger the script events of each script
         """
         try:
-            await self.queue.cmd_showScript.set_start(salIndex=salindex, timeout=self.cmd_timeout)
+            await self.queue.cmd_showScript.set_start(
+                salIndex=salindex, timeout=self.cmd_timeout
+            )
         except salobj.AckError as ack_err:
             self.log.info(f"Could not get info on script {salindex}. "
                           f"Failed with ack.result={ack_err.ack.result}")
@@ -357,29 +444,48 @@ class ScriptQueueProducer:
     # ----------HEARTBEATS---------
 
     def get_heartbeat_message(self, salindex):
+        """Returns a message with the heartbeats of the scripts
+
+        Parameters
+        ----------
+        salindex : int
+            The SAL Index of the scripts
+
+        Returns
+        -------
+        dict
+            The message
+        """
         heartbeat = {
-            'script_heartbeat': {
-                'salindex': salindex,
-                'lost': self.scripts[salindex]["lost_heartbeats"],
-                "last_heartbeat_timestamp": self.scripts[salindex]["last_heartbeat_timestamp"]
+            "script_heartbeat": {
+                "salindex": salindex,
+                "lost": self.scripts[salindex]["lost_heartbeats"],
+                "last_heartbeat_timestamp": self.scripts[salindex][
+                    "last_heartbeat_timestamp"
+                ],
             }
         }
         message = {
-            'category': 'event',
-            'data': [
+            "category": "event",
+            "data": [
                 {
-                    'csc': 'ScriptHeartbeats',
-                    'salindex': self.salindex,
-                    'data': json.loads(json.dumps({'stream': heartbeat}, cls=utils.NumpyEncoder))
+                    "csc": "ScriptHeartbeats",
+                    "salindex": self.salindex,
+                    "data": json.loads(
+                        json.dumps({"stream": heartbeat}, cls=utils.NumpyEncoder)
+                    ),
                 }
-            ]
+            ],
         }
         return message
 
     async def monitor_scripts_heartbeats(self):
+        """Cntinuously monitor the script heartbeats."""
         while True:
             try:
-                script_data = await self.script_remote.evt_heartbeat.next(flush=True, timeout=HEARTBEAT_TIMEOUT)
+                script_data = await self.script_remote.evt_heartbeat.next(
+                    flush=True, timeout=HEARTBEAT_TIMEOUT
+                )
             except asyncio.TimeoutError:
                 for salindex in self.scripts:
                     self.scripts[salindex]["lost_heartbeats"] += 1
@@ -392,9 +498,13 @@ class ScriptQueueProducer:
 
             # send currently received heartbeat
             current_timestamp = datetime.datetime.now().timestamp()
-            self.scripts[received_heartbeat_salindex]["last_heartbeat_timestamp"] = current_timestamp
+            self.scripts[received_heartbeat_salindex][
+                "last_heartbeat_timestamp"
+            ] = current_timestamp
             self.scripts[received_heartbeat_salindex]["lost_heartbeats"] = 0
-            self.send_message_callback(self.get_heartbeat_message(received_heartbeat_salindex))
+            self.send_message_callback(
+                self.get_heartbeat_message(received_heartbeat_salindex)
+            )
             # https://github.com/lsst-ts/LOVE-producer/issues/53
             # self.scripts[salindex]["last_heartbeat_timestamp"] = script_data.private_sndStamp
 
@@ -405,7 +515,9 @@ class ScriptQueueProducer:
                     continue
 
                 # count how many beats were lost since last timestamp
-                nlost_heartbeats = (current_timestamp - script["last_heartbeat_timestamp"])/HEARTBEAT_TIMEOUT
+                nlost_heartbeats = (
+                    current_timestamp - script["last_heartbeat_timestamp"]
+                ) / HEARTBEAT_TIMEOUT
                 nlost_heartbeats = math.floor(nlost_heartbeats)
 
                 # send it if nlost increased

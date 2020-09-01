@@ -1,4 +1,4 @@
-"""Main executable of the LOVE-producer."""
+"""Main executable of the Events Producer."""
 import asyncio
 from lsst.ts import salobj
 from telemetries.producer import TelemetriesProducer
@@ -29,6 +29,7 @@ class TelemetriesClient(BaseWSClient):
         asyncio.create_task(self.send_messages_after_timeout())
 
     async def send_messages_after_timeout(self):
+        """Send the telemetries periodically."""
         while True:
             message = self.producer.get_telemetry_message()
             if len(message["data"]) > 0:
@@ -37,6 +38,7 @@ class TelemetriesClient(BaseWSClient):
 
 
 async def main():
+    """The main function, starts the Client."""
     telemetry_client = TelemetriesClient()
     await telemetry_client.start_ws_client()
 

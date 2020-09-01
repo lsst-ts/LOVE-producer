@@ -1,3 +1,4 @@
+"""Test the Producer"""
 import asynctest
 import logging
 from events.producer import EventsProducer
@@ -12,6 +13,8 @@ index_gen = salobj.index_generator()
 
 
 class TestEventsMessages(asynctest.TestCase):
+    """Test suite for the Producer."""
+
     async def setUp(self):
         salobj.set_random_lsst_dds_domain()
         index = next(index_gen)
