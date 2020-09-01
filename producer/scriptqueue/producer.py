@@ -36,7 +36,7 @@ class ScriptQueueProducer:
         self.cmd_timeout = 15
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
-        self.scripts_schema_task = asyncio.create_task(asyncio.sleep(0))
+        self.scripts_schema_task = None
         # create logger
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.INFO)
@@ -173,6 +173,10 @@ class ScriptQueueProducer:
                 {"type": "external", "path": script_path, "configSchema": ""}
             )
         self.log.info('will query_scripts_config')
+        
+        # if self.script_schema_task is not None:
+        #     self.script_schema_task.cancel()
+        
         self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):

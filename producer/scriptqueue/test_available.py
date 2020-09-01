@@ -16,6 +16,7 @@ TIMEOUT = 30
 
 
 class TestScriptqueueAvailableScripts(asynctest.TestCase):
+    maxDiff = None
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:
@@ -28,13 +29,9 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
             available_scripts = utils.get_parameter_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream", "available_scripts"
             )
-            if all(
-                [
-                    s["path"] == "unloadable" or len(s["configSchema"]) > 0
-                    for s in available_scripts
-                ]
+            if len(available_scripts) > 0 and all(
+                [ s["path"] == "unloadable" or len(s["configSchema"]) > 0 for s in available_scripts ]
             ):
-
                 return [
                     {
                         "type": s["type"],
@@ -42,9 +39,8 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                         "configSchema": yaml.load(
                             s["configSchema"], Loader=yaml.SafeLoader
                         )
-                        if s["configSchema"] != ""
-                        and s["path"] != "subdir/subsubdir/script4"
-                        else "",
+                        if s["configSchema"] != "" and s["configSchema"] !=  "# empty schema"
+                        else  s["configSchema"]
                     }
                     for s in available_scripts
                 ]
@@ -87,7 +83,10 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         await asyncio.wait_for(producer.setup(), LONG_TIMEOUT)
 
         # ACT
-        await asyncio.wait_for(self.remote.cmd_showAvailableScripts.start(), TIMEOUT)
+        await asyncio.wait_for(producer.update(showAvailable=True), LONG_TIMEOUT)
+        while producer.scripts_schema_task is None:
+            await asyncio.sleep(0.1)
+        await producer.scripts_schema_task
         availableScripts = await asyncio.wait_for(
             self.remote.evt_availableScripts.aget(), TIMEOUT
         )
@@ -95,26 +94,45 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
             self.wait_for_all_config_schema(), LONG_TIMEOUT
         )
 
+
         # Assert
         expected_standard = [
-            {
+            { 
+                "type": "standard", 
+                "path": path, 
+                "configSchema": "# empty schema"
+            }
+            if path == "unloadable"
+            else {
+                "type": "standard",
+                "path": path,
+                "configSchema": "script4"
+            } if path == "subdir/subsubdir/script4"  
+            else {
                 "type": "standard",
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            if path != "unloadable" and path != "subdir/subsubdir/script4"
-            else {"type": "standard", "path": path, "configSchema": ""}
             for path in availableScripts.standard.split(":")
         ]
 
         expected_external = [
-            {
+            { 
+                "type": "external", 
+                "path": path, 
+                "configSchema": "# empty schema"
+            }
+            if path == "unloadable"
+            else {
+                "type": "external",
+                "path": path,
+                "configSchema": "script4"
+            } if path == "subdir/subsubdir/script4"  
+            else {
                 "type": "external",
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            if path != "unloadable" and path != "subdir/subsubdir/script4"
-            else {"type": "external", "path": path, "configSchema": ""}
             for path in availableScripts.external.split(":")
         ]
 
