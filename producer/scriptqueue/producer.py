@@ -174,8 +174,8 @@ class ScriptQueueProducer:
             )
         self.log.info('will query_scripts_config')
         
-        # if self.script_schema_task is not None:
-        #     self.script_schema_task.cancel()
+        if self.scripts_schema_task is not None:
+            self.scripts_schema_task.cancel()
         
         self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
@@ -394,7 +394,9 @@ class ScriptQueueProducer:
 
     async def query_scripts_config(self):
         """
-            Send command to the queue to trigger the script config event
+            Send command to the queue to trigger the script config event. 
+            If canceled (task.cancel for example) it will log a message and quit
+            the coroutine.
         """
         available_scripts = self.state["available_scripts"]
         self.log.info(f'Starting cmd_showSchema on {len(available_scripts)} scripts')
@@ -410,6 +412,7 @@ class ScriptQueueProducer:
                     timeout=self.cmd_timeout)
             except asyncio.CancelledError:
                 self.log.info(f"query_scripts_config canceled on isStandard={isStandard} and {path}")
+                return
             except Exception as e:
                 self.log.info(f"Could not get info on script {path}. "
                               f"Failed with ack.result={ack_err.ack.result}")
