@@ -36,7 +36,7 @@ class ScriptQueueProducer:
         self.cmd_timeout = 15
         self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
-        self.scripts_schema_task = None
+        self.scripts_schema_task = asyncio.create_task(asyncio.sleep(0))
         # create logger
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.DEBUG)
@@ -177,8 +177,8 @@ class ScriptQueueProducer:
                 self.log.info(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
                 break
 
-        self.log.info(f'summary:')
-        [self.log.info(f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}')
+        self.log.debug(f'summary:')
+        [self.log.debug(f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}')
          for script in self.state["available_scripts"]]
 
     def callback_queue_script(self, event):
@@ -317,6 +317,8 @@ class ScriptQueueProducer:
                     isStandard=isStandard,
                     path=path,
                     timeout=self.cmd_timeout)
+            except asyncio.CancelledError:
+                self.log.info(f"query_scripts_config canceled on isStandard={isStandard} and {path}")
             except Exception as e:
                 self.log.info(f"Could not get info on script {path}. "
                               f"Failed with ack.result={ack_err.ack.result}")
