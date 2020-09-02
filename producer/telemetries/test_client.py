@@ -116,7 +116,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
 
             # with patch("builtins.open", mock_open(read_data=json.dumps(config))) :
             remote = salobj.Remote(domain=salobj.Domain(), name="Test", index=self.index)
-            self.client = TelemetriesClient(csc_list=csc_list, sleepDuration=0.5, remote=remote)
+            self.client = TelemetriesClient(csc_list=[], sleepDuration=0.5, remote=remote)
             self.client_task = asyncio.create_task(self.client.start_ws_client())
 
         async def act_assert(websocket, path):

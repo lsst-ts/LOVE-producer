@@ -11,20 +11,25 @@ TIMEOUT = 10
 class EventsProducer:
     """ Produces messages with events coming from several CSCs """
 
-    def __init__(self, domain, csc_list, events_callback):
+    def __init__(self, domain, csc_list, events_callback, remote=None):
         self.events_callback = events_callback
         self.domain = domain
         self.remote_dict = {}
         self.initial_state_data = {}
-        for name, salindex in csc_list:
-            try:
-                print("- Listening to events from CSC: ", (name, salindex))
-                remote = salobj.Remote(domain=domain, name=name, index=salindex)
-                self.remote_dict[(name, salindex)] = remote
+        if not remote:
+            for name, salindex in csc_list:
+                try:
+                    print("- Listening to events from CSC: ", (name, salindex))
+                    new_remote = salobj.Remote(domain=domain, name=name, index=salindex)
+                    self.remote_dict[(name, salindex)] = new_remote
 
-            except Exception as e:
-                print("- Could not load events remote for", name, salindex)
-                print(e)
+                except Exception as e:
+                    print("- Could not load events remote for", name, salindex)
+                    print(e)
+        else:
+            name = remote.salinfo.name
+            salindex = remote.salinfo.index
+            self.remote_dict[(name, salindex)] = remote
 
     def setup_callbacks(self):
         """Configures a callback for each remote created"""

@@ -10,14 +10,14 @@ from base_ws_client import BaseWSClient
 class EventsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
-    def __init__(self, csc_list=None):
+    def __init__(self, csc_list=None, remote=None):
         super().__init__(name="Events")
         if csc_list != None:
             print("CSC list replaced by", csc_list)
             self.csc_list = csc_list
         self.connection_error = False
         self.producer = EventsProducer(
-            self.domain, self.csc_list, self.send_message_callback
+            self.domain, self.csc_list, self.send_message_callback, remote=remote
         )
 
     async def on_start_client(self):
