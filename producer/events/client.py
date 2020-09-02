@@ -26,13 +26,6 @@ class EventsWSClient(BaseWSClient):
         await asyncio.gather(
             *[remote.start_task for remote in self.producer.remote_dict.values()]
         )
-
-        await asyncio.gather(
-            *[
-                remote.start_task
-                for remote in self.producer.initial_state_remote_dict.values()
-            ]
-        )
         self.producer.setup_callbacks()
 
     def send_message_callback(self, message):

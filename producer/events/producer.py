@@ -15,16 +15,12 @@ class EventsProducer:
         self.events_callback = events_callback
         self.domain = domain
         self.remote_dict = {}
-        self.initial_state_remote_dict = {}
         self.initial_state_data = {}
         for name, salindex in csc_list:
             try:
                 print("- Listening to events from CSC: ", (name, salindex))
                 remote = salobj.Remote(domain=domain, name=name, index=salindex)
                 self.remote_dict[(name, salindex)] = remote
-                self.initial_state_remote_dict[(name, salindex)] = salobj.Remote(
-                    domain=domain, name=name, index=salindex
-                )
 
             except Exception as e:
                 print("- Could not load events remote for", name, salindex)
@@ -163,20 +159,15 @@ class EventsProducer:
                 self.remote_dict[(csc, salindex)] = salobj.Remote(
                     self.domain, csc, salindex
                 )
-                self.initial_state_remote_dict[(csc, salindex)] = salobj.Remote(
-                    domain=self.domain, name=csc, index=salindex
-                )
-                self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
+                await self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
             except RuntimeError:
                 return
 
-        remote = self.initial_state_remote_dict[(csc, salindex)]
+        remote = self.remote_dict[(csc, salindex)]
         remote_name = remote.salinfo.name
         index = remote.salinfo.index
 
         # safely request event data
-        # await remote.start_task
-        evt_object = getattr(remote, f"evt_{event_name}")
         try:
             # get most recent data or wait TIMEOUT seconds for the first one
             key = (remote_name, index, event_name)
