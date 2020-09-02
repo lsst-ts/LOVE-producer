@@ -22,7 +22,6 @@ class TestEventsMessages(asynctest.TestCase):
             index=index, config_dir=None, initial_state=salobj.State.ENABLED
         )
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
-        await self.remote.start_task
 
         self.message_queue = asyncio.Queue()
         self.callback = lambda message: asyncio.create_task(
@@ -57,6 +56,7 @@ class TestEventsMessages(asynctest.TestCase):
         )
         self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
+        await self.remote.start_task
         await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
 
         # Act
@@ -89,6 +89,7 @@ class TestEventsMessages(asynctest.TestCase):
         self.events_producer.setup_callbacks()
         # Setup the producer and the data
         cmd_data_sent = self.csc.make_random_cmd_arrays()
+        await self.remote.start_task
         await self.remote.cmd_setArrays.start(cmd_data_sent, timeout=STD_TIMEOUT)
 
         # Act
@@ -120,6 +121,7 @@ class TestEventsMessages(asynctest.TestCase):
         )
         self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
+        await self.remote.start_task
         await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
 
         # Act
