@@ -105,7 +105,7 @@ class BaseWSClient:
             except Exception as e:
                 print(f"Send Message Exception {e} \n")
         else:
-            print(f"{self.name} | Unable to send message {message}"[:100], flush=True)
+            print(f"{self.name} | Unable to send message {message}", flush=True)
 
     async def on_websocket_receive(self, message):
         """ Executed every time a message is received from the LOVE-manager """

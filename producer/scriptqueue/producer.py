@@ -8,7 +8,7 @@ from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 import utils
-
+import logging
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
 
@@ -33,11 +33,27 @@ class ScriptQueueProducer:
 
         self.initial_data = {}
         self.scripts = {}
-        self.cmd_timeout = 60
-        self.queue = salobj.Remote(
-            domain=self.domain, name="ScriptQueue", index=self.salindex
-        )
+        self.cmd_timeout = 15
+        self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
+        self.scripts_schema_task = None
+        # create logger
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.INFO)
+
+        # create console handler and set level to debug
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+
+        # # create formatter
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        # # add formatter to ch
+        # ch.setFormatter(formatter)
+
+        # add ch to self.log
+        self.log.addHandler(ch)
+
 
     async def setup(self):
         """Initialize the Producer.
@@ -152,12 +168,16 @@ class ScriptQueueProducer:
             self.state["available_scripts"].append(
                 {"type": "standard", "path": script_path, "configSchema": ""}
             )
-            self.query_script_config(True, script_path)
-        for script_path in event.external.split(":"):
+        for script_path in event.external.split(':'):
             self.state["available_scripts"].append(
                 {"type": "external", "path": script_path, "configSchema": ""}
             )
-            self.query_script_config(False, script_path)
+        self.log.info('will query_scripts_config')
+        
+        if self.scripts_schema_task is not None:
+            self.scripts_schema_task.cancel()
+        
+        self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):
         """Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
@@ -194,10 +214,14 @@ class ScriptQueueProducer:
         if event.isStandard:
             event_script_type = "standard"
         for script in self.state["available_scripts"]:
-
-            if script["path"] == event.path and script["type"] == event_script_type:
-                script["configSchema"] = event.configSchema
+            if script['path'] == event.path and script['type'] == event_script_type:
+                script['configSchema'] = "# empty schema" if event.configSchema == "" else event.configSchema
+                self.log.info(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
                 break
+
+        self.log.debug(f'summary:')
+        [self.log.debug(f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}')
+         for script in self.state["available_scripts"]]
 
     def callback_queue_script(self, event):
         """Callback for the queue.evt_script event
@@ -356,63 +380,73 @@ class ScriptQueueProducer:
 
     # --------- SAL queries ---------
 
-    async def query_script_info(self, salindex):
-        """Send commands to the queue to trigger the script events of each script
-
-        Parameters
-        ----------
-        salindex: int
-            The salindex of the script
+    async def query_scripts_info(self, salindex):
+        """
+            Send commands to the queue to trigger the script events of each script
         """
         try:
             await self.queue.cmd_showScript.set_start(
                 salIndex=salindex, timeout=self.cmd_timeout
             )
         except salobj.AckError as ack_err:
-            print(
-                f"Could not get info on script {salindex}. "
-                f"Failed with ack.result={ack_err.ack.result}"
-            )
+            self.log.info(f"Could not get info on script {salindex}. "
+                          f"Failed with ack.result={ack_err.ack.result}")
 
-    def query_script_config(self, isStandard, script_path):
-        """Send command to the queue to trigger the script config event
-
-        Parameters
-        ----------
-        isStandard : bool
-            True of it is a Standard script, False if not
-        script_path : string
-            The path where the script is located
+    async def query_scripts_config(self):
         """
-        try:
-            asyncio.create_task(
-                self.queue.cmd_showSchema.set_start(
-                    isStandard=isStandard, path=script_path, timeout=self.cmd_timeout
-                )
-            )
-        except salobj.AckError as ack_err:
-            print(
-                f"Could not get info on script {script_path}. "
-                f"Failed with ack.result={ack_err.ack.result}"
-            )
+            Send command to the queue to trigger the script config event. 
+            If canceled (task.cancel for example) it will log a message and quit
+            the coroutine.
+        """
+        available_scripts = self.state["available_scripts"]
+        self.log.info(f'Starting cmd_showSchema on {len(available_scripts)} scripts')
+        for (index, script) in enumerate(available_scripts):
+            path = script["path"]
+            isStandard = script["type"] == "standard"
 
-    async def update(self):
+            try:
+                self.log.info(f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}')
+                await self.queue.cmd_showSchema.set_start(
+                    isStandard=isStandard,
+                    path=path,
+                    timeout=self.cmd_timeout)
+            except asyncio.CancelledError:
+                self.log.info(f"query_scripts_config canceled on isStandard={isStandard} and {path}")
+                return
+            except Exception as e:
+                self.log.info(f"Could not get info on script {path}. "
+                              f"Failed with ack.result={ack_err.ack.result}")
+                self.log.info("Exception", e)
+
+    async def update(self, showAvailable):
         """
             Tries to trigger the queue event which will
             update all the info in the queue and its scripts
             if succeeds.
         """
 
-        try:
-            await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
-            await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
-            for script_index in self.scripts:
-                await self.queue.cmd_showScript.set_start(salIndex=script_index)
+        self.log.info('will update')
 
-            return True
+        try:
+            self.log.info('will showQueue')
+            await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
         except Exception as e:
-            print(e)
-            return False
+            self.log.info('Unable to show Queue', e)
+
+        if showAvailable:
+            try:
+                self.log.info('will showAvailableScripts')
+                await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
+            except Exception as e:
+                self.log.info('Unable to showAvailable', e)
+
+        for script_index in self.scripts:
+            try:
+                self.log.info(f"will showScript {script_index}")
+                await self.queue.cmd_showScript.set_start(salIndex=script_index)
+            except Exception as e:
+                self.log.info(f"Unable to showScript {script_index}")
+        return True
 
     # ----------HEARTBEATS---------
 
