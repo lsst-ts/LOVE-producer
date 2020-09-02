@@ -98,8 +98,5 @@ class TestEventsClient(test_utils.WSClientTestCase):
 
             for (csc, salindex) in self.client.producer.remote_dict:
                 await self.client.producer.remote_dict[(csc, salindex)].close()
-                await self.client.producer.initial_state_remote_dict[
-                    (csc, salindex)
-                ].close()
 
         await self.harness(act_assert, arrange, cleanup)

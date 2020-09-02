@@ -11,12 +11,19 @@ from base_ws_client import BaseWSClient
 class CSCHeartbeatsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Heartbeats Producer and the LOVE-manager."""
 
-    def __init__(self):
+    def __init__(self, remote=None):
+        """Initializes its producer
+
+        Parameters
+        ----------
+        remote: salobj.Remote
+            Optional Remote object, when the heartbeat of only one Remote is to be monitored
+        """
         super().__init__(name="CSCHeartbeats")
 
         self.connection_error = False
         self.producer = HeartbeatProducer(
-            self.domain, self.send_heartbeat, self.csc_list
+            self.domain, self.send_heartbeat, self.csc_list, remote
         )
 
     async def on_start_client(self):
