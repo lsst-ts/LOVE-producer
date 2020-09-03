@@ -80,9 +80,9 @@ class EventsWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def main():
+async def main(remote=None):
     """Main function, starts the client"""
-    telev_client = EventsWSClient()
+    telev_client = EventsWSClient(remote=remote)
     await telev_client.start_ws_client()
 
 

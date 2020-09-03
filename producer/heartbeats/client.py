@@ -52,9 +52,9 @@ class CSCHeartbeatsWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def main():
+async def main(remote=None):
     """Main function, starts the client"""
-    heartbeats_client = CSCHeartbeatsWSClient()
+    heartbeats_client = CSCHeartbeatsWSClient(remote=remote)
     await heartbeats_client.start_ws_client()
 
 
