@@ -60,6 +60,17 @@ class CSCWSClient(BaseWSClient):
         """
         self.connection_error = True
 
+    # Cancels running producers tasks
+    def close(self):
+        for task in self.events_clients:
+            task.cancel()
+        for task in self.telemetries_clients:
+            task.cancel()
+        for task in self.heartbeats_clients:
+            task.cancel()
+        for task in self.scriptqueue_clients:
+            task.cancel()
+
 async def main():
     """Main function, starts the client"""
     CSC_client = CSCWSClient()
