@@ -11,13 +11,13 @@ from base_ws_client import BaseWSClient
 class ScriptQueueWSClient(BaseWSClient):
     """Handles the websocket client connection between the ScriptQueue Producer and the LOVE-manager."""
 
-    def __init__(self, salindex):
+    def __init__(self, salindex, remote=None):
         super().__init__(name=f"ScriptQueue-{salindex}")
         self.name = f"ScriptQueue-{salindex}"
         self.connection_error = False
         self.salindex = salindex
         self.producer = ScriptQueueProducer(
-            self.domain, self.send_message_callback, self.salindex
+            self.domain, self.send_message_callback, self.salindex, remote
         )
 
     async def on_start_client(self):
@@ -56,7 +56,7 @@ class ScriptQueueWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def init_client(salindex):
+async def init_client(salindex, remote=None):
     """Initialize the client for a given ScriptQueue SAL index
 
     Parameters
@@ -64,16 +64,16 @@ async def init_client(salindex):
     salindex: int
         The SAL Index of the Script Queue
     """
-    sqclient = ScriptQueueWSClient(salindex)
+    sqclient = ScriptQueueWSClient(salindex, remote=remote)
     await sqclient.start_ws_client()
 
 
-async def main():
+async def main(remote=None):
     """Main function, starts the client."""
     sq_list = BaseWSClient.read_config(BaseWSClient.path, "ScriptQueue")
     print("List of Script Queues to listen:", sq_list)
     for name, salindex in sq_list:
-        asyncio.create_task(init_client(salindex))
+        asyncio.create_task(init_client(salindex, remote=remote))
 
 
 if __name__ == "__main__":
