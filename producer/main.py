@@ -60,7 +60,7 @@ def main():
             print(f'creating {SCRIPTQUEUE} producer')
             loop.create_task(scriptqueue())
     else:
-        name, salindex = LOVE_CSC_PRODUCER.split('.')
+        name, salindex = LOVE_CSC_PRODUCER.split(':')
         loop.create_task(csc(csc_list=[(name, salindex)]))
     loop.run_forever()
 
