@@ -4,6 +4,7 @@ from lsst.ts import salobj
 from events.client import main as events
 from telemetries.client import main as telemetries
 from heartbeats.client import main as heartbeats
+from heartbeats.producer import HeartbeatProducer
 from scriptqueue.client import main as scriptqueue
 
 import os
@@ -21,7 +22,7 @@ class CSCWSClient(BaseWSClient):
         super().__init__(name="CSCProducer")
         self.events_clients = []
         self.telemetries_clients = []
-        self.heartbeats_clients = []
+        self.heartbeats_producers = []
         self.scriptqueue_clients = []
         domain = salobj.Domain()
         if csc_list is not None:
@@ -33,9 +34,17 @@ class CSCWSClient(BaseWSClient):
         for name, salindex in self.csc_list:
             print("- CSCClient: Listening to events from CSC: ", (name, salindex))
             remote = salobj.Remote(domain=domain, name=name, index=salindex)
-            self.events_clients.append(loop.create_task(events(remote=remote)))
+            hb_producer = HeartbeatProducer(
+                domain, self.send_heartbeat, [(name, salindex)], remote=remote
+            )
+            hb_producer.start()
+            def heartbeat_callback(evt):
+                hb_producer.set_heartbeat(evt)
+
+            self.events_clients.append(loop.create_task(events(heartbeat_callback=heartbeat_callback, remote=remote)))
             self.telemetries_clients.append(loop.create_task(telemetries(remote=remote)))
-            self.heartbeats_clients.append(loop.create_task(heartbeats(remote=remote)))
+            self.heartbeats_producers.append(hb_producer)
+
             if name == "ScriptQueue":
                 self.scriptqueue_clients.append(loop.create_task(scriptqueue(remote=remote)))
 
@@ -45,6 +54,16 @@ class CSCWSClient(BaseWSClient):
     async def on_start_client(self):
         """ Initializes producer's callbacks """
         self.connection_error = False
+
+    async def send_heartbeat(self, message):
+        """Callback used by the heartbeats producer to send messages with the websocket client
+
+        Parameters
+        ----------
+        message: dictionmary
+            Message to send
+        """
+        asyncio.create_task(self.send_message(message))
 
     async def on_websocket_error(self, e):
         """ Set the internal variable connection_error to True when an error ocurrs
@@ -61,8 +80,6 @@ class CSCWSClient(BaseWSClient):
         for task in self.events_clients:
             task.cancel()
         for task in self.telemetries_clients:
-            task.cancel()
-        for task in self.heartbeats_clients:
             task.cancel()
         for task in self.scriptqueue_clients:
             task.cancel()
