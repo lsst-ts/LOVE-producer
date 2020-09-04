@@ -16,6 +16,7 @@ class EventsProducer:
         self.domain = domain
         self.remote_dict = {}
         self.initial_state_data = {}
+        self.auto_remote_creation = True
         if not remote:
             for name, salindex in csc_list:
                 try:
@@ -30,6 +31,7 @@ class EventsProducer:
             name = remote.salinfo.name
             salindex = remote.salinfo.index
             self.remote_dict[(name, salindex)] = remote
+            self.auto_remote_creation = False
 
     def setup_callbacks(self):
         """Configures a callback for each remote created"""
@@ -159,7 +161,7 @@ class EventsProducer:
         csc = request_data["csc"]
         salindex = int(request_data["salindex"])
         event_name = request_data["data"]["event_name"]
-        if (csc, salindex) not in self.remote_dict:
+        if self.auto_remote_creation and (csc, salindex) not in self.remote_dict:
             try:
                 self.remote_dict[(csc, salindex)] = salobj.Remote(
                     self.domain, csc, salindex

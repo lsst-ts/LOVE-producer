@@ -5,6 +5,7 @@ from telemetries.client import main as telemetries
 from events.client import main as events
 from scriptqueue.client import main as scriptqueue
 from heartbeats.client import main as heartbeats
+from csc.client import main as csc
 import os
 
 TELEMETRIES = "TELEMETRIES"
@@ -31,6 +32,7 @@ def main():
         - 
     """
     LOVE_PRODUCERS = os.environ.get('LOVE_PRODUCERS')
+    LOVE_CSC_PRODUCER = os.environ.get('LOVE_CSC_PRODUCER')
     if LOVE_PRODUCERS is None:
         producers = [TELEMETRIES, EVENTS, CSC_HEARTBEATS, SCRIPTQUEUE]
     else:
@@ -44,18 +46,22 @@ def main():
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(exception_handler)
     # loop.set_debug(True)
-    if TELEMETRIES in producers:
-        print(f'creating {TELEMETRIES} producer')
-        loop.create_task(telemetries())
-    if EVENTS in producers:
-        print(f'creating {EVENTS} producer')
-        loop.create_task(events())
-    if CSC_HEARTBEATS in producers:
-        print(f'creating {CSC_HEARTBEATS} producer')
-        loop.create_task(heartbeats())
-    if SCRIPTQUEUE in producers:
-        print(f'creating {SCRIPTQUEUE} producer')
-        loop.create_task(scriptqueue())
+    if not LOVE_CSC_PRODUCER:
+        if TELEMETRIES in producers:
+            print(f'creating {TELEMETRIES} producer')
+            loop.create_task(telemetries())
+        if EVENTS in producers:
+            print(f'creating {EVENTS} producer')
+            loop.create_task(events())
+        if CSC_HEARTBEATS in producers:
+            print(f'creating {CSC_HEARTBEATS} producer')
+            loop.create_task(heartbeats())
+        if SCRIPTQUEUE in producers:
+            print(f'creating {SCRIPTQUEUE} producer')
+            loop.create_task(scriptqueue())
+    else:
+        name, salindex = LOVE_CSC_PRODUCER.split('.')
+        loop.create_task(csc(csc_list=[(name, salindex)]))
     loop.run_forever()
 
 if __name__ == '__main__':
