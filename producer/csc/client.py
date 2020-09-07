@@ -56,6 +56,10 @@ class CSCWSClient(BaseWSClient):
 
         self.connection_error = False
 
+    async def start_scriptqueues(self, remote):
+        await asyncio.gather(*self.events_clients)
+        await scriptqueue(remote=remote)
+
 
     async def on_start_client(self):
         """ Initializes producer's callbacks """
