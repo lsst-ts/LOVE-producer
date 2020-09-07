@@ -52,7 +52,7 @@ class CSCWSClient(BaseWSClient):
             self.heartbeats_producers.append(hb_producer)
 
             if name == "ScriptQueue":
-                self.scriptqueue_clients.append(loop.create_task(scriptqueue(remote=remote)))
+                self.scriptqueue_clients.append(loop.create_task(self.start_scriptqueues))
 
         self.connection_error = False
 
