@@ -14,7 +14,13 @@ from base_ws_client import BaseWSClient
 
 
 class CSCWSClient(BaseWSClient):
-    """Handles the websocket client connection between the CSC Producer and the LOVE-manager."""
+    """Handles the websocket client connection between the CSC Producer and the LOVE-manager.
+    This producer disables the automatic instantiation of new CSCs on the events Producer.
+
+    Parameters
+    ----------
+    csc_list: List of  (csc, salindex) pairs
+    """
 
     def __init__(self, csc_list=None):
         """Initializes its producer
