@@ -18,7 +18,7 @@ class ScriptQueueProducer:
     to build their states and produce messages for the LOVE-manager
     in the 'event-ScriptQueueState-salindex-stream' group."""
 
-    def __init__(self, domain, send_message_callback, index):
+    def __init__(self, domain, send_message_callback, index, remote=None):
         self.domain = domain
         self.send_message_callback = send_message_callback
         self.salindex = index
@@ -34,7 +34,10 @@ class ScriptQueueProducer:
         self.initial_data = {}
         self.scripts = {}
         self.cmd_timeout = 15
-        self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
+        if remote is None:
+            self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
+        else:
+            self.queue = remote
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
         self.scripts_schema_task = None
         # create logger

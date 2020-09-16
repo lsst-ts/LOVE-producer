@@ -37,9 +37,9 @@ class TelemetriesClient(BaseWSClient):
             await asyncio.sleep(self.sleepDuration)
 
 
-async def main():
+async def main(remote=None):
     """The main function, starts the Client."""
-    telemetry_client = TelemetriesClient()
+    telemetry_client = TelemetriesClient(remote=remote)
     await telemetry_client.start_ws_client()
 
 

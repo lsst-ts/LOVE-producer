@@ -11,11 +11,13 @@ TIMEOUT = 10
 class EventsProducer:
     """ Produces messages with events coming from several CSCs """
 
-    def __init__(self, domain, csc_list, events_callback, remote=None):
+    def __init__(self, domain, csc_list, events_callback, heartbeat_callback=None, remote=None):
         self.events_callback = events_callback
         self.domain = domain
         self.remote_dict = {}
         self.initial_state_data = {}
+        self.auto_remote_creation = True
+        self.heartbeat_callback = heartbeat_callback
         if not remote:
             for name, salindex in csc_list:
                 try:
@@ -30,6 +32,7 @@ class EventsProducer:
             name = remote.salinfo.name
             salindex = remote.salinfo.index
             self.remote_dict[(name, salindex)] = remote
+            self.auto_remote_creation = False
 
     def setup_callbacks(self):
         """Configures a callback for each remote created"""
@@ -89,6 +92,9 @@ class EventsProducer:
         def callback(evt_data):
             if Settings.trace_timestamps():
                 rcv_time = Time.now().tai.datetime.timestamp()
+            if evt_name == "heartbeat" and self.heartbeat_callback:
+                self.heartbeat_callback(evt_data)
+                return
             evt_parameters = list(evt_data._member_attributes)
             remote = self.remote_dict[(csc, salindex)]
             remote_name = remote.salinfo.name
@@ -160,12 +166,15 @@ class EventsProducer:
         salindex = int(request_data["salindex"])
         event_name = request_data["data"]["event_name"]
         if (csc, salindex) not in self.remote_dict:
-            try:
-                self.remote_dict[(csc, salindex)] = salobj.Remote(
-                    self.domain, csc, salindex
-                )
-                await self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
-            except RuntimeError:
+            if self.auto_remote_creation:
+                try:
+                    self.remote_dict[(csc, salindex)] = salobj.Remote(
+                        self.domain, csc, salindex
+                    )
+                    await self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
+                except RuntimeError:
+                    return
+            else:
                 return
 
         remote = self.remote_dict[(csc, salindex)]

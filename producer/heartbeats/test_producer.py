@@ -127,6 +127,28 @@ class TestHeartbeatsMessages(asynctest.TestCase):
                             "csc": "Test",
                             "salindex": self.csc.salinfo.index,
                             "lost": 0,
+                            "last_heartbeat_timestamp": -2,
+                            "max_lost_heartbeats": 5
+                        }
+                    }
+                }
+            ]
+        }
+        self.assertEqual(expected_message, message)
+        self.heartbeat_producer.set_heartbeat("test")
+        message = await asyncio.wait_for(self.message_queue.get(), MSG_TIMEOUT)
+        # Assert:
+        expected_message = {
+            "category": "event",
+            "data": [
+                {
+                    "csc": "Heartbeat",
+                    "salindex": 0,
+                    "data": {
+                        "stream": {
+                            "csc": "Test",
+                            "salindex": self.csc.salinfo.index,
+                            "lost": 0,
                             "last_heartbeat_timestamp": mock_datetime.datetime.now().timestamp(),
                             "max_lost_heartbeats": 5
                         }

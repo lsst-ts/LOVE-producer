@@ -8,16 +8,23 @@ from base_ws_client import BaseWSClient
 
 
 class EventsWSClient(BaseWSClient):
-    """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
+    """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager.
+    Parameters
+    ----------
+    heartbeat_callback: function
+        Optional callback to be called when receiving a heartbeat event
+    remote: salobj.Remote
+        Optional remote to read events from
+    """
 
-    def __init__(self, csc_list=None, remote=None):
+    def __init__(self, csc_list=None, heartbeat_callback=None, remote=None):
         super().__init__(name="Events")
         if csc_list != None:
             print("CSC list replaced by", csc_list)
             self.csc_list = csc_list
         self.connection_error = False
         self.producer = EventsProducer(
-            self.domain, self.csc_list, self.send_message_callback, remote=remote
+            self.domain, self.csc_list, self.send_message_callback, heartbeat_callback=heartbeat_callback, remote=remote
         )
 
     async def on_start_client(self):
@@ -80,9 +87,9 @@ class EventsWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def main():
+async def main(heartbeat_callback=None, remote=None):
     """Main function, starts the client"""
-    telev_client = EventsWSClient()
+    telev_client = EventsWSClient(heartbeat_callback=heartbeat_callback, remote=remote)
     await telev_client.start_ws_client()
 
 

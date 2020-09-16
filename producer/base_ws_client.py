@@ -21,7 +21,6 @@ class BaseWSClient:
         self.name = name
         print(f"***** Starting {self.name} Producers *****")
         self.csc_list = self.read_config(self.path)
-        print("List of CSCs to listen:", self.csc_list)
         self.retry = True
         self.websocket = None
         self.heartbeat_task = None
