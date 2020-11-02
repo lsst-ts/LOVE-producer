@@ -90,6 +90,7 @@ class ScriptQueueProducer:
             self.script_remote.evt_logLevel, self.callback_script_logLevel
         )
         # --- Event callbacks ----
+        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def setup_script(self, salindex):
         """Creates tasks to monitor the heartbeats of the scripts
@@ -102,7 +103,6 @@ class ScriptQueueProducer:
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["setup"] = True
-        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
         """Return an empty script
