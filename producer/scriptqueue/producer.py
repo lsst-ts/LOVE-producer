@@ -498,6 +498,8 @@ class ScriptQueueProducer:
                 )
             except asyncio.TimeoutError:
                 for salindex in self.scripts:
+                    if salindex not in self.state["waitingIndices"] and salindex != self.state["currentIndex"]:
+                        continue
                     self.scripts[salindex]["lost_heartbeats"] += 1
                     self.send_message_callback(self.get_heartbeat_message(salindex))
                 continue
@@ -521,6 +523,8 @@ class ScriptQueueProducer:
             # check others heartbeats
             for salindex in self.scripts:
                 script = self.scripts[salindex]
+                if salindex not in self.state["waitingIndices"] or salindex != self.state["currentIndex"]:
+                    continue
                 if salindex == received_heartbeat_salindex:
                     continue
 
