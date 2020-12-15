@@ -90,6 +90,7 @@ class ScriptQueueProducer:
             self.script_remote.evt_logLevel, self.callback_script_logLevel
         )
         # --- Event callbacks ----
+        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def setup_script(self, salindex):
         """Creates tasks to monitor the heartbeats of the scripts
@@ -102,7 +103,6 @@ class ScriptQueueProducer:
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["setup"] = True
-        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
         """Return an empty script
@@ -498,6 +498,8 @@ class ScriptQueueProducer:
                 )
             except asyncio.TimeoutError:
                 for salindex in self.scripts:
+                    if salindex not in self.state["waitingIndices"] and salindex != self.state["currentIndex"]:
+                        continue
                     self.scripts[salindex]["lost_heartbeats"] += 1
                     self.send_message_callback(self.get_heartbeat_message(salindex))
                 continue
@@ -521,6 +523,8 @@ class ScriptQueueProducer:
             # check others heartbeats
             for salindex in self.scripts:
                 script = self.scripts[salindex]
+                if salindex not in self.state["waitingIndices"] or salindex != self.state["currentIndex"]:
+                    continue
                 if salindex == received_heartbeat_salindex:
                     continue
 
