@@ -1,5 +1,6 @@
 # loads files from volumes
-FROM lsstts/develop-env:c0010
+ARG LSSTTS_DEV_VERSION=c0010
+FROM lsstts/develop-env:${LSSTTS_DEV_VERSION}
 WORKDIR /usr/src/love/producer/love_csc
 COPY producer/love_csc/requirements.txt ./requirements.txt
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r ./requirements.txt
