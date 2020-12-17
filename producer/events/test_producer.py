@@ -28,6 +28,7 @@ class TestEventsMessages(asynctest.TestCase):
             self.message_queue.put(message)
         )
         self.events_producer = None
+        await self.csc.start_task
 
     async def tearDown(self):
         for remote in self.events_producer.remote_dict.values():

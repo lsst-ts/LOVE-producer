@@ -24,6 +24,7 @@ class TestHeartbeatsMessages(asynctest.TestCase):
             await asyncio.wait_for(self.message_queue.put(msg), MSG_TIMEOUT)
         self.callback = callback
         self.heartbeat_producer = None
+        await self.csc.start_task
 
     async def tearDown(self):
         # cleanup
