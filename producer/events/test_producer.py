@@ -28,6 +28,7 @@ class TestEventsMessages(asynctest.TestCase):
             self.message_queue.put(message)
         )
         self.events_producer = None
+        await self.csc.start_task
 
     async def tearDown(self):
         for remote in self.events_producer.remote_dict.values():
@@ -54,6 +55,8 @@ class TestEventsMessages(asynctest.TestCase):
             csc_list=[("Test", self.csc.salinfo.index)],
             events_callback=self.callback,
         )
+        for r in self.events_producer.remote_dict.values():
+            await r.start_task
         self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
         await self.remote.start_task
@@ -86,6 +89,8 @@ class TestEventsMessages(asynctest.TestCase):
             csc_list=[("Test", self.csc.salinfo.index)],
             events_callback=self.callback,
         )
+        for r in self.events_producer.remote_dict.values():
+            await r.start_task
         self.events_producer.setup_callbacks()
         # Setup the producer and the data
         cmd_data_sent = self.csc.make_random_cmd_arrays()
@@ -119,6 +124,8 @@ class TestEventsMessages(asynctest.TestCase):
             events_callback=self.callback,
             remote=remote,
         )
+        for r in self.events_producer.remote_dict.values():
+            await r.start_task
         self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
         await self.remote.start_task

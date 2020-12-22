@@ -28,6 +28,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
                 domain=self.csc.domain, name="Test", index=self.index
             )
             await self.remote.start_task
+            await self.csc.start_task
 
             self.client = EventsWSClient(csc_list=[("Test", self.index)])
             self.client_task = asyncio.create_task(self.client.start_ws_client())

@@ -20,6 +20,8 @@ class TestTelemetryMessages(asynctest.TestCase):
         )
         self.remote = salobj.Remote(domain=self.csc.domain, name="Test", index=index)
         await self.remote.start_task
+        await self.remote.salinfo.start_task
+        await self.csc.start_task
 
     async def tearDown(self):
         for remote in self.telemetry_producer.remote_list:
@@ -31,6 +33,8 @@ class TestTelemetryMessages(asynctest.TestCase):
         self.telemetry_producer = TelemetriesProducer(
             domain=self.csc.domain, csc_list=[("Test", self.csc.salinfo.index)]
         )
+        for r in self.telemetry_producer.remote_list:
+            await r.start_task
 
         cmd_data_sent = self.csc.make_random_cmd_scalars()
 
@@ -68,6 +72,7 @@ class TestTelemetryMessages(asynctest.TestCase):
     async def test_produced_message_with_telemetry_scalar_with_existing_remote(self):
         # Arrange
         remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.csc.salinfo.index)
+        await remote.start_task
         self.telemetry_producer = TelemetriesProducer(
             domain=None, csc_list=[], remote=remote
         )
