@@ -187,7 +187,7 @@ class TestScriptqueueState(asynctest.TestCase):
         waiting_indices = [100003, 100004]
         current_index = 100002
         finished_indices = [100001, 100000]
-        stream = await asyncio.wait_for(
+        await asyncio.wait_for(
             self.wait_until_state_indices_match(
                 waiting_indices, current_index, finished_indices
             ),

@@ -44,7 +44,6 @@ class HeartbeatProducer:
         if not self.remote:
             for i in range(len(self.csc_list)):
                 sal_lib_params = self.csc_list[i]
-                sal_lib_name = sal_lib_params[0]
                 print("- Listening to heartbeats from CSC: ", sal_lib_params)
                 [sal_lib_name, index] = sal_lib_params
 
