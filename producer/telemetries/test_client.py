@@ -61,7 +61,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(tel_scalars, p),
-                    "dataType": utils.getDataType(getattr(tel_scalars, p)),
+                    "dataType": utils.get_data_type(getattr(tel_scalars, p)),
                     "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters
@@ -144,7 +144,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(tel_scalars, p),
-                    "dataType": utils.getDataType(getattr(tel_scalars, p)),
+                    "dataType": utils.get_data_type(getattr(tel_scalars, p)),
                     "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters

@@ -2,7 +2,7 @@ import asyncio
 import json
 import numpy as np
 from astropy.time import Time
-from utils import NumpyEncoder, getDataType, make_stream_message, Settings
+from utils import NumpyEncoder, get_data_type, make_stream_message, Settings
 from lsst.ts import salobj
 
 TIMEOUT = 10
@@ -104,7 +104,7 @@ class EventsProducer:
             evt_result = {
                 p: {
                     "value": getattr(evt_data, p),
-                    "dataType": getDataType(getattr(evt_data, p)),
+                    "dataType": get_data_type(getattr(evt_data, p)),
                     "units": f"{evt_object.metadata.field_info[p].units}",
                 }
                 for p in evt_parameters
@@ -204,7 +204,7 @@ class EventsProducer:
             parameter_data = getattr(evt_data, parameter_name)
             result[parameter_name] = {
                 "value": parameter_data,
-                "dataType": getDataType(parameter_data),
+                "dataType": get_data_type(parameter_data),
             }
 
         message = {

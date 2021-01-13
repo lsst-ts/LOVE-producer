@@ -49,12 +49,12 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def getDataType(value):
+def get_data_type(value):
     if isinstance(value, (np.ndarray)) and value.ndim == 0:
-        return "Array<%s>" % getDataType(value.item())
+        return "Array<%s>" % get_data_type(value.item())
 
     if isinstance(value, (list, tuple, np.ndarray)):
-        return "Array<%s>" % getDataType(value[0])
+        return "Array<%s>" % get_data_type(value[0])
     if isinstance(value, (int, np.integer)):
         return "Int"
     if isinstance(value, float):
