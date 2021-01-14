@@ -64,7 +64,7 @@ def get_data_type(value):
     return "None"
 
 
-def onemsg_generator(category, csc, salindex, streamsDict):
+def onemsg_generator(category, csc, salindex, streams_dict):
     """Generates one msg for the LOVE-manager from a single (csc,salindex) source """
 
     return {
@@ -73,7 +73,7 @@ def onemsg_generator(category, csc, salindex, streamsDict):
             {
                 "csc": csc,
                 "salindex": salindex,
-                "data": json.loads(json.dumps(streamsDict, cls=NumpyEncoder)),
+                "data": json.loads(json.dumps(streams_dict, cls=NumpyEncoder)),
             }
         ],
     }

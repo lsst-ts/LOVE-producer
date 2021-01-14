@@ -93,8 +93,8 @@ class TestScriptqueueState(asynctest.TestCase):
         metadata = await script_remote.evt_metadata.aget()
         description = await script_remote.evt_description.aget()
         checkpoints = await script_remote.evt_checkpoints.aget()
-        logLevel = await script_remote.evt_logLevel.aget()
-        lastCheckpoint = await asyncio.wait_for(
+        log_level = await script_remote.evt_logLevel.aget()
+        last_checkpoint = await asyncio.wait_for(
             self.get_last_not_none_value_from_event_parameter(
                 script_remote.evt_state, "lastCheckpoint"
             ),
@@ -113,13 +113,13 @@ class TestScriptqueueState(asynctest.TestCase):
             "timestampProcessStart": script_data.timestampProcessStart,
             "timestampRunStart": script_data.timestampRunStart,
             "expected_duration": metadata.duration,
-            "last_checkpoint": lastCheckpoint,
+            "last_checkpoint": last_checkpoint,
             "pause_checkpoints": checkpoints.pause,
             "stop_checkpoints": checkpoints.stop,
             "description": description.description,
             "classname": description.classname,
             "remotes": description.remotes,
-            "log_level": logLevel.level,
+            "log_level": log_level.level,
         }
 
     async def test_state(self):

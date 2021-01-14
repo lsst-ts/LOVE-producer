@@ -72,10 +72,10 @@ class TestWebsocketsClient(WSClientTestCase):
             )
 
             # wait for the client to connect to the love_csc-love-0-observingLog group
-            observingLog_subscription = await websocket.recv()
+            observing_log_subscription = await websocket.recv()
 
             self.assertEqual(
-                json.loads(observingLog_subscription),
+                json.loads(observing_log_subscription),
                 {
                     "option": "subscribe",
                     "category": "love_csc",

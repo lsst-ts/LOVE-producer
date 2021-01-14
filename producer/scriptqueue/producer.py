@@ -87,7 +87,7 @@ class ScriptQueueProducer:
             self.script_remote.evt_checkpoints, self.callback_script_checkpoints
         )
         self.set_callback(
-            self.script_remote.evt_logLevel, self.callback_script_logLevel
+            self.script_remote.evt_logLevel, self.callback_script_log_level
         )
         # --- Event callbacks ----
         asyncio.create_task(self.monitor_scripts_heartbeats())
@@ -307,7 +307,7 @@ class ScriptQueueProducer:
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
 
-    def callback_script_logLevel(self, event):
+    def callback_script_log_level(self, event):
         """Listens to the logLevel event
     
         Parameters
@@ -405,16 +405,16 @@ class ScriptQueueProducer:
         self.log.info(f'Starting cmd_showSchema on {len(available_scripts)} scripts')
         for (index, script) in enumerate(available_scripts):
             path = script["path"]
-            isStandard = script["type"] == "standard"
+            is_standard = script["type"] == "standard"
 
             try:
                 self.log.info(f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}')
                 await self.queue.cmd_showSchema.set_start(
-                    isStandard=isStandard,
+                    isStandard=is_standard,
                     path=path,
                     timeout=self.cmd_timeout)
             except asyncio.CancelledError:
-                self.log.info(f"query_scripts_config canceled on isStandard={isStandard} and {path}")
+                self.log.info(f"query_scripts_config canceled on isStandard={is_standard} and {path}")
                 return
             except Exception as e:
                 self.log.info(f"Could not get info on script {path}. "

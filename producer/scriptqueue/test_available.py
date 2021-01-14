@@ -87,7 +87,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         while producer.scripts_schema_task is None:
             await asyncio.sleep(0.1)
         await producer.scripts_schema_task
-        availableScripts = await asyncio.wait_for(
+        available_scripts = await asyncio.wait_for(
             self.remote.evt_availableScripts.aget(), TIMEOUT
         )
         received_available = await asyncio.wait_for(
@@ -113,7 +113,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            for path in availableScripts.standard.split(":")
+            for path in available_scripts.standard.split(":")
         ]
 
         expected_external = [
@@ -133,7 +133,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            for path in availableScripts.external.split(":")
+            for path in available_scripts.external.split(":")
         ]
 
         expected_available = expected_standard + expected_external
