@@ -15,6 +15,7 @@ LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
 TIMEOUT = 15
 
+salobj.set_random_lsst_dds_partition_prefix()
 
 class TestScriptqueueState(asynctest.TestCase):
     maxDiff = None
@@ -136,7 +137,6 @@ class TestScriptqueueState(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
@@ -249,7 +249,7 @@ class TestScriptqueueState(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
