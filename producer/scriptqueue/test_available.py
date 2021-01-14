@@ -96,6 +96,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
 
 
         # Assert
+        script4_path = "subdir/subsubdir/script4"
         expected_standard = [
             { 
                 "type": "standard", 
@@ -107,7 +108,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                 "type": "standard",
                 "path": path,
                 "configSchema": "script4"
-            } if path == "subdir/subsubdir/script4"  
+            } if path == script4_path  
             else {
                 "type": "standard",
                 "path": path,
@@ -127,7 +128,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                 "type": "external",
                 "path": path,
                 "configSchema": "script4"
-            } if path == "subdir/subsubdir/script4"  
+            } if path == script4_path  
             else {
                 "type": "external",
                 "path": path,
