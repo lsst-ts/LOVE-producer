@@ -490,7 +490,7 @@ class ScriptQueueProducer:
         return message
 
     async def monitor_scripts_heartbeats(self):
-        """Cntinuously monitor the script heartbeats."""
+        """Continuously monitor the script heartbeats."""
         while True:
             try:
                 script_data = await self.script_remote.evt_heartbeat.next(
@@ -523,9 +523,7 @@ class ScriptQueueProducer:
             # check others heartbeats
             for salindex in self.scripts:
                 script = self.scripts[salindex]
-                if salindex not in self.state["waitingIndices"] or salindex != self.state["currentIndex"]:
-                    continue
-                if salindex == received_heartbeat_salindex:
+                if salindex not in self.state["waitingIndices"] or salindex != self.state["currentIndex"] or salindex == received_heartbeat_salindex:
                     continue
 
                 # count how many beats were lost since last timestamp
