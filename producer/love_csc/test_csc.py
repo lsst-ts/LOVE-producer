@@ -13,6 +13,9 @@ index_gen = salobj.index_generator()
 
 
 class TestLOVECsc(asynctest.TestCase):
+    observing_log_username = "an user"
+    observing_log_message = "a message"
+
     async def test_add_observing_log(self):
         """Test that logs work directly from the csc method """
         salobj.set_random_lsst_dds_domain()
@@ -24,12 +27,12 @@ class TestLOVECsc(asynctest.TestCase):
 
         # Act: write down some logs and get the results from the event
         self.remote.evt_observingLog.flush()
-        self.csc.add_observing_log("an user", "a message")
+        self.csc.add_observing_log(observing_log_username, "a message")
 
         # Assert
         result = await self.remote.evt_observingLog.next(flush=False)
-        self.assertEqual(result.user, "an user")
-        self.assertEqual(result.message, "a message")
+        self.assertEqual(result.user, self.observing_log_username)
+        self.assertEqual(result.message, self.observing_log_message)
 
         # clean up
         await self.csc.close()
@@ -93,7 +96,7 @@ class TestWebsocketsClient(WSClientTestCase):
                 "love",
                 0,
                 "observingLog",
-                {"user": "an user", "message": "a message"},
+                {"user": self.observing_log_username, "message": self.observing_log_message},
             )
 
             await websocket.send(json.dumps(message))
@@ -102,7 +105,7 @@ class TestWebsocketsClient(WSClientTestCase):
             result = await self.remote.evt_observingLog.next(
                 flush=False, timeout=STD_TIMEOUT
             )
-            self.assertEqual(result.user, "an user")
-            self.assertEqual(result.message, "a message")
+            self.assertEqual(result.user, self.observing_log_username)
+            self.assertEqual(result.message, self.observing_log_message)
 
         await self.harness(act_assert, arrange, cleanup)
