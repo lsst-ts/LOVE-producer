@@ -11,15 +11,15 @@ SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
 
-
 class TestLOVECsc(asynctest.TestCase):
     observing_log_username = "an user"
     observing_log_message = "a message"
 
     async def test_add_observing_log(self):
         """Test that logs work directly from the csc method """
-        salobj.set_random_lsst_dds_domain()
+        
         # Arrange
+        salobj.set_random_lsst_dds_partition_prefix()
         self.csc = LOVECsc()
         self.remote = salobj.Remote(domain=self.csc.domain, name="LOVE")
         await self.csc.start_task
@@ -27,7 +27,7 @@ class TestLOVECsc(asynctest.TestCase):
 
         # Act: write down some logs and get the results from the event
         self.remote.evt_observingLog.flush()
-        self.csc.add_observing_log(observing_log_username, "a message")
+        self.csc.add_observing_log(self.observing_log_username, "a message")
 
         # Assert
         result = await self.remote.evt_observingLog.next(flush=False)
@@ -44,7 +44,7 @@ class TestWebsocketsClient(WSClientTestCase):
         async def arrange():
             from love_csc.client import LOVEWSClient
 
-            salobj.set_random_lsst_dds_domain()
+            salobj.set_random_lsst_dds_partition_prefix()
             self.remote = salobj.Remote(domain=salobj.Domain(), name="LOVE")
             await self.remote.start_task
             self.client = LOVEWSClient()
