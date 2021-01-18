@@ -79,7 +79,7 @@ class TestCSCClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(evt_scalars, p),
-                    "dataType": utils.getDataType(getattr(evt_scalars, p)),
+                    "dataType": utils.get_data_type(getattr(evt_scalars, p)),
                     "units": f"{self.remote.evt_scalars.metadata.field_info[p].units}",
                 }
                 for p in evt_parameters

@@ -11,7 +11,7 @@ from base_ws_client import BaseWSClient
 class TelemetriesClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
-    def __init__(self, sleepDuration=2, csc_list=None, remote=None):
+    def __init__(self, sleep_duration=2, csc_list=None, remote=None):
         super().__init__(name="Telemetries")
 
         if csc_list != None:
@@ -20,7 +20,7 @@ class TelemetriesClient(BaseWSClient):
 
         self.producer = TelemetriesProducer(self.domain, self.csc_list, remote)
 
-        self.sleepDuration = sleepDuration
+        self.sleep_duration = sleep_duration
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
@@ -34,7 +34,7 @@ class TelemetriesClient(BaseWSClient):
             message = self.producer.get_telemetry_message()
             if len(message["data"]) > 0:
                 asyncio.create_task(self.send_message(message))
-            await asyncio.sleep(self.sleepDuration)
+            await asyncio.sleep(self.sleep_duration)
 
 
 async def main(remote=None):

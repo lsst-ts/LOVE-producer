@@ -2,7 +2,7 @@ import asyncio
 import json
 import numpy as np
 from astropy.time import Time
-from utils import NumpyEncoder, getDataType, Settings
+from utils import NumpyEncoder, get_data_type, Settings
 from lsst.ts import salobj
 
 
@@ -49,7 +49,7 @@ class TelemetriesProducer:
             tel_result = {
                 p: {
                     "value": getattr(data, p),
-                    "dataType": getDataType(getattr(data, p)),
+                    "dataType": get_data_type(getattr(data, p)),
                     "units": f"{tel_remote.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters

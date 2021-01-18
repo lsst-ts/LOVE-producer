@@ -51,10 +51,8 @@ class BaseWSClient:
         await self.on_start_client()
         while self.retry:
             try:
-                # self.websocket = await websockets.connect(self.url)
                 async with aiohttp.ClientSession() as session:
                     self.websocket = await session.ws_connect(self.url)
-                    # async with websockets.connect(self.url) as websocket:
                     print(f"### {self.name} | loaded ws")
                     initial_state_subscribe_msg = {
                         "option": "subscribe",
@@ -151,7 +149,6 @@ class BaseWSClient:
         with open(path) as config_file:
             data = json.loads(config_file.read())
 
-        # data = json.load(open(path, 'r'))
         csc_list = []
         if key:
             if not key in data:

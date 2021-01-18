@@ -49,12 +49,22 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def getDataType(value):
+class MissingMessageParameter(Exception):
+    """ Exception class to be raised on missing message parameter """
+    pass
+
+
+class MissingMessageStream(Exception):
+    """ Exception class to be raised on missing message stream """
+    pass
+
+
+def get_data_type(value):
     if isinstance(value, (np.ndarray)) and value.ndim == 0:
-        return "Array<%s>" % getDataType(value.item())
+        return "Array<%s>" % get_data_type(value.item())
 
     if isinstance(value, (list, tuple, np.ndarray)):
-        return "Array<%s>" % getDataType(value[0])
+        return "Array<%s>" % get_data_type(value[0])
     if isinstance(value, (int, np.integer)):
         return "Int"
     if isinstance(value, float):
@@ -64,7 +74,7 @@ def getDataType(value):
     return "None"
 
 
-def onemsg_generator(category, csc, salindex, streamsDict):
+def onemsg_generator(category, csc, salindex, streams_dict):
     """Generates one msg for the LOVE-manager from a single (csc,salindex) source """
 
     return {
@@ -73,7 +83,7 @@ def onemsg_generator(category, csc, salindex, streamsDict):
             {
                 "csc": csc,
                 "salindex": salindex,
-                "data": json.loads(json.dumps(streamsDict, cls=NumpyEncoder)),
+                "data": json.loads(json.dumps(streams_dict, cls=NumpyEncoder)),
             }
         ],
     }
@@ -90,7 +100,7 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream]
 
-    raise Exception(
+    raise MissingMessageStream(
         "Stream {}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream
         )
@@ -124,7 +134,7 @@ def get_parameter_from_last_message(
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream][parameter]
 
-    raise Exception(
+    raise MissingMessageParameter(
         "Parameter {}-{}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream, parameter
         )

@@ -15,9 +15,27 @@ LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
 TIMEOUT = 15
 
+salobj.set_random_lsst_dds_partition_prefix()
 
 class TestScriptqueueState(asynctest.TestCase):
     maxDiff = None
+
+    @staticmethod
+    def find_script_by_salindex(stream, queue_position, salindex):
+        for s in stream[queue_position]:
+            if s["index"] == salindex:
+                return s
+
+    @staticmethod
+    async def get_last_not_none_value_from_event_parameter(evt, parameter):
+        value = None
+        while True:
+            last_data = evt.get_oldest()
+            if last_data is None:
+                return value
+            value = getattr(last_data, parameter)
+
+        return value
 
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
@@ -46,6 +64,7 @@ class TestScriptqueueState(asynctest.TestCase):
             break
         return stream
 
+
     async def wait_for_script_state_to_match(
         self, salindex, queue_position, process_state, script_state
     ):
@@ -62,10 +81,7 @@ class TestScriptqueueState(asynctest.TestCase):
             if queue_position == "current":
                 script = stream[queue_position]
             else:
-                for s in stream[queue_position]:
-                    if s["index"] == salindex:
-                        script = s
-                        break
+                script = TestScriptqueueState.find_script_by_salindex(stream, queue_position, salindex)
 
             if (
                 script["process_state"] == process_state
@@ -73,15 +89,6 @@ class TestScriptqueueState(asynctest.TestCase):
             ):
                 return stream
 
-    async def get_last_not_none_value_from_event_parameter(self, evt, parameter):
-        value = None
-        while True:
-            last_data = evt.get_oldest()
-            if last_data is None:
-                return value
-            value = getattr(last_data, parameter)
-
-        return value
 
     async def make_expected_script(self, script_remote):
         # get script state data from scriptqueue.evt_script
@@ -93,9 +100,9 @@ class TestScriptqueueState(asynctest.TestCase):
         metadata = await script_remote.evt_metadata.aget()
         description = await script_remote.evt_description.aget()
         checkpoints = await script_remote.evt_checkpoints.aget()
-        logLevel = await script_remote.evt_logLevel.aget()
-        lastCheckpoint = await asyncio.wait_for(
-            self.get_last_not_none_value_from_event_parameter(
+        log_level = await script_remote.evt_logLevel.aget()
+        last_checkpoint = await asyncio.wait_for(
+            TestScriptqueueState.get_last_not_none_value_from_event_parameter(
                 script_remote.evt_state, "lastCheckpoint"
             ),
             SHORT_TIMEOUT,
@@ -113,13 +120,13 @@ class TestScriptqueueState(asynctest.TestCase):
             "timestampProcessStart": script_data.timestampProcessStart,
             "timestampRunStart": script_data.timestampRunStart,
             "expected_duration": metadata.duration,
-            "last_checkpoint": lastCheckpoint,
+            "last_checkpoint": last_checkpoint,
             "pause_checkpoints": checkpoints.pause,
             "stop_checkpoints": checkpoints.stop,
             "description": description.description,
             "classname": description.classname,
             "remotes": description.remotes,
-            "log_level": logLevel.level,
+            "log_level": log_level.level,
         }
 
     async def test_state(self):
@@ -130,7 +137,6 @@ class TestScriptqueueState(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
@@ -187,7 +193,7 @@ class TestScriptqueueState(asynctest.TestCase):
         waiting_indices = [100003, 100004]
         current_index = 100002
         finished_indices = [100001, 100000]
-        stream = await asyncio.wait_for(
+        await asyncio.wait_for(
             self.wait_until_state_indices_match(
                 waiting_indices, current_index, finished_indices
             ),
@@ -243,7 +249,7 @@ class TestScriptqueueState(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
