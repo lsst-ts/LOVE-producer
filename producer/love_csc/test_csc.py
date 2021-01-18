@@ -12,7 +12,7 @@ SHOW_LOG_MESSAGES = False
 index_gen = salobj.index_generator()
 
 class TestLOVECsc(asynctest.TestCase):
-    observing_log_username = "an user"
+    observing_log_username = "a user"
     observing_log_message = "a message"
 
     async def test_add_observing_log(self):
