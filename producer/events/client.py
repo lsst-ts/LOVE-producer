@@ -24,7 +24,11 @@ class EventsWSClient(BaseWSClient):
             self.csc_list = csc_list
         self.connection_error = False
         self.producer = EventsProducer(
-            self.domain, self.csc_list, self.send_message_callback, heartbeat_callback=heartbeat_callback, remote=remote
+            self.domain,
+            self.csc_list,
+            self.send_message_callback,
+            heartbeat_callback=heartbeat_callback,
+            remote=remote,
         )
 
     async def on_start_client(self):

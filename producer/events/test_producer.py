@@ -117,7 +117,9 @@ class TestEventsMessages(asynctest.TestCase):
 
     async def test_produced_message_with_event_scalar_with_existing_remote(self):
         # Arrange
-        remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.csc.salinfo.index)
+        remote = salobj.Remote(
+            domain=self.csc.domain, name="Test", index=self.csc.salinfo.index
+        )
         self.events_producer = EventsProducer(
             domain=self.csc.domain,
             csc_list=[],

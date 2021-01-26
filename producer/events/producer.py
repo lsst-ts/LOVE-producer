@@ -11,7 +11,9 @@ TIMEOUT = 10
 class EventsProducer:
     """ Produces messages with events coming from several CSCs """
 
-    def __init__(self, domain, csc_list, events_callback, heartbeat_callback=None, remote=None):
+    def __init__(
+        self, domain, csc_list, events_callback, heartbeat_callback=None, remote=None
+    ):
         self.events_callback = events_callback
         self.domain = domain
         self.remote_dict = {}
@@ -117,7 +119,7 @@ class EventsProducer:
         return callback
 
     async def process_message(self, message):
-        """ 
+        """
         Tries to obtain the current data for an event with salobj.
 
         Parameters
@@ -171,7 +173,9 @@ class EventsProducer:
                     self.remote_dict[(csc, salindex)] = salobj.Remote(
                         self.domain, csc, salindex
                     )
-                    await self.set_remote_evt_callbacks(self.remote_dict[(csc, salindex)])
+                    await self.set_remote_evt_callbacks(
+                        self.remote_dict[(csc, salindex)]
+                    )
                 except RuntimeError:
                     return
             else:

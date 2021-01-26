@@ -30,8 +30,8 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
     async def wait_until_state_indices_match(
         self, waiting_indices, current_index, finished_indices
     ):
-        """Reads/waits for produced messages until the lists of waiting, 
-        current and finished scripts indices matches the input, returning the 
+        """Reads/waits for produced messages until the lists of waiting,
+        current and finished scripts indices matches the input, returning the
         stream data.
         """
         while True:
@@ -58,7 +58,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
             return stream
 
     async def wait_for_heartbeat_to_be_received(self, target_stamp):
-        """Waits for a heartbeat message to be produced with a specific 
+        """Waits for a heartbeat message to be produced with a specific
         last_heartbeat_timestamp and returns its produced stream"""
         while True:
             message = await self.message_queue.get()
@@ -79,7 +79,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
 
     @patch("scriptqueue.producer.datetime")
     async def test_heartbeats(self, mock_datetime):
-        """Tests that a script heartbeat contains the right info 
+        """Tests that a script heartbeat contains the right info
         for a "healthy" current script"""
         mock_datetime.datetime.now.return_value = datetime.datetime(2019, 1, 1)
         # ARRANGE
