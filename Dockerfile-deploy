@@ -8,7 +8,6 @@ COPY producer/requirements.txt .
 ARG idl
 RUN source /home/saluser/.setup_sal_env.sh && \
     pip install kafkit[aiohttp] aiokafka && \
-    conda install -c lsstts ts-idl=${idl} && \
     pip install -r requirements.txt
 
 COPY producer ./producer
