@@ -11,13 +11,14 @@ SHOW_LOG_MESSAGES = False
 
 index_gen = salobj.index_generator()
 
+
 class TestLOVECsc(asynctest.TestCase):
     observing_log_username = "a user"
     observing_log_message = "a message"
 
     async def test_add_observing_log(self):
         """Test that logs work directly from the csc method """
-        
+
         # Arrange
         salobj.set_random_lsst_dds_partition_prefix()
         self.csc = LOVECsc()
@@ -96,7 +97,10 @@ class TestWebsocketsClient(WSClientTestCase):
                 "love",
                 0,
                 "observingLog",
-                {"user": self.observing_log_username, "message": self.observing_log_message},
+                {
+                    "user": self.observing_log_username,
+                    "message": self.observing_log_message,
+                },
             )
 
             await websocket.send(json.dumps(message))
