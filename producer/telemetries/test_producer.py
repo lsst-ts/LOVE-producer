@@ -68,10 +68,11 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         self.assertEqual(stream, expected_stream)
 
-
     async def test_produced_message_with_telemetry_scalar_with_existing_remote(self):
         # Arrange
-        remote = salobj.Remote(domain=self.csc.domain, name="Test", index=self.csc.salinfo.index)
+        remote = salobj.Remote(
+            domain=self.csc.domain, name="Test", index=self.csc.salinfo.index
+        )
         await remote.start_task
         self.telemetry_producer = TelemetriesProducer(
             domain=None, csc_list=[], remote=remote
@@ -108,4 +109,3 @@ class TestTelemetryMessages(asynctest.TestCase):
         del stream["private_rcvStamp"]
 
         self.assertEqual(stream, expected_stream)
-

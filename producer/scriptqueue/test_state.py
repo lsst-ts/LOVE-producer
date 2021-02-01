@@ -17,6 +17,7 @@ TIMEOUT = 15
 
 salobj.set_random_lsst_dds_partition_prefix()
 
+
 class TestScriptqueueState(asynctest.TestCase):
     maxDiff = None
 
@@ -64,7 +65,6 @@ class TestScriptqueueState(asynctest.TestCase):
             break
         return stream
 
-
     async def wait_for_script_state_to_match(
         self, salindex, queue_position, process_state, script_state
     ):
@@ -81,14 +81,15 @@ class TestScriptqueueState(asynctest.TestCase):
             if queue_position == "current":
                 script = stream[queue_position]
             else:
-                script = TestScriptqueueState.find_script_by_salindex(stream, queue_position, salindex)
+                script = TestScriptqueueState.find_script_by_salindex(
+                    stream, queue_position, salindex
+                )
 
             if (
                 script["process_state"] == process_state
                 and script["script_state"] == script_state
             ):
                 return stream
-
 
     async def make_expected_script(self, script_remote):
         # get script state data from scriptqueue.evt_script
@@ -131,8 +132,8 @@ class TestScriptqueueState(asynctest.TestCase):
 
     async def test_state(self):
         """
-            Asserts the produced message contains the right content after moving the queue
-            to a certain state (1 running script, 2 waiting, 2 finished)
+        Asserts the produced message contains the right content after moving the queue
+        to a certain state (1 running script, 2 waiting, 2 finished)
         """
         # ARRANGE
 
@@ -243,8 +244,8 @@ class TestScriptqueueState(asynctest.TestCase):
 
     async def test_state_with_existing_remote(self):
         """
-            Asserts the produced message contains the right content after moving the queue
-            to a certain state (1 running script, 2 waiting, 2 finished)
+        Asserts the produced message contains the right content after moving the queue
+        to a certain state (1 running script, 2 waiting, 2 finished)
         """
         # ARRANGE
 
@@ -272,11 +273,12 @@ class TestScriptqueueState(asynctest.TestCase):
         def callback(msg):
             asyncio.get_event_loop().create_task(self.message_queue.put(msg))
 
-        remote = salobj.Remote(
-            domain=self.queue.domain, name="ScriptQueue", index=1
-        )
+        remote = salobj.Remote(domain=self.queue.domain, name="ScriptQueue", index=1)
         producer = ScriptQueueProducer(
-            domain=self.queue.domain, send_message_callback=callback, index=1, remote=remote
+            domain=self.queue.domain,
+            send_message_callback=callback,
+            index=1,
+            remote=remote,
         )
         await asyncio.wait_for(producer.setup(), LONG_TIMEOUT)
 

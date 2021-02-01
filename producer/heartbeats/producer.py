@@ -52,7 +52,9 @@ class HeartbeatProducer:
                 )
         else:
             asyncio.get_event_loop().create_task(
-                self.monitor_remote_heartbeat_callbacks(self.remote.salinfo.name, self.remote.salinfo.index)
+                self.monitor_remote_heartbeat_callbacks(
+                    self.remote.salinfo.name, self.remote.salinfo.index
+                )
             )
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
@@ -161,7 +163,7 @@ class HeartbeatProducer:
             await self.send_heartbeat(msg)
 
     def set_heartbeat(self, heartbeat_event):
-        """ Sets the internal value for the latest hearbeat event received
+        """Sets the internal value for the latest hearbeat event received
 
         Parameters
         ----------
@@ -223,6 +225,7 @@ class HeartbeatProducer:
                 remote_name, salindex, nlost_subsequent, timestamp
             )
             await self.send_heartbeat(msg)
+
 
 if __name__ == "__main__":
     csc_list = [("ATDome", 1), ("ScriptQueue", 1), ("ScriptQueue", 2)]

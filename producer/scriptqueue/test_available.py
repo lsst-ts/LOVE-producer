@@ -17,6 +17,7 @@ TIMEOUT = 30
 
 class TestScriptqueueAvailableScripts(asynctest.TestCase):
     maxDiff = None
+
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:
@@ -30,7 +31,10 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                 message, "event", "ScriptQueueState", 1, "stream", "available_scripts"
             )
             if len(available_scripts) > 0 and all(
-                [ s["path"] == "unloadable" or len(s["configSchema"]) > 0 for s in available_scripts ]
+                [
+                    s["path"] == "unloadable" or len(s["configSchema"]) > 0
+                    for s in available_scripts
+                ]
             ):
                 return [
                     {
@@ -39,16 +43,17 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                         "configSchema": yaml.load(
                             s["configSchema"], Loader=yaml.SafeLoader
                         )
-                        if s["configSchema"] != "" and s["configSchema"] !=  "# empty schema"
-                        else  s["configSchema"]
+                        if s["configSchema"] != ""
+                        and s["configSchema"] != "# empty schema"
+                        else s["configSchema"],
                     }
                     for s in available_scripts
                 ]
 
     async def test_state(self):
         """
-            Asserts the produced message contains the right content after moving the queue
-            to a certain state (1 running script, 2 waiting, 2 finished)
+        Asserts the produced message contains the right content after moving the queue
+        to a certain state (1 running script, 2 waiting, 2 finished)
         """
         # ARRANGE
 
@@ -94,21 +99,13 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
             self.wait_for_all_config_schema(), LONG_TIMEOUT
         )
 
-
         # Assert
         script4_path = "subdir/subsubdir/script4"
         expected_standard = [
-            { 
-                "type": "standard", 
-                "path": path, 
-                "configSchema": "# empty schema"
-            }
+            {"type": "standard", "path": path, "configSchema": "# empty schema"}
             if path == "unloadable"
-            else {
-                "type": "standard",
-                "path": path,
-                "configSchema": "script4"
-            } if path == script4_path  
+            else {"type": "standard", "path": path, "configSchema": "script4"}
+            if path == script4_path
             else {
                 "type": "standard",
                 "path": path,
@@ -118,17 +115,10 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         ]
 
         expected_external = [
-            { 
-                "type": "external", 
-                "path": path, 
-                "configSchema": "# empty schema"
-            }
+            {"type": "external", "path": path, "configSchema": "# empty schema"}
             if path == "unloadable"
-            else {
-                "type": "external",
-                "path": path,
-                "configSchema": "script4"
-            } if path == script4_path  
+            else {"type": "external", "path": path, "configSchema": "script4"}
+            if path == script4_path
             else {
                 "type": "external",
                 "path": path,

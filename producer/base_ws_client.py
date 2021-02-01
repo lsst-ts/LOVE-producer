@@ -130,7 +130,7 @@ class BaseWSClient:
 
     @staticmethod
     def read_config(path, key=None):
-        """ Reads a given config file and returns the lists of CSCs to listen to.
+        """Reads a given config file and returns the lists of CSCs to listen to.
         It can read the full file (by default), or read only a specific key
 
         Parameters

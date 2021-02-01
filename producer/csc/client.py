@@ -23,8 +23,7 @@ class CSCWSClient(BaseWSClient):
     """
 
     def __init__(self, csc_list=None):
-        """Initializes its producer
-        """
+        """Initializes its producer"""
         super().__init__(name="CSCProducer")
         self.events_clients = []
         self.telemetries_clients = []
@@ -44,21 +43,29 @@ class CSCWSClient(BaseWSClient):
                 domain, self.send_heartbeat, [(name, salindex)], remote=remote
             )
             hb_producer.start()
+
             def heartbeat_callback(evt):
                 hb_producer.set_heartbeat(evt)
 
-            self.events_clients.append(loop.create_task(events(heartbeat_callback=heartbeat_callback, remote=remote)))
-            self.telemetries_clients.append(loop.create_task(telemetries(remote=remote)))
+            self.events_clients.append(
+                loop.create_task(
+                    events(heartbeat_callback=heartbeat_callback, remote=remote)
+                )
+            )
+            self.telemetries_clients.append(
+                loop.create_task(telemetries(remote=remote))
+            )
             self.heartbeats_producers.append(hb_producer)
 
             if name == "ScriptQueue":
-                self.scriptqueue_clients.append(loop.create_task(self.start_scriptqueues()))
+                self.scriptqueue_clients.append(
+                    loop.create_task(self.start_scriptqueues())
+                )
 
         self.connection_error = False
 
     async def start_scriptqueues(self):
         await asyncio.gather(*self.events_clients, scriptqueue())
-
 
     async def on_start_client(self):
         """ Initializes producer's callbacks """
@@ -75,7 +82,7 @@ class CSCWSClient(BaseWSClient):
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_error(self, e):
-        """ Set the internal variable connection_error to True when an error ocurrs
+        """Set the internal variable connection_error to True when an error ocurrs
 
         Parameters
         ----------
@@ -92,6 +99,7 @@ class CSCWSClient(BaseWSClient):
             task.cancel()
         for task in self.scriptqueue_clients:
             task.cancel()
+
 
 async def main(csc_list=None):
     """Main function, starts the client"""

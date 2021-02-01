@@ -9,6 +9,7 @@ from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 import utils
 import logging
+
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
 
@@ -35,7 +36,9 @@ class ScriptQueueProducer:
         self.scripts = {}
         self.cmd_timeout = 15
         if remote is None:
-            self.queue = salobj.Remote(domain=self.domain, name="ScriptQueue", index=self.salindex)
+            self.queue = salobj.Remote(
+                domain=self.domain, name="ScriptQueue", index=self.salindex
+            )
         else:
             self.queue = remote
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
@@ -56,7 +59,6 @@ class ScriptQueueProducer:
 
         # add ch to self.log
         self.log.addHandler(ch)
-
 
     async def setup(self):
         """Initialize the Producer.
@@ -171,15 +173,15 @@ class ScriptQueueProducer:
             self.state["available_scripts"].append(
                 {"type": "standard", "path": script_path, "configSchema": ""}
             )
-        for script_path in event.external.split(':'):
+        for script_path in event.external.split(":"):
             self.state["available_scripts"].append(
                 {"type": "external", "path": script_path, "configSchema": ""}
             )
-        self.log.info('will query_scripts_config')
-        
+        self.log.info("will query_scripts_config")
+
         if self.scripts_schema_task is not None:
             self.scripts_schema_task.cancel()
-        
+
         self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):
@@ -217,14 +219,22 @@ class ScriptQueueProducer:
         if event.isStandard:
             event_script_type = "standard"
         for script in self.state["available_scripts"]:
-            if script['path'] == event.path and script['type'] == event_script_type:
-                script['configSchema'] = "# empty schema" if event.configSchema == "" else event.configSchema
-                self.log.info(f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}')
+            if script["path"] == event.path and script["type"] == event_script_type:
+                script["configSchema"] = (
+                    "# empty schema" if event.configSchema == "" else event.configSchema
+                )
+                self.log.info(
+                    f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}'
+                )
                 break
 
-        self.log.debug(f'summary:')
-        [self.log.debug(f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}')
-         for script in self.state["available_scripts"]]
+        self.log.debug(f"summary:")
+        [
+            self.log.debug(
+                f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}'
+            )
+            for script in self.state["available_scripts"]
+        ]
 
     def callback_queue_script(self, event):
         """Callback for the queue.evt_script event
@@ -309,7 +319,7 @@ class ScriptQueueProducer:
 
     def callback_script_log_level(self, event):
         """Listens to the logLevel event
-    
+
         Parameters
         ----------
         event: SALPY_Script.Script_logevent_metadataC
@@ -385,63 +395,72 @@ class ScriptQueueProducer:
 
     async def query_scripts_info(self, salindex):
         """
-            Send commands to the queue to trigger the script events of each script
+        Send commands to the queue to trigger the script events of each script
         """
         try:
             await self.queue.cmd_showScript.set_start(
                 salIndex=salindex, timeout=self.cmd_timeout
             )
         except salobj.AckError as ack_err:
-            self.log.info(f"Could not get info on script {salindex}. "
-                          f"Failed with ack.result={ack_err.ack.result}")
+            self.log.info(
+                f"Could not get info on script {salindex}. "
+                f"Failed with ack.result={ack_err.ack.result}"
+            )
 
     async def query_scripts_config(self):
         """
-            Send command to the queue to trigger the script config event. 
-            If canceled (task.cancel for example) it will log a message and quit
-            the coroutine.
+        Send command to the queue to trigger the script config event.
+        If canceled (task.cancel for example) it will log a message and quit
+        the coroutine.
         """
         available_scripts = self.state["available_scripts"]
-        self.log.info(f'Starting cmd_showSchema on {len(available_scripts)} scripts')
+        self.log.info(f"Starting cmd_showSchema on {len(available_scripts)} scripts")
         for (index, script) in enumerate(available_scripts):
             path = script["path"]
             is_standard = script["type"] == "standard"
 
             try:
-                self.log.info(f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}')
+                self.log.info(
+                    f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}'
+                )
                 await self.queue.cmd_showSchema.set_start(
-                    isStandard=is_standard,
-                    path=path,
-                    timeout=self.cmd_timeout)
+                    isStandard=is_standard, path=path, timeout=self.cmd_timeout
+                )
             except asyncio.CancelledError:
-                self.log.info(f"query_scripts_config canceled on isStandard={is_standard} and {path}")
+                self.log.info(
+                    f"query_scripts_config canceled on isStandard={is_standard} and {path}"
+                )
                 return
             except Exception as e:
-                self.log.info(f"Could not get info on script {path}. "
-                              f"Failed with ack.result={ack_err.ack.result}")
+                self.log.info(
+                    f"Could not get info on script {path}. "
+                    f"Failed with ack.result={ack_err.ack.result}"
+                )
                 self.log.info("Exception", e)
 
     async def update(self, showAvailable):
         """
-            Tries to trigger the queue event which will
-            update all the info in the queue and its scripts
-            if succeeds.
+        Tries to trigger the queue event which will
+        update all the info in the queue and its scripts
+        if succeeds.
         """
 
-        self.log.info('will update')
+        self.log.info("will update")
 
         try:
-            self.log.info('will showQueue')
+            self.log.info("will showQueue")
             await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
         except Exception as e:
-            self.log.info('Unable to show Queue', e)
+            self.log.info("Unable to show Queue", e)
 
         if showAvailable:
             try:
-                self.log.info('will showAvailableScripts')
-                await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
+                self.log.info("will showAvailableScripts")
+                await self.queue.cmd_showAvailableScripts.start(
+                    timeout=self.cmd_timeout
+                )
             except Exception as e:
-                self.log.info('Unable to showAvailable', e)
+                self.log.info("Unable to showAvailable", e)
 
         for script_index in self.scripts:
             try:
@@ -498,7 +517,10 @@ class ScriptQueueProducer:
                 )
             except asyncio.TimeoutError:
                 for salindex in self.scripts:
-                    if salindex not in self.state["waitingIndices"] and salindex != self.state["currentIndex"]:
+                    if (
+                        salindex not in self.state["waitingIndices"]
+                        and salindex != self.state["currentIndex"]
+                    ):
                         continue
                     self.scripts[salindex]["lost_heartbeats"] += 1
                     self.send_message_callback(self.get_heartbeat_message(salindex))
@@ -523,7 +545,11 @@ class ScriptQueueProducer:
             # check others heartbeats
             for salindex in self.scripts:
                 script = self.scripts[salindex]
-                if salindex not in self.state["waitingIndices"] or salindex != self.state["currentIndex"] or salindex == received_heartbeat_salindex:
+                if (
+                    salindex not in self.state["waitingIndices"]
+                    or salindex != self.state["currentIndex"]
+                    or salindex == received_heartbeat_salindex
+                ):
                     continue
 
                 # count how many beats were lost since last timestamp
