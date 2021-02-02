@@ -1,5 +1,5 @@
 # loads files from volumes
-ARG LSSTTS_DEV_VERSION=c0010
+ARG LSSTTS_DEV_VERSION=develop
 FROM lsstts/develop-env:${LSSTTS_DEV_VERSION}
 WORKDIR /usr/src/love/producer/love_csc
 COPY producer/love_csc/requirements.txt ./requirements.txt

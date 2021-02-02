@@ -7,6 +7,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-dev
+      args:
+        LSSTTS_DEV_VERSION: c0017.000
     image: love-producer-image-mount
     volumes:
       - .:/usr/src/love
