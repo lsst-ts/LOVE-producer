@@ -1,8 +1,8 @@
-import asyncio
+import os
 import datetime
 import json
-import os
-import threading
+import asyncio
+
 from lsst.ts import salobj
 
 MAX_LOST_HEARTBEATS_DEFAULT = 5
@@ -22,7 +22,8 @@ class HeartbeatProducer:
         Parameters
         ----------
         domain: salobj Domain object to create salobj Remotes
-        send_heartbeat: callback coroutine that receives the message dictionary msg, to be sent later to the LOVE-manager
+        send_heartbeat: callback coroutine that receives the message dictionary msg, to be
+        sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
         remote: Optional salobj.Remote object, to avoid creating duplicates
         """
@@ -182,7 +183,6 @@ class HeartbeatProducer:
         salindex: int
             Sal index of the remote to monitor
         """
-        domain = self.domain
         remote = self.remote
         self.remotes.append(remote)
         await remote.start_task

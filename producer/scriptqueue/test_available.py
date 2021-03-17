@@ -1,14 +1,14 @@
-import asyncio
 import os
-import asynctest
 import warnings
+import yaml
+
+import asynctest
+import asyncio
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
-from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
-from lsst.ts.idl.enums.Script import ScriptState
-from .producer import ScriptQueueProducer
-import utils
-import yaml
+
+from scriptqueue.producer import ScriptQueueProducer
+from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -58,7 +58,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")

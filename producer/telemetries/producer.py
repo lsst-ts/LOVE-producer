@@ -1,9 +1,9 @@
-import asyncio
 import json
-import numpy as np
+
 from astropy.time import Time
-from utils import NumpyEncoder, get_data_type, Settings
 from lsst.ts import salobj
+
+from utils import NumpyEncoder, get_data_type, Settings
 
 
 class TelemetriesProducer:
@@ -14,6 +14,7 @@ class TelemetriesProducer:
         if not remote:
             for name, salindex in csc_list:
                 try:
+                    print("- Listening to telemetries from CSC: ", (name, salindex))
                     new_remote = salobj.Remote(domain=domain, name=name, index=salindex)
                     self.remote_list.append(new_remote)
 

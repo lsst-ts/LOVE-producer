@@ -1,9 +1,7 @@
 """Main executable of the LOVE-producer."""
 import asyncio
-from lsst.ts import salobj
+
 from events.producer import EventsProducer
-import os
-import utils
 from base_ws_client import BaseWSClient
 
 
@@ -19,7 +17,7 @@ class EventsWSClient(BaseWSClient):
 
     def __init__(self, csc_list=None, heartbeat_callback=None, remote=None):
         super().__init__(name="Events")
-        if csc_list != None:
+        if csc_list is not None:
             print("CSC list replaced by", csc_list)
             self.csc_list = csc_list
         self.connection_error = False

@@ -1,14 +1,15 @@
 import math
-import asyncio
 import json
 import datetime
+import logging
+
+import asyncio
 from lsst.ts import salobj
-from utils import onemsg_generator
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
-import utils
-import logging
+
+from utils import onemsg_generator, NumpyEncoder
 
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
@@ -185,7 +186,8 @@ class ScriptQueueProducer:
         self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):
-        """Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
+        """Saves the queue state using the event data and queries the state of
+        each script that does not exist or has not been set up
 
         Parameters
         ----------
@@ -431,11 +433,12 @@ class ScriptQueueProducer:
                     f"query_scripts_config canceled on isStandard={is_standard} and {path}"
                 )
                 return
-            except Exception as e:
+            except salobj.AckError as ack_err:
                 self.log.info(
                     f"Could not get info on script {path}. "
                     f"Failed with ack.result={ack_err.ack.result}"
                 )
+            except Exception as e:
                 self.log.info("Exception", e)
 
     async def update(self, showAvailable):
@@ -467,7 +470,7 @@ class ScriptQueueProducer:
                 self.log.info(f"will showScript {script_index}")
                 await self.queue.cmd_showScript.set_start(salIndex=script_index)
             except Exception as e:
-                self.log.info(f"Unable to showScript {script_index}")
+                self.log.info(f"Unable to showScript {script_index}", e)
         return True
 
     # ----------HEARTBEATS---------
@@ -501,7 +504,7 @@ class ScriptQueueProducer:
                     "csc": "ScriptHeartbeats",
                     "salindex": self.salindex,
                     "data": json.loads(
-                        json.dumps({"stream": heartbeat}, cls=utils.NumpyEncoder)
+                        json.dumps({"stream": heartbeat}, cls=NumpyEncoder)
                     ),
                 }
             ],

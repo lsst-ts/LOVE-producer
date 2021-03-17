@@ -1,10 +1,12 @@
-import asynctest
-import asyncio
 import json
+import asyncio
+
 from lsst.ts import salobj
-import test_utils
-import utils
-from mock import patch, mock_open
+
+# from mock import patch, mock_open
+
+from .. import test_utils
+from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -19,7 +21,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def arrange():
             from telemetries.client import TelemetriesClient
 
-            salobj.set_random_lsst_dds_domain()
+            salobj.set_random_lsst_dds_partition_prefix()
             self.index = next(index_gen)
             self.csc = salobj.TestCsc(
                 index=self.index, config_dir=None, initial_state=salobj.State.ENABLED
@@ -101,7 +103,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def arrange():
             from telemetries.client import TelemetriesClient
 
-            salobj.set_random_lsst_dds_domain()
+            salobj.set_random_lsst_dds_partition_prefix()
             self.index = next(index_gen)
             self.csc = salobj.TestCsc(
                 index=self.index, config_dir=None, initial_state=salobj.State.ENABLED
@@ -112,7 +114,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             )
             await self.remote.start_task
 
-            csc_list = [("Test", self.index)]
+            # csc_list = [("Test", self.index)]
 
             # with patch("builtins.open", mock_open(read_data=json.dumps(config))) :
             remote = salobj.Remote(

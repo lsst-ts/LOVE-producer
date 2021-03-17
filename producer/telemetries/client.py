@@ -1,11 +1,8 @@
 """Main executable of the Events Producer."""
 import asyncio
-from lsst.ts import salobj
-from telemetries.producer import TelemetriesProducer
-import os
-import utils
 
 from base_ws_client import BaseWSClient
+from telemetries.producer import TelemetriesProducer
 
 
 class TelemetriesClient(BaseWSClient):
@@ -14,7 +11,7 @@ class TelemetriesClient(BaseWSClient):
     def __init__(self, sleep_duration=2, csc_list=None, remote=None):
         super().__init__(name="Telemetries")
 
-        if csc_list != None:
+        if csc_list is not None:
             self.csc_list = csc_list
             print("CSCs to listen replaced by", csc_list)
 

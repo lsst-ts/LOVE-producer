@@ -1,9 +1,9 @@
 import asyncio
-import json
-import numpy as np
+
 from astropy.time import Time
-from utils import NumpyEncoder, get_data_type, make_stream_message, Settings
 from lsst.ts import salobj
+
+from utils import get_data_type, make_stream_message, Settings
 
 TIMEOUT = 10
 
@@ -67,7 +67,7 @@ class EventsProducer:
             try:
                 evt_data = evt_object.get()
                 self.initial_state_data[(remote_name, index, evt)] = evt_data
-            except Exception as e:
+            except Exception:
                 self.initial_state_data[(remote_name, index, evt)] = None
             evt_object.callback = self.make_callback(
                 remote.salinfo.name, remote.salinfo.index, evt
