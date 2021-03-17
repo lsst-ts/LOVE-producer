@@ -1,18 +1,17 @@
-import asyncio
 import os
-import asynctest
 import warnings
 import datetime
+
+import asyncio
+import asynctest
 from asynctest.mock import patch
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
-from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
-from lsst.ts.idl.enums.Script import ScriptState
-from scriptqueue.producer import ScriptQueueProducer
+from lsst.ts.idl.enums.ScriptQueue import Location
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 
-import utils
-import yaml
+from scriptqueue.producer import ScriptQueueProducer
+from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -84,7 +83,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         mock_datetime.datetime.now.return_value = datetime.datetime(2019, 1, 1)
         # ARRANGE
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
@@ -142,9 +141,9 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
 
         # ACT
         # get the next script heartbeat in SAL
-        heartbeat_data = await script_remote.evt_heartbeat.next(
-            flush=True, timeout=LONG_TIMEOUT
-        )
+        # heartbeat_data = await script_remote.evt_heartbeat.next(
+        #     flush=True, timeout=LONG_TIMEOUT
+        # )
 
         # get the produced heartbeat message
         produced_heartbeat_stream = await asyncio.wait_for(

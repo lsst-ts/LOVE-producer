@@ -1,11 +1,8 @@
 """The client for the Heartbeats Producer."""
 import asyncio
-from lsst.ts import salobj
-from .producer import HeartbeatProducer
-import os
-import utils
 
 from base_ws_client import BaseWSClient
+from heartbeats.producer import HeartbeatProducer
 
 
 class CSCHeartbeatsWSClient(BaseWSClient):

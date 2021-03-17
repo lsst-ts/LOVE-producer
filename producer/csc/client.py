@@ -1,15 +1,12 @@
 """The client for the CSC Producer."""
 import asyncio
+
 from lsst.ts import salobj
+
 from events.client import main as events
 from telemetries.client import main as telemetries
-from heartbeats.client import main as heartbeats
 from heartbeats.producer import HeartbeatProducer
 from scriptqueue.client import main as scriptqueue
-
-import os
-import utils
-
 from base_ws_client import BaseWSClient
 
 

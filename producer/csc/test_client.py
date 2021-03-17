@@ -1,10 +1,11 @@
 """Test the Client"""
-import asynctest
-import asyncio
 import json
+
+import asyncio
 from lsst.ts import salobj
-import test_utils
-import utils
+
+from .. import test_utils
+from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -19,7 +20,7 @@ class TestCSCClient(test_utils.WSClientTestCase):
         async def arrange():
             from csc.client import CSCWSClient
 
-            salobj.set_random_lsst_dds_domain()
+            salobj.set_random_lsst_dds_partition_prefix()
             self.index = next(index_gen)
             self.csc = salobj.TestCsc(
                 index=self.index, config_dir=None, initial_state=salobj.State.ENABLED

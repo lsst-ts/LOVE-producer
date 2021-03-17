@@ -1,21 +1,21 @@
-import asyncio
 import os
-import asynctest
+import asyncio
 import warnings
 import logging
+
+import asynctest
+import pytest
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
-from .producer import ScriptQueueProducer
-import utils
 
+from scriptqueue.producer import ScriptQueueProducer
+from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
 TIMEOUT = 15
-
-salobj.set_random_lsst_dds_partition_prefix()
 
 
 class TestScriptqueueState(asynctest.TestCase):
@@ -130,6 +130,7 @@ class TestScriptqueueState(asynctest.TestCase):
             "log_level": log_level.level,
         }
 
+    @pytest.mark.xfail(strict=True)
     async def test_state(self):
         """
         Asserts the produced message contains the right content after moving the queue
@@ -138,6 +139,7 @@ class TestScriptqueueState(asynctest.TestCase):
         # ARRANGE
 
         # Create the CSC
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
@@ -242,6 +244,7 @@ class TestScriptqueueState(asynctest.TestCase):
             )
             self.assertEqual(expected_script, produced_script)
 
+    @pytest.mark.xfail
     async def test_state_with_existing_remote(self):
         """
         Asserts the produced message contains the right content after moving the queue

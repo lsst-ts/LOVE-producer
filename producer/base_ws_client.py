@@ -1,12 +1,13 @@
-import asyncio
+import os
 import json
-import websockets
-import aiohttp
 import datetime
 import traceback
-import os
+import asyncio
+
+import aiohttp
 from astropy.time import Time
 from lsst.ts import salobj
+
 from utils import Settings, NumpyEncoder
 
 
@@ -26,7 +27,8 @@ class BaseWSClient:
         self.heartbeat_task = None
 
     async def handle_message_reception(self):
-        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
+        """Handles the reception of messages from the LOVE-manager,
+        and if an initial state is requested it sends the latest seen value in SAL"""
         if self.websocket:
             async for message in self.websocket:
                 if message.type == aiohttp.WSMsgType.TEXT:
@@ -151,7 +153,7 @@ class BaseWSClient:
 
         csc_list = []
         if key:
-            if not key in data:
+            if key not in data:
                 return csc_list
             for csc_instance in data[key]:
                 index = 0

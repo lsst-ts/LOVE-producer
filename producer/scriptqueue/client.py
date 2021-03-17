@@ -1,11 +1,9 @@
 """Main executable of the LOVE-producer."""
 import asyncio
-from lsst.ts import salobj
-from .producer import ScriptQueueProducer
-import os
-import utils
 
 from base_ws_client import BaseWSClient
+from scriptqueue.producer import ScriptQueueProducer
+import utils
 
 
 class ScriptQueueWSClient(BaseWSClient):
@@ -38,7 +36,8 @@ class ScriptQueueWSClient(BaseWSClient):
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_receive(self, message):
-        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it triggers the producer.update() coro
+        """Handles the reception of messages from the LOVE-manager,
+        and if an initial state is requested it triggers the producer.update() coro
 
         Parameters
         ----------

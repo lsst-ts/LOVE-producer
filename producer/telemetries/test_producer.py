@@ -1,9 +1,8 @@
 import asynctest
-import logging
-from telemetries.producer import TelemetriesProducer
-import asyncio
 from lsst.ts import salobj
-import utils
+
+from telemetries.producer import TelemetriesProducer
+from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -13,7 +12,7 @@ index_gen = salobj.index_generator()
 
 class TestTelemetryMessages(asynctest.TestCase):
     async def setUp(self):
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         index = next(index_gen)
         self.csc = salobj.TestCsc(
             index=index, config_dir=None, initial_state=salobj.State.ENABLED

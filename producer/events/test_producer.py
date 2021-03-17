@@ -1,10 +1,11 @@
 """Test the Producer"""
-import asynctest
-import logging
-from events.producer import EventsProducer
 import asyncio
+
+import asynctest
 from lsst.ts import salobj
-import utils
+
+from events.producer import EventsProducer
+from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -16,7 +17,7 @@ class TestEventsMessages(asynctest.TestCase):
     """Test suite for the Producer."""
 
     async def setUp(self):
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         index = next(index_gen)
         self.csc = salobj.TestCsc(
             index=index, config_dir=None, initial_state=salobj.State.ENABLED
