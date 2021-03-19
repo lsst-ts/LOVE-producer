@@ -130,7 +130,7 @@ class TestScriptqueueState(asynctest.TestCase):
             "log_level": log_level.level,
         }
 
-    @pytest.mark.xfail(strict=True)
+    @pytest.mark.xfail
     async def test_state(self):
         """
         Asserts the produced message contains the right content after moving the queue
