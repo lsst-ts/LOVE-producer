@@ -5,7 +5,7 @@ pipeline {
     dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
     dockerLoveCSCImageName = "lsstts/love-csc:"
-    LSSTTS_DEV_VERSION = "c0017.000"
+    dev_cycle = "c0017.000"
     user_ci = credentials('lsst-io')
     LTD_USERNAME="${user_ci_USR}"
     LTD_PASSWORD="${user_ci_PSW}"
@@ -37,7 +37,7 @@ pipeline {
           }
           dockerImageName = dockerImageName + image_tag
           echo "dockerImageName: ${dockerImageName}"
-          dockerImage = docker.build(dockerImageName, "--build-arg LSSTTS_DEV_VERSION=${LSSTTS_DEV_VERSION} .")
+          dockerImage = docker.build(dockerImageName, "--build-arg dev_cycle=${dev_cycle} .")
         }
       }
     }
@@ -75,7 +75,7 @@ pipeline {
           }
           dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
           echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
-          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "-f ./Dockerfile-lovecsc .")
+          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "--build-arg dev_cycle=${dev_cycle} -f ./Dockerfile-lovecsc .")
         }
       }
     }
