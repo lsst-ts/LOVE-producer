@@ -6,7 +6,7 @@ import asyncio
 from lsst.ts import salobj
 
 MAX_LOST_HEARTBEATS_DEFAULT = 5
-HEARTBEAT_TIMEOUT_DEFAULT = 15
+HEARTBEAT_TIMEOUT_DEFAULT = 3
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
 HEARTBEATS_CONFIG_PATH = "config.json"
@@ -213,6 +213,7 @@ class HeartbeatProducer:
                     await asyncio.sleep(2)
                     continue
                 # await remote.evt_heartbeat.next(flush=True, timeout=timeout)
+                print(f"Sleeping for Timeout: {timeout}")
                 await asyncio.sleep(timeout)
                 if last_heartbeat_tested == self.last_heartbeat_event:
                     raise asyncio.TimeoutError
@@ -224,6 +225,7 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
+            print(f"Sending {remote_name} heartbeat...")
             await self.send_heartbeat(msg)
 
 
