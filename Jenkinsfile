@@ -5,6 +5,10 @@ pipeline {
     dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
     dockerLoveCSCImageName = "lsstts/love-csc:"
+    dev_cycle = "c0017.000"
+    user_ci = credentials('lsst-io')
+    LTD_USERNAME="${user_ci_USR}"
+    LTD_PASSWORD="${user_ci_PSW}"
   }
 
   stages {
@@ -16,6 +20,7 @@ pipeline {
           branch "bugfix/*"
           branch "hotfix/*"
           branch "release/*"
+          branch "tickets/*"
         }
       }
       steps {
@@ -26,13 +31,13 @@ pipeline {
           if (slashPosition > 0) {
             git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
             git_branch = git_branch.substring(0, slashPosition)
-            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix") {
+            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix" || git_branch == "tickets") {
               image_tag = git_tag
             }
           }
           dockerImageName = dockerImageName + image_tag
           echo "dockerImageName: ${dockerImageName}"
-          dockerImage = docker.build dockerImageName
+          dockerImage = docker.build(dockerImageName, "--build-arg dev_cycle=${dev_cycle} .")
         }
       }
     }
@@ -46,6 +51,7 @@ pipeline {
             branch "bugfix/*"
             branch "hotfix/*"
             branch "release/*"
+            branch "tickets/*"
           }
           anyOf {
             changeset "producer/love_csc/**/*"
@@ -63,13 +69,13 @@ pipeline {
           if (slashPosition > 0) {
             git_tag = git_branch.substring(slashPosition + 1, git_branch.length())
             git_branch = git_branch.substring(0, slashPosition)
-            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix") {
+            if (git_branch == "release" || git_branch == "hotfix" || git_branch == "bugfix" || git_branch == "tickets") {
               image_tag = git_tag
             }
           }
           dockerLoveCSCImageName = dockerLoveCSCImageName + image_tag
           echo "dockerLoveCSCImageName: ${dockerLoveCSCImageName}"
-          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "-f ./Dockerfile-lovecsc .")
+          dockerLoveCSCImageName = docker.build(dockerLoveCSCImageName, "--build-arg dev_cycle=${dev_cycle} -f ./Dockerfile-lovecsc .")
         }
       }
     }
@@ -82,6 +88,7 @@ pipeline {
           branch "bugfix/*"
           branch "hotfix/*"
           branch "release/*"
+          branch "tickets/*"
         }
       }
       steps {
@@ -116,6 +123,7 @@ pipeline {
             branch "bugfix/*"
             branch "hotfix/*"
             branch "release/*"
+            branch "tickets/*"
           }
           anyOf {
             changeset "producer/love_csc/**/*"
@@ -130,6 +138,31 @@ pipeline {
           docker.withRegistry("", registryCredential) {
             dockerLoveCSCImageName.push()
           }
+        }
+      }
+    }
+
+    stage("Deploy documentation") {
+      agent {
+        docker {
+          alwaysPull true
+          image 'lsstts/develop-env:develop'
+          args "-u root --entrypoint=''"
+        }
+      }
+      when {
+        anyOf {
+          changeset "docs/*"
+        }
+      }
+      steps {
+        script {
+          sh "pwd"
+          sh """
+            source /home/saluser/.setup_dev.sh
+            pip install ltd-conveyor
+            ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
+          """
         }
       }
     }

@@ -1,10 +1,10 @@
 """The client for the LOVE CSC."""
 import asyncio
-from lsst.ts import salobj
-import os
-import utils
+
 from base_ws_client import BaseWSClient
 from love_csc.csc import LOVECsc
+
+# import utils
 
 
 class LOVEWSClient(BaseWSClient):
@@ -31,7 +31,7 @@ class LOVEWSClient(BaseWSClient):
         await self.send_message(observingLog_subscribe_msg)
 
     async def on_websocket_receive(self, message):
-         """Handle the reception of a new message and distributes to the corresponding function
+        """Handle the reception of a new message and distributes to the corresponding function
 
         Parameters
         ----------
@@ -48,14 +48,15 @@ class LOVEWSClient(BaseWSClient):
         if len(message["data"]) == 0:
             return
 
-        print(f"{self.name } | {message}")
-        user = utils.get_parameter_from_last_message(
-            message, "love_csc", "love", 0, "observingLog", "user"
-        )
-        log_message = utils.get_parameter_from_last_message(
-            message, "love_csc", "love", 0, "observingLog", "message"
-        )
-        self.csc.add_observing_log(user, log_message)
+        pass
+        # print(f"{self.name } | {message}")
+        # user = utils.get_parameter_from_last_message(
+        #     message, "love_csc", "love", 0, "observingLog", "user"
+        # )
+        # log_message = utils.get_parameter_from_last_message(
+        #     message, "love_csc", "love", 0, "observingLog", "message"
+        # )
+        # self.csc.add_observing_log(user, log_message)
 
     async def on_websocket_error(self, e):
         """Set the internal variable connection_error to True when an error ocurrs

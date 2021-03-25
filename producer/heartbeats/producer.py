@@ -1,19 +1,19 @@
-import asyncio
+import os
 import datetime
 import json
-import os
-import threading
+import asyncio
+
 from lsst.ts import salobj
 
 MAX_LOST_HEARTBEATS_DEFAULT = 5
-HEARTBEAT_TIMEOUT_DEFAULT = 15
+HEARTBEAT_TIMEOUT_DEFAULT = 3
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
 HEARTBEATS_CONFIG_PATH = "config.json"
 
 
 class HeartbeatProducer:
-    def __init__(self, domain, send_heartbeat, csc_list):
+    def __init__(self, domain, send_heartbeat, csc_list, remote=None):
         """Monitor CSC heartbeats and produces messages for the LOVE manager.
 
         It has a default configuration for the monitoring parameters which are overriden by
@@ -22,12 +22,16 @@ class HeartbeatProducer:
         Parameters
         ----------
         domain: salobj Domain object to create salobj Remotes
-        send_heartbeat: callback coroutine that receives the message dictionary msg, to be sent later to the LOVE-manager
+        send_heartbeat: callback coroutine that receives the message dictionary msg, to be
+        sent later to the LOVE-manager
         csc_list: List of  (csc, salindex) pairs
+        remote: Optional salobj.Remote object, to avoid creating duplicates
         """
         self.send_heartbeat = send_heartbeat
         self.domain = domain
         self.csc_list = csc_list
+        self.remote = remote
+        self.last_heartbeat_event = None
 
         # params to replace the defaults later
         path = os.path.join(os.path.dirname(__file__), HEARTBEATS_CONFIG_PATH)
@@ -38,14 +42,20 @@ class HeartbeatProducer:
 
     def start(self):
         """Start the producer."""
-        for i in range(len(self.csc_list)):
-            sal_lib_params = self.csc_list[i]
-            sal_lib_name = sal_lib_params[0]
-            print("- Listening to heartbeats from CSC: ", sal_lib_params)
-            [sal_lib_name, index] = sal_lib_params
+        if not self.remote:
+            for i in range(len(self.csc_list)):
+                sal_lib_params = self.csc_list[i]
+                print("- Listening to heartbeats from CSC: ", sal_lib_params)
+                [sal_lib_name, index] = sal_lib_params
 
+                asyncio.get_event_loop().create_task(
+                    self.monitor_remote_heartbeat(sal_lib_name, index)
+                )
+        else:
             asyncio.get_event_loop().create_task(
-                self.monitor_remote_heartbeat(sal_lib_name, index)
+                self.monitor_remote_heartbeat_callbacks(
+                    self.remote.salinfo.name, self.remote.salinfo.index
+                )
             )
 
     def get_heartbeat_message(self, remote_name, salindex, nlost_subsequent, timestamp):
@@ -111,7 +121,10 @@ class HeartbeatProducer:
             Sal index of the remote to monitor
         """
         domain = self.domain
-        remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
+        if not self.remote:
+            remote = salobj.Remote(domain=domain, name=remote_name, index=salindex)
+        else:
+            remote = self.remote
         self.remotes.append(remote)
         await remote.start_task
         nlost_subsequent = 0
@@ -132,9 +145,6 @@ class HeartbeatProducer:
 
         while True:
             try:
-                # if random.random() > 0.2:
-                #     await asyncio.sleep(2)
-                #     raise asyncio.TimeoutError('sadsa')
                 if not hasattr(remote, "evt_heartbeat"):
                     timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
                     msg = self.get_heartbeat_message(
@@ -151,6 +161,71 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
+            await self.send_heartbeat(msg)
+
+    def set_heartbeat(self, heartbeat_event):
+        """Sets the internal value for the latest hearbeat event received
+
+        Parameters
+        ----------
+        heartbeat_event: salobj.Event
+            salobj heartbeat event (evt_heartbeat)
+        """
+        self.last_heartbeat_event = heartbeat_event
+
+    async def monitor_remote_heartbeat_callbacks(self, remote_name, salindex):
+        """Continuously compare the latest heartbeat value and send messages to the manager
+
+        Parameters
+        ----------
+        remote_name: string
+            Name fo the remote to monitor
+        salindex: int
+            Sal index of the remote to monitor
+        """
+        remote = self.remote
+        self.remotes.append(remote)
+        await remote.start_task
+        nlost_subsequent = 0
+
+        # find the first element that matches the csc/salindex and use it instead of the default value
+        timeout = HEARTBEAT_TIMEOUT_DEFAULT
+        if remote_name in self.heartbeat_params:
+            timeout = next(
+                (
+                    el["heartbeat_timeout"]
+                    for el in self.heartbeat_params[remote_name]
+                    if el["index"] == salindex
+                ),
+                HEARTBEAT_TIMEOUT_DEFAULT,
+            )
+
+        timestamp = NEVER_RECEIVED_TIMESTAMP
+        last_heartbeat_tested = None
+        while True:
+            try:
+                if not self.last_heartbeat_event:
+                    timestamp = NO_HEARTBEAT_EVENT_TIMESTAMP
+                    msg = self.get_heartbeat_message(
+                        remote_name, salindex, nlost_subsequent, timestamp
+                    )
+                    await self.send_heartbeat(msg)
+                    await asyncio.sleep(2)
+                    continue
+                # await remote.evt_heartbeat.next(flush=True, timeout=timeout)
+                print(f"Sleeping for Timeout: {timeout}")
+                await asyncio.sleep(timeout)
+                if last_heartbeat_tested == self.last_heartbeat_event:
+                    raise asyncio.TimeoutError
+                last_heartbeat_tested = self.last_heartbeat_event
+                nlost_subsequent = 0
+                timestamp = datetime.datetime.now().timestamp()
+            except asyncio.TimeoutError:
+                nlost_subsequent += 1
+            msg = self.get_heartbeat_message(
+                remote_name, salindex, nlost_subsequent, timestamp
+            )
+            print(f"Sending {remote_name} heartbeat...")
             await self.send_heartbeat(msg)
 
 

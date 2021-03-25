@@ -1,22 +1,26 @@
 """The client for the Heartbeats Producer."""
 import asyncio
-from lsst.ts import salobj
-from .producer import HeartbeatProducer
-import os
-import utils
 
 from base_ws_client import BaseWSClient
+from heartbeats.producer import HeartbeatProducer
 
 
 class CSCHeartbeatsWSClient(BaseWSClient):
     """Handles the websocket client connection between the Heartbeats Producer and the LOVE-manager."""
 
-    def __init__(self):
+    def __init__(self, remote=None):
+        """Initializes its producer
+
+        Parameters
+        ----------
+        remote: salobj.Remote
+            Optional Remote object, when the heartbeat of only one Remote is to be monitored
+        """
         super().__init__(name="CSCHeartbeats")
 
         self.connection_error = False
         self.producer = HeartbeatProducer(
-            self.domain, self.send_heartbeat, self.csc_list
+            self.domain, self.send_heartbeat, self.csc_list, remote
         )
 
     async def on_start_client(self):
@@ -45,9 +49,9 @@ class CSCHeartbeatsWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def main():
+async def main(remote=None):
     """Main function, starts the client"""
-    heartbeats_client = CSCHeartbeatsWSClient()
+    heartbeats_client = CSCHeartbeatsWSClient(remote=remote)
     await heartbeats_client.start_ws_client()
 
 

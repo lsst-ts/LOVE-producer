@@ -1,12 +1,13 @@
-import asyncio
+import os
 import json
-import websockets
-import aiohttp
 import datetime
 import traceback
-import os
+import asyncio
+
+import aiohttp
 from astropy.time import Time
 from lsst.ts import salobj
+
 from utils import Settings, NumpyEncoder
 
 
@@ -21,13 +22,13 @@ class BaseWSClient:
         self.name = name
         print(f"***** Starting {self.name} Producers *****")
         self.csc_list = self.read_config(self.path)
-        print("List of CSCs to listen:", self.csc_list)
         self.retry = True
         self.websocket = None
         self.heartbeat_task = None
 
     async def handle_message_reception(self):
-        """Handles the reception of messages from the LOVE-manager, and if an initial state is requested it sends the latest seen value in SAL"""
+        """Handles the reception of messages from the LOVE-manager,
+        and if an initial state is requested it sends the latest seen value in SAL"""
         if self.websocket:
             async for message in self.websocket:
                 if message.type == aiohttp.WSMsgType.TEXT:
@@ -52,10 +53,8 @@ class BaseWSClient:
         await self.on_start_client()
         while self.retry:
             try:
-                # self.websocket = await websockets.connect(self.url)
                 async with aiohttp.ClientSession() as session:
                     self.websocket = await session.ws_connect(self.url)
-                    # async with websockets.connect(self.url) as websocket:
                     print(f"### {self.name} | loaded ws")
                     initial_state_subscribe_msg = {
                         "option": "subscribe",
@@ -105,7 +104,7 @@ class BaseWSClient:
             except Exception as e:
                 print(f"Send Message Exception {e} \n")
         else:
-            print(f"{self.name} | Unable to send message {message}"[:100], flush=True)
+            print(f"{self.name} | Unable to send message {message}", flush=True)
 
     async def on_websocket_receive(self, message):
         """ Executed every time a message is received from the LOVE-manager """
@@ -133,7 +132,7 @@ class BaseWSClient:
 
     @staticmethod
     def read_config(path, key=None):
-        """ Reads a given config file and returns the lists of CSCs to listen to.
+        """Reads a given config file and returns the lists of CSCs to listen to.
         It can read the full file (by default), or read only a specific key
 
         Parameters
@@ -152,10 +151,9 @@ class BaseWSClient:
         with open(path) as config_file:
             data = json.loads(config_file.read())
 
-        # data = json.load(open(path, 'r'))
         csc_list = []
         if key:
-            if not key in data:
+            if key not in data:
                 return csc_list
             for csc_instance in data[key]:
                 index = 0

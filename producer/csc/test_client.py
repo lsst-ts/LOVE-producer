@@ -1,7 +1,7 @@
 """Test the Client"""
 import json
-import asyncio
 
+import asyncio
 from lsst.ts import salobj
 
 from .. import test_utils
@@ -13,12 +13,12 @@ SHOW_LOG_MESSAGES = False
 index_gen = salobj.index_generator()
 
 
-class TestEventsClient(test_utils.WSClientTestCase):
+class TestCSCClient(test_utils.WSClientTestCase):
     """Test suite for the Client."""
 
     async def test_valid_remote_not_in_config(self):
         async def arrange():
-            from events.client import EventsWSClient
+            from csc.client import CSCWSClient
 
             salobj.set_random_lsst_dds_partition_prefix()
             self.index = next(index_gen)
@@ -31,7 +31,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
             await self.remote.start_task
             await self.csc.start_task
 
-            self.client = EventsWSClient(csc_list=[("Test", self.index)])
+            self.client = CSCWSClient(csc_list=[("Test", self.index)])
             self.client_task = asyncio.create_task(self.client.start_ws_client())
 
         async def act_assert(websocket, path):
@@ -92,13 +92,11 @@ class TestEventsClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
+            self.client.close()
             self.client_task.cancel()
             await self.client_task
 
             await self.csc.close()
             await self.remote.close()
-
-            for (csc, salindex) in self.client.producer.remote_dict:
-                await self.client.producer.remote_dict[(csc, salindex)].close()
 
         await self.harness(act_assert, arrange, cleanup)

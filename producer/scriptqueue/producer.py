@@ -1,13 +1,15 @@
 import math
-import asyncio
 import json
 import datetime
+import logging
+
+import asyncio
 from lsst.ts import salobj
-from utils import onemsg_generator
 from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
-import utils
+
+from utils import onemsg_generator, NumpyEncoder
 
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 
@@ -18,7 +20,7 @@ class ScriptQueueProducer:
     to build their states and produce messages for the LOVE-manager
     in the 'event-ScriptQueueState-salindex-stream' group."""
 
-    def __init__(self, domain, send_message_callback, index):
+    def __init__(self, domain, send_message_callback, index, remote=None):
         self.domain = domain
         self.send_message_callback = send_message_callback
         self.salindex = index
@@ -33,11 +35,31 @@ class ScriptQueueProducer:
 
         self.initial_data = {}
         self.scripts = {}
-        self.cmd_timeout = 60
-        self.queue = salobj.Remote(
-            domain=self.domain, name="ScriptQueue", index=self.salindex
-        )
+        self.cmd_timeout = 15
+        if remote is None:
+            self.queue = salobj.Remote(
+                domain=self.domain, name="ScriptQueue", index=self.salindex
+            )
+        else:
+            self.queue = remote
         self.script_remote = salobj.Remote(domain=self.domain, name="Script", index=0)
+        self.scripts_schema_task = None
+        # create logger
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.INFO)
+
+        # create console handler and set level to debug
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+
+        # # create formatter
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+        # # add formatter to ch
+        # ch.setFormatter(formatter)
+
+        # add ch to self.log
+        self.log.addHandler(ch)
 
     async def setup(self):
         """Initialize the Producer.
@@ -68,9 +90,10 @@ class ScriptQueueProducer:
             self.script_remote.evt_checkpoints, self.callback_script_checkpoints
         )
         self.set_callback(
-            self.script_remote.evt_logLevel, self.callback_script_logLevel
+            self.script_remote.evt_logLevel, self.callback_script_log_level
         )
         # --- Event callbacks ----
+        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def setup_script(self, salindex):
         """Creates tasks to monitor the heartbeats of the scripts
@@ -83,7 +106,6 @@ class ScriptQueueProducer:
         self.scripts[salindex] = self.new_empty_script()
         self.scripts[salindex]["index"] = salindex
         self.scripts[salindex]["setup"] = True
-        asyncio.create_task(self.monitor_scripts_heartbeats())
 
     def new_empty_script(self):
         """Return an empty script
@@ -152,15 +174,20 @@ class ScriptQueueProducer:
             self.state["available_scripts"].append(
                 {"type": "standard", "path": script_path, "configSchema": ""}
             )
-            self.query_script_config(True, script_path)
         for script_path in event.external.split(":"):
             self.state["available_scripts"].append(
                 {"type": "external", "path": script_path, "configSchema": ""}
             )
-            self.query_script_config(False, script_path)
+        self.log.info("will query_scripts_config")
+
+        if self.scripts_schema_task is not None:
+            self.scripts_schema_task.cancel()
+
+        self.scripts_schema_task = asyncio.create_task(self.query_scripts_config())
 
     def callback_queue(self, event):
-        """Saves the queue state using the event data and queries the state of each script that does not exist or has not been set up
+        """Saves the queue state using the event data and queries the state of
+        each script that does not exist or has not been set up
 
         Parameters
         ----------
@@ -194,10 +221,22 @@ class ScriptQueueProducer:
         if event.isStandard:
             event_script_type = "standard"
         for script in self.state["available_scripts"]:
-
             if script["path"] == event.path and script["type"] == event_script_type:
-                script["configSchema"] = event.configSchema
+                script["configSchema"] = (
+                    "# empty schema" if event.configSchema == "" else event.configSchema
+                )
+                self.log.info(
+                    f'got schema for {script["type"]}.{script["path"]}, len={len(event.configSchema)}'
+                )
                 break
+
+        self.log.debug(f"summary:")
+        [
+            self.log.debug(
+                f'\t{script["type"]}.{script["path"]}: {len(script["configSchema"])}'
+            )
+            for script in self.state["available_scripts"]
+        ]
 
     def callback_queue_script(self, event):
         """Callback for the queue.evt_script event
@@ -280,9 +319,9 @@ class ScriptQueueProducer:
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
 
-    def callback_script_logLevel(self, event):
+    def callback_script_log_level(self, event):
         """Listens to the logLevel event
-    
+
         Parameters
         ----------
         event: SALPY_Script.Script_logevent_metadataC
@@ -356,63 +395,83 @@ class ScriptQueueProducer:
 
     # --------- SAL queries ---------
 
-    async def query_script_info(self, salindex):
-        """Send commands to the queue to trigger the script events of each script
-
-        Parameters
-        ----------
-        salindex: int
-            The salindex of the script
+    async def query_scripts_info(self, salindex):
+        """
+        Send commands to the queue to trigger the script events of each script
         """
         try:
             await self.queue.cmd_showScript.set_start(
                 salIndex=salindex, timeout=self.cmd_timeout
             )
         except salobj.AckError as ack_err:
-            print(
+            self.log.info(
                 f"Could not get info on script {salindex}. "
                 f"Failed with ack.result={ack_err.ack.result}"
             )
 
-    def query_script_config(self, isStandard, script_path):
-        """Send command to the queue to trigger the script config event
-
-        Parameters
-        ----------
-        isStandard : bool
-            True of it is a Standard script, False if not
-        script_path : string
-            The path where the script is located
+    async def query_scripts_config(self):
         """
-        try:
-            asyncio.create_task(
-                self.queue.cmd_showSchema.set_start(
-                    isStandard=isStandard, path=script_path, timeout=self.cmd_timeout
+        Send command to the queue to trigger the script config event.
+        If canceled (task.cancel for example) it will log a message and quit
+        the coroutine.
+        """
+        available_scripts = self.state["available_scripts"]
+        self.log.info(f"Starting cmd_showSchema on {len(available_scripts)} scripts")
+        for (index, script) in enumerate(available_scripts):
+            path = script["path"]
+            is_standard = script["type"] == "standard"
+
+            try:
+                self.log.info(
+                    f'[{index+1}/{len(available_scripts)}]  {script["type"]}.{script["path"]}'
                 )
-            )
-        except salobj.AckError as ack_err:
-            print(
-                f"Could not get info on script {script_path}. "
-                f"Failed with ack.result={ack_err.ack.result}"
-            )
+                await self.queue.cmd_showSchema.set_start(
+                    isStandard=is_standard, path=path, timeout=self.cmd_timeout
+                )
+            except asyncio.CancelledError:
+                self.log.info(
+                    f"query_scripts_config canceled on isStandard={is_standard} and {path}"
+                )
+                return
+            except salobj.AckError as ack_err:
+                self.log.info(
+                    f"Could not get info on script {path}. "
+                    f"Failed with ack.result={ack_err.ack.result}"
+                )
+            except Exception as e:
+                self.log.info("Exception", e)
 
-    async def update(self):
+    async def update(self, showAvailable):
         """
-            Tries to trigger the queue event which will
-            update all the info in the queue and its scripts
-            if succeeds.
+        Tries to trigger the queue event which will
+        update all the info in the queue and its scripts
+        if succeeds.
         """
+
+        self.log.info("will update")
 
         try:
+            self.log.info("will showQueue")
             await self.queue.cmd_showQueue.start(timeout=self.cmd_timeout)
-            await self.queue.cmd_showAvailableScripts.start(timeout=self.cmd_timeout)
-            for script_index in self.scripts:
-                await self.queue.cmd_showScript.set_start(salIndex=script_index)
-
-            return True
         except Exception as e:
-            print(e)
-            return False
+            self.log.info("Unable to show Queue", e)
+
+        if showAvailable:
+            try:
+                self.log.info("will showAvailableScripts")
+                await self.queue.cmd_showAvailableScripts.start(
+                    timeout=self.cmd_timeout
+                )
+            except Exception as e:
+                self.log.info("Unable to showAvailable", e)
+
+        for script_index in self.scripts:
+            try:
+                self.log.info(f"will showScript {script_index}")
+                await self.queue.cmd_showScript.set_start(salIndex=script_index)
+            except Exception as e:
+                self.log.info(f"Unable to showScript {script_index}", e)
+        return True
 
     # ----------HEARTBEATS---------
 
@@ -445,7 +504,7 @@ class ScriptQueueProducer:
                     "csc": "ScriptHeartbeats",
                     "salindex": self.salindex,
                     "data": json.loads(
-                        json.dumps({"stream": heartbeat}, cls=utils.NumpyEncoder)
+                        json.dumps({"stream": heartbeat}, cls=NumpyEncoder)
                     ),
                 }
             ],
@@ -453,7 +512,7 @@ class ScriptQueueProducer:
         return message
 
     async def monitor_scripts_heartbeats(self):
-        """Cntinuously monitor the script heartbeats."""
+        """Continuously monitor the script heartbeats."""
         while True:
             try:
                 script_data = await self.script_remote.evt_heartbeat.next(
@@ -461,6 +520,11 @@ class ScriptQueueProducer:
                 )
             except asyncio.TimeoutError:
                 for salindex in self.scripts:
+                    if (
+                        salindex not in self.state["waitingIndices"]
+                        and salindex != self.state["currentIndex"]
+                    ):
+                        continue
                     self.scripts[salindex]["lost_heartbeats"] += 1
                     self.send_message_callback(self.get_heartbeat_message(salindex))
                 continue
@@ -484,7 +548,11 @@ class ScriptQueueProducer:
             # check others heartbeats
             for salindex in self.scripts:
                 script = self.scripts[salindex]
-                if salindex == received_heartbeat_salindex:
+                if (
+                    salindex not in self.state["waitingIndices"]
+                    or salindex != self.state["currentIndex"]
+                    or salindex == received_heartbeat_salindex
+                ):
                     continue
 
                 # count how many beats were lost since last timestamp

@@ -1,0 +1,21 @@
+ARG cycle
+
+FROM ts-dockerhub.lsst.org/deploy-env:${cycle}
+
+WORKDIR /usr/src/love/producer/love_csc
+COPY producer/love_csc/requirements.txt ./requirements.txt
+
+ARG idl
+RUN source /home/saluser/.setup_sal_env.sh && \
+    pip install kafkit[aiohttp] aiokafka && \
+    conda install -c lsstts ts-idl=${idl} && \
+    pip install -r requirements.txt
+
+COPY producer ./producer
+COPY producer/love_csc/.setup-deploy.sh /home/saluser/.startup.sh
+USER root
+RUN chown saluser:saluser /home/saluser/.startup.sh && \
+    chmod a+x /home/saluser/.startup.sh
+USER saluser
+
+WORKDIR /home/saluser

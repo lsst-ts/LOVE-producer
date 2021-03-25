@@ -49,12 +49,24 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def getDataType(value):
+class MissingMessageParameter(Exception):
+    """ Exception class to be raised on missing message parameter """
+
+    pass
+
+
+class MissingMessageStream(Exception):
+    """ Exception class to be raised on missing message stream """
+
+    pass
+
+
+def get_data_type(value):
     if isinstance(value, (np.ndarray)) and value.ndim == 0:
-        return "Array<%s>" % getDataType(value.item())
+        return "Array<%s>" % get_data_type(value.item())
 
     if isinstance(value, (list, tuple, np.ndarray)):
-        return "Array<%s>" % getDataType(value[0])
+        return "Array<%s>" % get_data_type(value[0])
     if isinstance(value, (int, np.integer)):
         return "Int"
     if isinstance(value, float):
@@ -64,7 +76,7 @@ def getDataType(value):
     return "None"
 
 
-def onemsg_generator(category, csc, salindex, streamsDict):
+def onemsg_generator(category, csc, salindex, streams_dict):
     """Generates one msg for the LOVE-manager from a single (csc,salindex) source """
 
     return {
@@ -73,7 +85,7 @@ def onemsg_generator(category, csc, salindex, streamsDict):
             {
                 "csc": csc,
                 "salindex": salindex,
-                "data": json.loads(json.dumps(streamsDict, cls=NumpyEncoder)),
+                "data": json.loads(json.dumps(streams_dict, cls=NumpyEncoder)),
             }
         ],
     }
@@ -81,7 +93,7 @@ def onemsg_generator(category, csc, salindex, streamsDict):
 
 def get_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
     If not found then it will throw an error
     """
     if message["category"] != category:
@@ -90,7 +102,7 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream]
 
-    raise Exception(
+    raise MissingMessageStream(
         "Stream {}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream
         )
@@ -99,7 +111,7 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
 
 def check_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
     If not found then it will throw an error
     """
     if message["category"] != category:
@@ -115,7 +127,7 @@ def get_parameter_from_last_message(
     message, category, csc, salindex, stream, parameter
 ):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream) 
+    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
     If not found then it will throw an error
     """
     if message["category"] != category:
@@ -124,7 +136,7 @@ def get_parameter_from_last_message(
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream][parameter]
 
-    raise Exception(
+    raise MissingMessageParameter(
         "Parameter {}-{}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream, parameter
         )
@@ -133,14 +145,14 @@ def get_parameter_from_last_message(
 
 def get_all_csc_names_in_message(message):
     """
-        Returns a list of all cscs names contained in a message
+    Returns a list of all cscs names contained in a message
     """
     return [data["csc"] for data in message["data"]]
 
 
 def get_event_stream(message, category, csc, salindex, stream_name):
-    """ Tries to return the first stream found in a LOVE message. 
-    Throws errors if it does not exist. """
+    """Tries to return the first stream found in a LOVE message.
+    Throws errors if it does not exist."""
 
     data_generator = (
         d for d in message["data"] if d["csc"] == csc and d["salindex"] == salindex
@@ -152,8 +164,8 @@ def get_event_stream(message, category, csc, salindex, stream_name):
 
 
 def check_event_stream(message, category, csc, salindex, stream_name):
-    """ Tries to return the first stream found in a LOVE message. 
-    Throws errors if it does not exist. """
+    """Tries to return the first stream found in a LOVE message.
+    Throws errors if it does not exist."""
 
     try:
         data_generator = (
@@ -175,8 +187,8 @@ def check_event_stream(message, category, csc, salindex, stream_name):
 
 
 def make_stream_message(category, csc, salindex, stream, content):
-    """Returns a message for the LOVE-manager group (category-csc-salindex-stream) with 
-    a given content """
+    """Returns a message for the LOVE-manager group (category-csc-salindex-stream) with
+    a given content"""
 
     return {
         "category": category,

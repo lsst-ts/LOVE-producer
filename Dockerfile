@@ -1,13 +1,14 @@
-FROM lsstts/develop-env:b101
+ARG dev_cycle=develop
+FROM lsstts/develop-env:${dev_cycle}
 
 WORKDIR /usr/src/love
 COPY producer/requirements.txt .
 RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
 RUN source /opt/lsst/software/stack/loadLSST.bash \
-    && source /home/saluser/repos/ts_sal/setup.env \
+    && source /home/saluser/.setup_salobj.sh \
     && setup ts_sal -t current \
     && /home/saluser/repos/ts_sal/bin/make_idl_files.py Watcher \
-    && /home/saluser/repos/ts_sal/bin/make_idl_files.py Environment
+    && /home/saluser/repos/ts_sal/bin/make_idl_files.py WeatherStation
 
 COPY producer ./producer
 WORKDIR /home/saluser

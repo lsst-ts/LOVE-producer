@@ -1,26 +1,23 @@
 """Main executable of the Events Producer."""
 import asyncio
-from lsst.ts import salobj
-from telemetries.producer import TelemetriesProducer
-import os
-import utils
 
 from base_ws_client import BaseWSClient
+from telemetries.producer import TelemetriesProducer
 
 
 class TelemetriesClient(BaseWSClient):
     """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
 
-    def __init__(self, sleepDuration=2, csc_list=None):
+    def __init__(self, sleep_duration=2, csc_list=None, remote=None):
         super().__init__(name="Telemetries")
 
-        if csc_list != None:
+        if csc_list is not None:
             self.csc_list = csc_list
             print("CSCs to listen replaced by", csc_list)
 
-        self.producer = TelemetriesProducer(self.domain, self.csc_list)
+        self.producer = TelemetriesProducer(self.domain, self.csc_list, remote)
 
-        self.sleepDuration = sleepDuration
+        self.sleep_duration = sleep_duration
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
@@ -34,12 +31,12 @@ class TelemetriesClient(BaseWSClient):
             message = self.producer.get_telemetry_message()
             if len(message["data"]) > 0:
                 asyncio.create_task(self.send_message(message))
-            await asyncio.sleep(self.sleepDuration)
+            await asyncio.sleep(self.sleep_duration)
 
 
-async def main():
+async def main(remote=None):
     """The main function, starts the Client."""
-    telemetry_client = TelemetriesClient()
+    telemetry_client = TelemetriesClient(remote=remote)
     await telemetry_client.start_ws_client()
 
 

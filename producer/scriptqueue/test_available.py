@@ -1,14 +1,14 @@
-import asyncio
 import os
-import asynctest
 import warnings
+import yaml
+
+import asynctest
+import asyncio
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
-from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
-from lsst.ts.idl.enums.Script import ScriptState
-from .producer import ScriptQueueProducer
-import utils
-import yaml
+
+from scriptqueue.producer import ScriptQueueProducer
+from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -16,6 +16,8 @@ TIMEOUT = 30
 
 
 class TestScriptqueueAvailableScripts(asynctest.TestCase):
+    maxDiff = None
+
     async def tearDown(self):
         nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:
@@ -28,13 +30,12 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
             available_scripts = utils.get_parameter_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream", "available_scripts"
             )
-            if all(
+            if len(available_scripts) > 0 and all(
                 [
                     s["path"] == "unloadable" or len(s["configSchema"]) > 0
                     for s in available_scripts
                 ]
             ):
-
                 return [
                     {
                         "type": s["type"],
@@ -43,21 +44,21 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
                             s["configSchema"], Loader=yaml.SafeLoader
                         )
                         if s["configSchema"] != ""
-                        and s["path"] != "subdir/subsubdir/script4"
-                        else "",
+                        and s["configSchema"] != "# empty schema"
+                        else s["configSchema"],
                     }
                     for s in available_scripts
                 ]
 
     async def test_state(self):
         """
-            Asserts the produced message contains the right content after moving the queue
-            to a certain state (1 running script, 2 waiting, 2 finished)
+        Asserts the produced message contains the right content after moving the queue
+        to a certain state (1 running script, 2 waiting, 2 finished)
         """
         # ARRANGE
 
         # Create the CSC
-        salobj.set_random_lsst_dds_domain()
+        salobj.set_random_lsst_dds_partition_prefix()
         datadir = "/home/saluser/repos/ts_scriptqueue/tests/data"
         standardpath = os.path.join(datadir, "standard")
         externalpath = os.path.join(datadir, "external")
@@ -87,8 +88,11 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         await asyncio.wait_for(producer.setup(), LONG_TIMEOUT)
 
         # ACT
-        await asyncio.wait_for(self.remote.cmd_showAvailableScripts.start(), TIMEOUT)
-        availableScripts = await asyncio.wait_for(
+        await asyncio.wait_for(producer.update(showAvailable=True), LONG_TIMEOUT)
+        while producer.scripts_schema_task is None:
+            await asyncio.sleep(0.1)
+        await producer.scripts_schema_task
+        available_scripts = await asyncio.wait_for(
             self.remote.evt_availableScripts.aget(), TIMEOUT
         )
         received_available = await asyncio.wait_for(
@@ -96,26 +100,31 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
         )
 
         # Assert
+        script4_path = "subdir/subsubdir/script4"
         expected_standard = [
-            {
+            {"type": "standard", "path": path, "configSchema": "# empty schema"}
+            if path == "unloadable"
+            else {"type": "standard", "path": path, "configSchema": "script4"}
+            if path == script4_path
+            else {
                 "type": "standard",
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            if path != "unloadable" and path != "subdir/subsubdir/script4"
-            else {"type": "standard", "path": path, "configSchema": ""}
-            for path in availableScripts.standard.split(":")
+            for path in available_scripts.standard.split(":")
         ]
 
         expected_external = [
-            {
+            {"type": "external", "path": path, "configSchema": "# empty schema"}
+            if path == "unloadable"
+            else {"type": "external", "path": path, "configSchema": "script4"}
+            if path == script4_path
+            else {
                 "type": "external",
                 "path": path,
                 "configSchema": salobj.TestScript.get_schema(),
             }
-            if path != "unloadable" and path != "subdir/subsubdir/script4"
-            else {"type": "external", "path": path, "configSchema": ""}
-            for path in availableScripts.external.split(":")
+            for path in available_scripts.external.split(":")
         ]
 
         expected_available = expected_standard + expected_external

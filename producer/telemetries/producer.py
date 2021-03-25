@@ -1,24 +1,28 @@
-import asyncio
 import json
-import numpy as np
+
 from astropy.time import Time
-from utils import NumpyEncoder, getDataType, Settings
 from lsst.ts import salobj
+
+from utils import NumpyEncoder, get_data_type, Settings
 
 
 class TelemetriesProducer:
     """  Produces messages with telemetries coming from several CSCs """
 
-    def __init__(self, domain, csc_list):
+    def __init__(self, domain, csc_list, remote=None):
         self.remote_list = []
-        for name, salindex in csc_list:
-            try:
-                remote = salobj.Remote(domain=domain, name=name, index=salindex)
-                self.remote_list.append(remote)
+        if not remote:
+            for name, salindex in csc_list:
+                try:
+                    print("- Listening to telemetries from CSC: ", (name, salindex))
+                    new_remote = salobj.Remote(domain=domain, name=name, index=salindex)
+                    self.remote_list.append(new_remote)
 
-            except Exception as e:
-                print("- Could not load telemetries remote for", name, salindex)
-                print(e)
+                except Exception as e:
+                    print("- Could not load telemetries remote for", name, salindex)
+                    print(e)
+        else:
+            self.remote_list.append(remote)
 
     def get_remote_tel_values(self, remote):
         """Get telemetries from the Remote
@@ -46,7 +50,7 @@ class TelemetriesProducer:
             tel_result = {
                 p: {
                     "value": getattr(data, p),
-                    "dataType": getDataType(getattr(data, p)),
+                    "dataType": get_data_type(getattr(data, p)),
                     "units": f"{tel_remote.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters
