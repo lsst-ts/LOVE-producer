@@ -3,7 +3,7 @@ import asyncio
 from astropy.time import Time
 from lsst.ts import salobj
 
-from utils import get_data_type, make_stream_message, Settings
+from producer_utils import get_data_type, make_stream_message, Settings
 
 TIMEOUT = 10
 

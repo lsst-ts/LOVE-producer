@@ -42,8 +42,6 @@ class CSCWSClient(BaseWSClient):
             hb_producer.start()
 
             def heartbeat_callback(evt):
-                print("Executing heartbeat_callback...")
-                print(evt)
                 hb_producer.set_heartbeat(evt)
 
             self.events_clients.append(

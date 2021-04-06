@@ -1,8 +1,8 @@
 import asynctest
 from lsst.ts import salobj
 
+import producer_utils
 from telemetries.producer import TelemetriesProducer
-from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -47,7 +47,7 @@ class TestTelemetryMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 "value": getattr(tel_scalars, p),
-                "dataType": utils.get_data_type(getattr(tel_scalars, p)),
+                "dataType": producer_utils.get_data_type(getattr(tel_scalars, p)),
                 "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
             }
             for p in tel_parameters
@@ -56,7 +56,7 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         # extracting the message should be made synchronously
         message = self.telemetry_producer.get_telemetry_message()
-        stream = utils.get_event_stream(
+        stream = producer_utils.get_event_stream(
             message, "telemetry", "Test", self.csc.salinfo.index, "scalars"
         )
 
@@ -89,7 +89,7 @@ class TestTelemetryMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 "value": getattr(tel_scalars, p),
-                "dataType": utils.get_data_type(getattr(tel_scalars, p)),
+                "dataType": producer_utils.get_data_type(getattr(tel_scalars, p)),
                 "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
             }
             for p in tel_parameters
@@ -98,7 +98,7 @@ class TestTelemetryMessages(asynctest.TestCase):
 
         # extracting the message should be made synchronously
         message = self.telemetry_producer.get_telemetry_message()
-        stream = utils.get_event_stream(
+        stream = producer_utils.get_event_stream(
             message, "telemetry", "Test", self.csc.salinfo.index, "scalars"
         )
 

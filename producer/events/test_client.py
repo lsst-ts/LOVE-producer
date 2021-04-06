@@ -4,8 +4,8 @@ import asyncio
 
 from lsst.ts import salobj
 
-from .. import test_utils
-from .. import utils
+import test_utils
+import producer_utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -59,12 +59,12 @@ class TestEventsClient(test_utils.WSClientTestCase):
                 message = json.loads(response)
                 if "heartbeat" in message:
                     continue
-                stream_exists = utils.check_event_stream(
+                stream_exists = producer_utils.check_event_stream(
                     message, "event", "Test", 1, "scalars"
                 )
                 print("stream_exists", stream_exists, flush=True)
                 if stream_exists:
-                    stream = utils.get_event_stream(
+                    stream = producer_utils.get_event_stream(
                         message, "event", "Test", self.index, "scalars"
                     )[0]
                     break
@@ -80,7 +80,7 @@ class TestEventsClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(evt_scalars, p),
-                    "dataType": utils.get_data_type(getattr(evt_scalars, p)),
+                    "dataType": producer_utils.get_data_type(getattr(evt_scalars, p)),
                     "units": f"{self.remote.evt_scalars.metadata.field_info[p].units}",
                 }
                 for p in evt_parameters

@@ -4,8 +4,8 @@ import asyncio
 import asynctest
 from lsst.ts import salobj
 
+import producer_utils
 from events.producer import EventsProducer
-from .. import utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -40,11 +40,11 @@ class TestEventsMessages(asynctest.TestCase):
     async def wait_for_stream(self, stream):
         while True:
             message = await self.message_queue.get()
-            if not utils.check_event_stream(
+            if not producer_utils.check_event_stream(
                 message, "event", "Test", self.csc.salinfo.index, stream
             ):
                 continue
-            stream = utils.get_event_stream(
+            stream = producer_utils.get_event_stream(
                 message, "event", "Test", self.csc.salinfo.index, stream
             )[0]
             return stream
@@ -75,7 +75,7 @@ class TestEventsMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 "value": getattr(evt_scalars, p),
-                "dataType": utils.get_data_type(getattr(evt_scalars, p)),
+                "dataType": producer_utils.get_data_type(getattr(evt_scalars, p)),
                 "units": f"{self.remote.evt_scalars.metadata.field_info[p].units}",
             }
             for p in evt_parameters
@@ -108,7 +108,7 @@ class TestEventsMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 "value": getattr(evt_arrays, p),
-                "dataType": utils.get_data_type(getattr(evt_arrays, p)),
+                "dataType": producer_utils.get_data_type(getattr(evt_arrays, p)),
                 "units": f"{self.remote.evt_scalars.metadata.field_info[p].units}",
             }
             for p in evt_parameters
@@ -146,7 +146,7 @@ class TestEventsMessages(asynctest.TestCase):
         expected_stream = {
             p: {
                 "value": getattr(evt_scalars, p),
-                "dataType": utils.get_data_type(getattr(evt_scalars, p)),
+                "dataType": producer_utils.get_data_type(getattr(evt_scalars, p)),
                 "units": f"{self.remote.evt_scalars.metadata.field_info[p].units}",
             }
             for p in evt_parameters

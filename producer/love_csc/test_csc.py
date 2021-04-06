@@ -4,8 +4,8 @@ import asyncio
 import asynctest
 from lsst.ts import salobj
 
+import test_utils
 from love_csc.csc import LOVECsc
-from .. import test_utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False

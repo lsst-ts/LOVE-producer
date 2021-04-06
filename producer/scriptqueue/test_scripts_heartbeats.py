@@ -10,8 +10,8 @@ from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 
+import producer_utils
 from scriptqueue.producer import ScriptQueueProducer
-from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -37,11 +37,11 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
             message = await self.message_queue.get()
 
             # extract stream from message if it exists
-            if not utils.check_stream_from_last_message(
+            if not producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             ):
                 continue
-            stream = utils.get_stream_from_last_message(
+            stream = producer_utils.get_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             )
 
@@ -61,10 +61,10 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         last_heartbeat_timestamp and returns its produced stream"""
         while True:
             message = await self.message_queue.get()
-            if utils.check_stream_from_last_message(
+            if producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptHeartbeats", 1, "stream"
             ):
-                stream = utils.get_stream_from_last_message(
+                stream = producer_utils.get_stream_from_last_message(
                     message, "event", "ScriptHeartbeats", 1, "stream"
                 )
                 print(

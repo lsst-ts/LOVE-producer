@@ -10,8 +10,8 @@ from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location, ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 
+import producer_utils
 from scriptqueue.producer import ScriptQueueProducer
-from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -49,11 +49,11 @@ class TestScriptqueueState(asynctest.TestCase):
     ):
         while True:
             message = await self.message_queue.get()
-            if not utils.check_stream_from_last_message(
+            if not producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             ):
                 continue
-            stream = utils.get_stream_from_last_message(
+            stream = producer_utils.get_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             )
             if stream["finishedIndices"] != finished_indices:
@@ -70,11 +70,11 @@ class TestScriptqueueState(asynctest.TestCase):
     ):
         while True:
             message = await self.message_queue.get()
-            if not utils.check_stream_from_last_message(
+            if not producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             ):
                 continue
-            stream = utils.get_stream_from_last_message(
+            stream = producer_utils.get_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             )
 
