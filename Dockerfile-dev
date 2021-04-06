@@ -3,7 +3,10 @@ FROM lsstts/develop-env:${dev_cycle}
 
 WORKDIR /usr/src/love/producer
 COPY producer/requirements.txt .
-RUN source /opt/lsst/software/stack/loadLSST.bash && pip install -r requirements.txt
+RUN source /opt/lsst/software/stack/loadLSST.bash && \
+	pip install kafkit[aiohttp] aiokafka && \
+	pip install -r requirements.txt
+
 RUN source /opt/lsst/software/stack/loadLSST.bash \
     && source /home/saluser/.setup_salobj.sh \
     && setup ts_sal -t current \
