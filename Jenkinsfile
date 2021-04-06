@@ -5,7 +5,7 @@ pipeline {
     dockerImageName = "lsstts/love-producer:"
     dockerImage = ""
     dockerLoveCSCImageName = "lsstts/love-csc:"
-    dev_cycle = "c0017.000"
+    dev_cycle = "c0018.001"
     user_ci = credentials('lsst-io')
     LTD_USERNAME="${user_ci_USR}"
     LTD_PASSWORD="${user_ci_PSW}"
