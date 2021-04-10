@@ -92,11 +92,9 @@ class TestCSCClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client.close()
-            self.client_task.cancel()
-            await self.client_task
-
             await self.csc.close()
             await self.remote.close()
+
+            self.client.close()
 
         await self.harness(act_assert, arrange, cleanup)

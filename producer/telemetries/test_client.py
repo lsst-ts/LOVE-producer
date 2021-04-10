@@ -89,13 +89,14 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client_task.cancel()
-            await self.client_task
 
             await self.csc.close()
             await self.remote.close()
             for remote in self.client.producer.remote_list:
                 await remote.close()
+
+            self.client_task.cancel()
+            await self.client_task
 
         await self.harness(act_assert, arrange, cleanup)
 
@@ -176,12 +177,13 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client_task.cancel()
-            await self.client_task
 
             await self.csc.close()
             await self.remote.close()
             for remote in self.client.producer.remote_list:
                 await remote.close()
+
+            self.client_task.cancel()
+            await self.client_task
 
         await self.harness(act_assert, arrange, cleanup)
