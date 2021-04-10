@@ -1,10 +1,9 @@
 """The client for the LOVE CSC."""
 import asyncio
 
+# import producer_utils
 from base_ws_client import BaseWSClient
 from love_csc.csc import LOVECsc
-
-# import utils
 
 
 class LOVEWSClient(BaseWSClient):
@@ -50,10 +49,10 @@ class LOVEWSClient(BaseWSClient):
 
         pass
         # print(f"{self.name } | {message}")
-        # user = utils.get_parameter_from_last_message(
+        # user = producer_utils.get_parameter_from_last_message(
         #     message, "love_csc", "love", 0, "observingLog", "user"
         # )
-        # log_message = utils.get_parameter_from_last_message(
+        # log_message = producer_utils.get_parameter_from_last_message(
         #     message, "love_csc", "love", 0, "observingLog", "message"
         # )
         # self.csc.add_observing_log(user, log_message)

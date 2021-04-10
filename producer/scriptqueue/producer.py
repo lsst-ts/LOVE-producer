@@ -9,7 +9,7 @@ from lsst.ts.idl.enums.ScriptQueue import ScriptProcessState
 from lsst.ts.idl.enums.Script import ScriptState
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 
-from utils import onemsg_generator, NumpyEncoder
+from producer_utils import onemsg_generator, NumpyEncoder
 
 HEARTBEAT_TIMEOUT = 3 * HEARTBEAT_INTERVAL
 

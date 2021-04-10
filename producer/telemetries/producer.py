@@ -3,7 +3,7 @@ import json
 from astropy.time import Time
 from lsst.ts import salobj
 
-from utils import NumpyEncoder, get_data_type, Settings
+from producer_utils import NumpyEncoder, get_data_type, Settings
 
 
 class TelemetriesProducer:

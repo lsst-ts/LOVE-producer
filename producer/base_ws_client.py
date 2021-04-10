@@ -8,7 +8,7 @@ import aiohttp
 from astropy.time import Time
 from lsst.ts import salobj
 
-from utils import Settings, NumpyEncoder
+from producer_utils import Settings, NumpyEncoder
 
 
 class BaseWSClient:
@@ -67,7 +67,7 @@ class BaseWSClient:
 
                     print(f"### {self.name} | subscribed to initial state")
                     await self.on_connected()
-                    self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
+                    # self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
                     await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
