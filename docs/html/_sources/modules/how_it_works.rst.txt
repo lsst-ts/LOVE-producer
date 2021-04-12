@@ -7,7 +7,7 @@ Producer
 ################################
 
 .. image:: ../assets/New-producer-details.svg
-The LOVE-Producer consists of several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State`, :code:`Command Receiver` and :code:`Initial State`), each refered to as "a Producer", and a :code:`main.py` python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager. 
+The LOVE-Producer consists of docker containers for each CSC producer or CSC remote with several python classes (:code:`Telemetries and Events`, :code:`Heartbeats`, :code:`ScriptQueue State`, :code:`Command Receiver` and :code:`Initial State`), each refered to as "a Producer", and a :code:`main.py` python script . Each CSC Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the :code:`main.py` script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager.
 
 
 The :code:`main.py` file
