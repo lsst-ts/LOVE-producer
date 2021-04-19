@@ -6,7 +6,7 @@ import asyncio
 from lsst.ts import salobj
 
 MAX_LOST_HEARTBEATS_DEFAULT = 5
-HEARTBEAT_TIMEOUT_DEFAULT = 15
+HEARTBEAT_TIMEOUT_DEFAULT = 3
 NEVER_RECEIVED_TIMESTAMP = -1
 NO_HEARTBEAT_EVENT_TIMESTAMP = -2
 HEARTBEATS_CONFIG_PATH = "config.json"
@@ -150,7 +150,7 @@ class HeartbeatProducer:
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp
                     )
-                    await self.send_heartbeat(msg)
+                    self.send_heartbeat(msg)
                     await asyncio.sleep(2)
                     continue
                 await remote.evt_heartbeat.next(flush=True, timeout=timeout)
@@ -161,7 +161,7 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
-            await self.send_heartbeat(msg)
+            self.send_heartbeat(msg)
 
     def set_heartbeat(self, heartbeat_event):
         """Sets the internal value for the latest hearbeat event received
@@ -209,8 +209,8 @@ class HeartbeatProducer:
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp
                     )
-                    await self.send_heartbeat(msg)
-                    await asyncio.sleep(2)
+                    self.send_heartbeat(msg)
+                    await asyncio.sleep(timeout)
                     continue
                 # await remote.evt_heartbeat.next(flush=True, timeout=timeout)
                 await asyncio.sleep(timeout)
@@ -224,7 +224,7 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
-            await self.send_heartbeat(msg)
+            self.send_heartbeat(msg)
 
 
 if __name__ == "__main__":
