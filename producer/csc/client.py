@@ -68,7 +68,7 @@ class CSCWSClient(BaseWSClient):
         """ Initializes producer's callbacks """
         self.connection_error = False
 
-    async def send_heartbeat(self, message):
+    def send_heartbeat(self, message):
         """Callback used by the heartbeats producer to send messages with the websocket client
 
         Parameters
@@ -76,7 +76,6 @@ class CSCWSClient(BaseWSClient):
         message: dictionmary
             Message to send
         """
-        print(f"Sending CSC {self.csc_list} heartbeat...")
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_error(self, e):

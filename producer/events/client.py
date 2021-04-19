@@ -17,10 +17,14 @@ class EventsWSClient(BaseWSClient):
 
     def __init__(self, csc_list=None, heartbeat_callback=None, remote=None):
         super().__init__(name="Events")
+
         if csc_list is not None:
             print("CSC list replaced by", csc_list)
             self.csc_list = csc_list
+
         self.connection_error = False
+        self.remote_name = remote.salinfo.name if remote else None
+
         self.producer = EventsProducer(
             self.domain,
             self.csc_list,

@@ -15,9 +15,10 @@ class TelemetriesClient(BaseWSClient):
             self.csc_list = csc_list
             print("CSCs to listen replaced by", csc_list)
 
-        self.producer = TelemetriesProducer(self.domain, self.csc_list, remote)
-
         self.sleep_duration = sleep_duration
+        self.remote_name = remote.salinfo.name if remote else None
+
+        self.producer = TelemetriesProducer(self.domain, self.csc_list, remote)
 
     async def on_start_client(self):
         """ Initializes the websocket client and producer callbacks """
