@@ -150,7 +150,7 @@ class HeartbeatProducer:
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp
                     )
-                    self.send_heartbeat(msg)
+                    await self.send_heartbeat(msg)
                     await asyncio.sleep(2)
                     continue
                 await remote.evt_heartbeat.next(flush=True, timeout=timeout)
@@ -161,7 +161,7 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
-            self.send_heartbeat(msg)
+            await self.send_heartbeat(msg)
 
     def set_heartbeat(self, heartbeat_event):
         """Sets the internal value for the latest hearbeat event received
@@ -209,8 +209,8 @@ class HeartbeatProducer:
                     msg = self.get_heartbeat_message(
                         remote_name, salindex, nlost_subsequent, timestamp
                     )
-                    self.send_heartbeat(msg)
-                    await asyncio.sleep(timeout)
+                    await self.send_heartbeat(msg)
+                    await asyncio.sleep(2)
                     continue
                 # await remote.evt_heartbeat.next(flush=True, timeout=timeout)
                 await asyncio.sleep(timeout)
@@ -224,7 +224,7 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
-            self.send_heartbeat(msg)
+            await self.send_heartbeat(msg)
 
 
 if __name__ == "__main__":

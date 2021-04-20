@@ -76,7 +76,6 @@ class CSCWSClient(BaseWSClient):
         message: dictionmary
             Message to send
         """
-        print(f"Sending CSC {self.csc_list} heartbeat...")
         asyncio.create_task(self.send_message(message))
 
     async def on_websocket_error(self, e):
