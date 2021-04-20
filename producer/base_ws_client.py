@@ -59,17 +59,21 @@ class BaseWSClient:
                     self.websocket = await session.ws_connect(self.url)
                     print(f"### {self.name} | loaded ws")
 
+                    csc = "all"
+                    if self.remote_name == "ScriptQueue":
+                        csc = "Script"
+                    elif self.remote_name:
+                        csc = self.remote_name
+
                     initial_state_subscribe_msg = {
                         "option": "subscribe",
                         "category": "initial_state",
-                        "csc": self.remote_name or "all",
+                        "csc": csc,
                         "salindex": "all",
                         "stream": "all",
                     }
                     await self.send_message(initial_state_subscribe_msg)
-                    print(
-                        f"### {self.name} | subscribed to initial state of {self.remote_name or 'all'} CSC"
-                    )
+                    print(f"### {self.name} | subscribed to initial state of {csc} CSC")
 
                     await self.on_connected()
                     await self.handle_message_reception()
