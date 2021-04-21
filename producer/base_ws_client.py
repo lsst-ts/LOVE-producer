@@ -85,6 +85,8 @@ class BaseWSClient:
                         )
 
                     await self.on_connected()
+                    # DEPRECATED: now heartbeats are handled using SALobj events callbacks
+                    self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
                     await self.handle_message_reception()
             except Exception as e:
                 self.websocket = None
