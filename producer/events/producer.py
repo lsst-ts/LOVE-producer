@@ -168,7 +168,7 @@ class EventsProducer:
         salindex = int(request_data["salindex"])
         event_name = request_data["data"]["event_name"]
         if (csc, salindex) not in self.remote_dict:
-            if self.auto_remote_creation:
+            if self.auto_remote_creation or csc == "Script":
                 try:
                     self.remote_dict[(csc, salindex)] = salobj.Remote(
                         self.domain, csc, salindex

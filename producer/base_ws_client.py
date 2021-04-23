@@ -25,6 +25,7 @@ class BaseWSClient:
         self.retry = True
         self.websocket = None
         self.heartbeat_task = None
+        self.remote_name = None
 
     async def handle_message_reception(self):
         """Handles the reception of messages from the LOVE-manager,
@@ -37,6 +38,7 @@ class BaseWSClient:
                         continue
                     await self.on_websocket_receive(msg)
 
+    # DEPRECATED: now heartbeats are handled using SALobj events callbacks
     async def start_heartbeat(self):
         """Sends its heartbeat periodically."""
         while True:
@@ -56,17 +58,34 @@ class BaseWSClient:
                 async with aiohttp.ClientSession() as session:
                     self.websocket = await session.ws_connect(self.url)
                     print(f"### {self.name} | loaded ws")
+
                     initial_state_subscribe_msg = {
                         "option": "subscribe",
                         "category": "initial_state",
-                        "csc": "all",
+                        "csc": self.remote_name or "all",
                         "salindex": "all",
                         "stream": "all",
                     }
                     await self.send_message(initial_state_subscribe_msg)
+                    print(
+                        f"### {self.name} | subscribed to initial state of {self.remote_name or 'all'} CSC"
+                    )
 
-                    print(f"### {self.name} | subscribed to initial state")
+                    if self.remote_name == "ScriptQueue":
+                        initial_state_subscribe_msg = {
+                            "option": "subscribe",
+                            "category": "initial_state",
+                            "csc": "Script",
+                            "salindex": "all",
+                            "stream": "all",
+                        }
+                        await self.send_message(initial_state_subscribe_msg)
+                        print(
+                            f"### {self.name} | subscribed to initial state of Script CSC"
+                        )
+
                     await self.on_connected()
+                    # DEPRECATED: now heartbeats are handled using SALobj events callbacks
                     # self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
                     await self.handle_message_reception()
             except Exception as e:
