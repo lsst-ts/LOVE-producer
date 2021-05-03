@@ -135,7 +135,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
                 {
                     "option": "subscribe",
                     "category": "initial_state",
-                    "csc": "all",
+                    "csc": "Test",
                     "salindex": "all",
                     "stream": "all",
                 },
