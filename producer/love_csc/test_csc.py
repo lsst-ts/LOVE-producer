@@ -4,8 +4,8 @@ import asyncio
 import asynctest
 from lsst.ts import salobj
 
+import test_utils
 from love_csc.csc import LOVECsc
-from .. import test_utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -55,11 +55,12 @@ class TestWebsocketsClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client_task.cancel()
-            await self.client_task
 
             await self.client.csc.close()
             await self.remote.close()
+
+            self.client_task.cancel()
+            await self.client_task
 
         async def act_assert(websocket, path):
             """Server-ready callback. Runs the test actions and assertions"""

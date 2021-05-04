@@ -4,14 +4,15 @@ import datetime
 
 import asyncio
 import asynctest
+import pytest
 from asynctest.mock import patch
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 from lsst.ts.idl.enums.ScriptQueue import Location
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL
 
+import producer_utils
 from scriptqueue.producer import ScriptQueueProducer
-from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -37,11 +38,11 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
             message = await self.message_queue.get()
 
             # extract stream from message if it exists
-            if not utils.check_stream_from_last_message(
+            if not producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             ):
                 continue
-            stream = utils.get_stream_from_last_message(
+            stream = producer_utils.get_stream_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream"
             )
 
@@ -61,10 +62,10 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         last_heartbeat_timestamp and returns its produced stream"""
         while True:
             message = await self.message_queue.get()
-            if utils.check_stream_from_last_message(
+            if producer_utils.check_stream_from_last_message(
                 message, "event", "ScriptHeartbeats", 1, "stream"
             ):
-                stream = utils.get_stream_from_last_message(
+                stream = producer_utils.get_stream_from_last_message(
                     message, "event", "ScriptHeartbeats", 1, "stream"
                 )
                 print(
@@ -76,6 +77,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
                 ):
                     return stream
 
+    @pytest.mark.xfail
     @patch("scriptqueue.producer.datetime")
     async def test_heartbeats(self, mock_datetime):
         """Tests that a script heartbeat contains the right info
@@ -90,6 +92,7 @@ class ScriptHeartbeatTestCase(asynctest.TestCase):
         self.queue = scriptqueue.ScriptQueue(
             index=1, standardpath=standardpath, externalpath=externalpath, verbose=True
         )
+
         await asyncio.wait_for(self.queue.start_task, TIMEOUT)
 
         # Create a remote and send the csc to enabled state

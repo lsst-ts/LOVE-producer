@@ -5,8 +5,8 @@ from lsst.ts import salobj
 
 # from mock import patch, mock_open
 
-from .. import test_utils
-from .. import utils
+import test_utils
+import producer_utils
 
 STD_TIMEOUT = 15  # timeout for command ack
 SHOW_LOG_MESSAGES = False
@@ -63,7 +63,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(tel_scalars, p),
-                    "dataType": utils.get_data_type(getattr(tel_scalars, p)),
+                    "dataType": producer_utils.get_data_type(getattr(tel_scalars, p)),
                     "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters
@@ -73,11 +73,11 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             while True:
                 response = await websocket.recv()
                 message = json.loads(response)
-                stream_exists = utils.check_event_stream(
+                stream_exists = producer_utils.check_event_stream(
                     message, "telemetry", "Test", self.index, "scalars"
                 )
                 if stream_exists:
-                    stream = utils.get_event_stream(
+                    stream = producer_utils.get_event_stream(
                         message, "telemetry", "Test", self.index, "scalars"
                     )
                     break
@@ -89,13 +89,14 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client_task.cancel()
-            await self.client_task
 
             await self.csc.close()
             await self.remote.close()
             for remote in self.client.producer.remote_list:
                 await remote.close()
+
+            self.client_task.cancel()
+            await self.client_task
 
         await self.harness(act_assert, arrange, cleanup)
 
@@ -134,7 +135,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
                 {
                     "option": "subscribe",
                     "category": "initial_state",
-                    "csc": "all",
+                    "csc": "Test",
                     "salindex": "all",
                     "stream": "all",
                 },
@@ -150,7 +151,7 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             expected_stream = {
                 p: {
                     "value": getattr(tel_scalars, p),
-                    "dataType": utils.get_data_type(getattr(tel_scalars, p)),
+                    "dataType": producer_utils.get_data_type(getattr(tel_scalars, p)),
                     "units": f"{self.remote.tel_scalars.metadata.field_info[p].units}",
                 }
                 for p in tel_parameters
@@ -160,11 +161,11 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
             while True:
                 response = await websocket.recv()
                 message = json.loads(response)
-                stream_exists = utils.check_event_stream(
+                stream_exists = producer_utils.check_event_stream(
                     message, "telemetry", "Test", self.index, "scalars"
                 )
                 if stream_exists:
-                    stream = utils.get_event_stream(
+                    stream = producer_utils.get_event_stream(
                         message, "telemetry", "Test", self.index, "scalars"
                     )
                     break
@@ -176,12 +177,13 @@ class TestTelemetriesClient(test_utils.WSClientTestCase):
         async def cleanup():
             # cleanup
             self.client.retry = False
-            self.client_task.cancel()
-            await self.client_task
 
             await self.csc.close()
             await self.remote.close()
             for remote in self.client.producer.remote_list:
                 await remote.close()
+
+            self.client_task.cancel()
+            await self.client_task
 
         await self.harness(act_assert, arrange, cleanup)

@@ -7,8 +7,8 @@ import asyncio
 from lsst.ts import salobj
 from lsst.ts import scriptqueue
 
+import producer_utils
 from scriptqueue.producer import ScriptQueueProducer
-from .. import utils
 
 LONG_TIMEOUT = 60
 SHORT_TIMEOUT = 1
@@ -27,7 +27,7 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
     async def wait_for_all_config_schema(self):
         while True:
             message = await self.message_queue.get()
-            available_scripts = utils.get_parameter_from_last_message(
+            available_scripts = producer_utils.get_parameter_from_last_message(
                 message, "event", "ScriptQueueState", 1, "stream", "available_scripts"
             )
             if len(available_scripts) > 0 and all(

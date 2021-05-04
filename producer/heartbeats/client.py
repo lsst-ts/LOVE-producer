@@ -19,6 +19,7 @@ class CSCHeartbeatsWSClient(BaseWSClient):
         super().__init__(name="CSCHeartbeats")
 
         self.connection_error = False
+
         self.producer = HeartbeatProducer(
             self.domain, self.send_heartbeat, self.csc_list, remote
         )

@@ -213,7 +213,6 @@ class HeartbeatProducer:
                     await asyncio.sleep(2)
                     continue
                 # await remote.evt_heartbeat.next(flush=True, timeout=timeout)
-                print(f"Sleeping for Timeout: {timeout}")
                 await asyncio.sleep(timeout)
                 if last_heartbeat_tested == self.last_heartbeat_event:
                     raise asyncio.TimeoutError
@@ -225,7 +224,6 @@ class HeartbeatProducer:
             msg = self.get_heartbeat_message(
                 remote_name, salindex, nlost_subsequent, timestamp
             )
-            print(f"Sending {remote_name} heartbeat...")
             await self.send_heartbeat(msg)
 
 

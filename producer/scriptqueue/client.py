@@ -3,7 +3,7 @@ import asyncio
 
 from base_ws_client import BaseWSClient
 from scriptqueue.producer import ScriptQueueProducer
-import utils
+import producer_utils
 
 
 class ScriptQueueWSClient(BaseWSClient):
@@ -11,9 +11,12 @@ class ScriptQueueWSClient(BaseWSClient):
 
     def __init__(self, salindex, remote=None):
         super().__init__(name=f"ScriptQueue-{salindex}")
+
         self.name = f"ScriptQueue-{salindex}"
         self.connection_error = False
         self.salindex = salindex
+        self.remote_name = remote.salinfo.name if remote else None
+
         self.producer = ScriptQueueProducer(
             self.domain, self.send_message_callback, self.salindex, remote
         )
@@ -45,7 +48,7 @@ class ScriptQueueWSClient(BaseWSClient):
             The message
         """
 
-        stream_exists = utils.check_stream_from_last_message(
+        stream_exists = producer_utils.check_stream_from_last_message(
             message, "initial_state", "ScriptQueueState", self.salindex, "event_name"
         )
         if stream_exists:
