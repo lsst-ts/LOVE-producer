@@ -60,7 +60,7 @@ class TestCSCClient(test_utils.WSClientTestCase):
                 if "heartbeat" in message:
                     continue
                 stream_exists = producer_utils.check_event_stream(
-                    message, "event", "Test", 1, "scalars"
+                    message, "event", "Test", self.index, "scalars"
                 )
                 print("stream_exists", stream_exists, flush=True)
                 if stream_exists:
