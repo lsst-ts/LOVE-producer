@@ -1,0 +1,29 @@
+{% set data= load_setup_py_data() %}
+package:
+  name: love-producer
+  version: {{ data.get('version') }}
+
+source:
+  path: ../
+
+build:
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools_scm
+    - setuptools
+  run:
+    - python
+    - setuptools
+    - setuptools_scm
+    - ts-salobj
+    - ts-idl
+    - gevent
+    - greenlet
+    - six
+    - websocket-client
+    - websockets
+    - eventlet
