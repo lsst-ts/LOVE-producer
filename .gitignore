@@ -7,3 +7,5 @@
 **/pytest_session.txt
 **/.pytest_cache
 **/.vscode
+**/*.egg-info
+python/love/producer/version.py
