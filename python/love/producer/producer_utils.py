@@ -21,7 +21,7 @@ class Settings:
     @staticmethod
     def ws_host():
         if Settings._ws_host is None:
-            Settings._ws_host = os.environ.get("WEBSOCKET_HOST", "0.0.0.0:9999")
+            Settings._ws_host = os.environ.get("WEBSOCKET_HOST", "")
         return Settings._ws_host
 
     @staticmethod
