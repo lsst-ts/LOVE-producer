@@ -6,7 +6,8 @@ from love.producer.telemetries.producer import TelemetriesProducer
 
 
 class TelemetriesClient(BaseWSClient):
-    """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
+    """Handles the websocket client connection
+    between the Telemetries&Events Producer and the LOVE-manager."""
 
     def __init__(self, sleep_duration=2, csc_list=None, remote=None):
         super().__init__(name="Telemetries")
