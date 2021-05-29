@@ -6,7 +6,7 @@ import os
 
 STD_TIMEOUT = 30  # timeout for command ack
 
-    
+
 class WSClientTestCase(unittest.IsolatedAsyncioTestCase):
     """ Class to run tests with a mock-up ws server"""
 
