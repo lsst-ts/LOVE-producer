@@ -210,6 +210,7 @@ class EventsProducer:
 
 
         """
+        self.log.debug(f"Processing message: {message}.")
         request_data = message["data"][0]
         csc = request_data["csc"]
         salindex = int(request_data["salindex"])
@@ -236,18 +237,19 @@ class EventsProducer:
         try:
             # get most recent data or wait TIMEOUT seconds for the first one
             key = (remote_name, index, event_name)
+            self.log.debug("Requesting data for: {key}")
+
             evt_data = None
             if key in self.initial_state_data:
                 evt_data = self.initial_state_data[(remote_name, index, event_name)]
-            if evt_data is None:
+                self.log.debug(f"Initial state data for {key}: {evt_data}.")
+            else:
+                self.log.debug(f"No initial state data for: {key}")
                 return
-        except Exception as e:
-            print(
-                "InitialStateProducer failed to obtain data from {}-{}-{}".format(
-                    csc, salindex, event_name
-                )
+        except Exception:
+            self.log.exception(
+                f"InitialStateProducer failed to obtain data from {csc}-{salindex}-{event_name}."
             )
-            print(e)
             return
         result = {}
         for parameter_name in evt_data._member_attributes:
@@ -258,10 +260,11 @@ class EventsProducer:
                 "dataType": get_data_type(parameter_data),
             }
 
-        message = {
+        return_message = {
             "category": "event",
             "data": [
                 {"csc": csc, "salindex": salindex, "data": {event_name: [result]}}
             ],
         }
-        return message
+        self.log.debug(f"Processed message for {key}: {return_message}")
+        return return_message
