@@ -1,12 +1,16 @@
 """Main executable of the LOVE-producer."""
 
+import os
+import sys
 import asyncio
+import logging
+import argparse
+
 from love.producer.telemetries.client import main as main_telemetries
 from love.producer.events.client import main as main_events
 from love.producer.scriptqueue.client import main as main_scriptqueue
 from love.producer.heartbeats.client import main as main_heartbeats
 from love.producer.csc.client import main as main_csc
-import os
 
 TELEMETRIES = "TELEMETRIES"
 EVENTS = "EVENTS"
@@ -14,7 +18,7 @@ CSC_HEARTBEATS = "CSC_HEARTBEATS"
 SCRIPTQUEUE = "SCRIPTQUEUE"
 
 
-def main():
+def main(argv):
     """
     Reads the LOVE_PRODUCERS environment variable and launches one or more
     producers depending on its content.
@@ -31,6 +35,20 @@ def main():
     export LOVE_PRODUCERS= #loads all producers
     -
     """
+
+    parser = argparse.ArgumentParser(description="Run LOVE producer.")
+    parser.add_argument(
+        "--log-level",
+        type=int,
+        default=logging.INFO,
+        help="Debug level of log files. It can be DEBUG (10), INFO (20, default), "
+        "WARNING (30), ERROR (40), or CRITICAL (50).",
+    )
+
+    args = parser.parse_args()
+
+    logging.basicConfig(format="%(name)s:%(message)s", level=args.log_level)
+
     LOVE_PRODUCERS = os.environ.get("LOVE_PRODUCERS")
     LOVE_CSC_PRODUCER = os.environ.get("LOVE_CSC_PRODUCER")
     if LOVE_PRODUCERS is None:
@@ -66,4 +84,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
