@@ -18,7 +18,8 @@ class ScriptQueueProducer:
     """
     Listens to several callbacks of the ScriptQueue and Script CSCs
     to build their states and produce messages for the LOVE-manager
-    in the 'event-ScriptQueueState-salindex-stream' group."""
+    in the 'event-ScriptQueueState-salindex-stream' group.
+    """
 
     def __init__(self, domain, send_message_callback, index, remote=None):
         self.domain = domain

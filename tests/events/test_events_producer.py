@@ -58,7 +58,7 @@ class TestEventsMessages(asynctest.TestCase):
         )
         for r in self.events_producer.remote_dict.values():
             await r.start_task
-        self.events_producer.setup_callbacks()
+        await self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
         await self.remote.start_task
         await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
@@ -93,7 +93,7 @@ class TestEventsMessages(asynctest.TestCase):
         )
         for r in self.events_producer.remote_dict.values():
             await r.start_task
-        self.events_producer.setup_callbacks()
+        await self.events_producer.setup_callbacks()
         # Setup the producer and the data
         cmd_data_sent = self.csc.make_random_cmd_arrays()
         await self.remote.start_task
@@ -133,7 +133,7 @@ class TestEventsMessages(asynctest.TestCase):
         )
         for r in self.events_producer.remote_dict.values():
             await r.start_task
-        self.events_producer.setup_callbacks()
+        await self.events_producer.setup_callbacks()
         cmd_data_sent = self.csc.make_random_cmd_scalars()
         await self.remote.start_task
         await self.remote.cmd_setScalars.start(cmd_data_sent, timeout=STD_TIMEOUT)
