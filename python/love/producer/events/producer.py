@@ -1,6 +1,8 @@
 import asyncio
+import logging
 
 from astropy.time import Time
+
 from lsst.ts import salobj
 
 from love.producer.producer_utils import get_data_type, make_stream_message, Settings
@@ -12,8 +14,20 @@ class EventsProducer:
     """ Produces messages with events coming from several CSCs """
 
     def __init__(
-        self, domain, csc_list, events_callback, heartbeat_callback=None, remote=None
+        self,
+        domain,
+        csc_list,
+        events_callback,
+        heartbeat_callback=None,
+        remote=None,
+        log=None,
     ):
+
+        if log is None:
+            self.log = logging.getLogger(type(self).__name__)
+        else:
+            self.log = log.getChild(type(self).__name__)
+
         self.events_callback = events_callback
         self.domain = domain
         self.remote_dict = {}
@@ -23,30 +37,32 @@ class EventsProducer:
         if not remote:
             for name, salindex in csc_list:
                 try:
-                    print("- Listening to events from CSC: ", (name, salindex))
+                    self.log.debug(f"Listening to events from CSC: {name}:{salindex}.")
                     new_remote = salobj.Remote(domain=domain, name=name, index=salindex)
                     self.remote_dict[(name, salindex)] = new_remote
 
-                except Exception as e:
-                    print("- Could not load events remote for", name, salindex)
-                    print(e)
+                except Exception:
+                    self.log.exception(
+                        f"Could not load events remote for {name}:{salindex}."
+                    )
         else:
             name = remote.salinfo.name
             salindex = remote.salinfo.index
             self.remote_dict[(name, salindex)] = remote
             self.auto_remote_creation = False
 
-    def setup_callbacks(self):
+    async def setup_callbacks(self):
         """Configures a callback for each remote created"""
         tasks = []
         for (name, salindex) in self.remote_dict:
             try:
                 remote = self.remote_dict[(name, salindex)]
                 tasks.append(self.set_remote_evt_callbacks(remote))
-            except Exception as e:
-                print("- Could not setup events callback for", name, salindex)
-                print(e)
-        asyncio.gather(*tasks)
+            except Exception:
+                self.log.exception(
+                    f"Could not setup events callback for: {name}:{salindex}."
+                )
+        await asyncio.gather(*tasks)
 
     async def set_remote_evt_callbacks(self, remote):
         """Set the callbacks for the events of a given remote
@@ -102,7 +118,7 @@ class EventsProducer:
             remote_name = remote.salinfo.name
             index = remote.salinfo.index
             evt_object = getattr(remote, f"evt_{evt_name}")
-            self.initial_state_data[(remote_name, index, evt_name)] = evt_object.get()
+            self.initial_state_data[(remote_name, index, evt_name)] = evt_data
             evt_result = {
                 p: {
                     "value": getattr(evt_data, p),
@@ -117,6 +133,37 @@ class EventsProducer:
             self.events_callback(message)
 
         return callback
+
+    async def send_initial_state_data(self):
+        """Send all initial state data."""
+
+        self.log.debug(f"Sending initial data.")
+
+        for key in self.initial_state_data:
+
+            (csc, salindex, evt_name) = key
+
+            evt_data = self.initial_state_data[key]
+
+            if evt_data is None or evt_name == "heartbeat":
+                continue
+
+            evt_parameters = list(evt_data._member_attributes)
+            remote = self.remote_dict[(csc, salindex)]
+            evt_object = getattr(remote, f"evt_{evt_name}")
+            evt_result = {
+                p: {
+                    "value": getattr(evt_data, p),
+                    "dataType": get_data_type(getattr(evt_data, p)),
+                    "units": f"{evt_object.metadata.field_info[p].units}",
+                }
+                for p in evt_parameters
+            }
+            if Settings.trace_timestamps():
+                evt_result["producer_rcv"] = Time.now().tai.datetime.timestamp()
+
+            message = make_stream_message("event", csc, salindex, evt_name, evt_result)
+            self.events_callback(message)
 
     async def process_message(self, message):
         """

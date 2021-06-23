@@ -39,7 +39,7 @@ class EventsWSClient(BaseWSClient):
         await asyncio.gather(
             *[remote.start_task for remote in self.producer.remote_dict.values()]
         )
-        self.producer.setup_callbacks()
+        await self.producer.setup_callbacks()
 
     def send_message_callback(self, message):
         """Create a task to send a given message
@@ -91,6 +91,10 @@ class EventsWSClient(BaseWSClient):
             The error
         """
         self.connection_error = True
+
+    async def on_connected(self):
+        """ Executed everytime the connection is made, be it after an error or the first time, etc"""
+        await self.producer.send_initial_state_data()
 
 
 async def main(heartbeat_callback=None, remote=None):
