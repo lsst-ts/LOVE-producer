@@ -5,8 +5,8 @@ from lsst.ts import salobj
 
 from love.producer.events.client import main as events
 from love.producer.telemetries.client import main as telemetries
-from love.producer.heartbeats.producer import HeartbeatProducer
 from love.producer.scriptqueue.client import main as scriptqueue
+from love.producer.heartbeats.producer import HeartbeatProducer
 from love.producer.base_ws_client import BaseWSClient
 
 
@@ -34,14 +34,16 @@ class CSCWSClient(BaseWSClient):
         loop = asyncio.get_event_loop()
 
         for name, salindex in self.csc_list:
-            self.log.debug(
+            self.log.info(
                 f"- CSCClient: Listening to events from CSC: {name}, {salindex}"
             )
             remote = salobj.Remote(domain=self.domain, name=name, index=salindex)
+
             hb_producer = HeartbeatProducer(
                 self.domain, self.send_heartbeat, [(name, salindex)], remote=remote
             )
             hb_producer.start()
+            self.heartbeats_producers.append(hb_producer)
 
             def heartbeat_callback(evt):
                 hb_producer.set_heartbeat(evt)
@@ -51,15 +53,20 @@ class CSCWSClient(BaseWSClient):
                     events(heartbeat_callback=heartbeat_callback, remote=remote)
                 )
             )
-            self.telemetries_clients.append(
-                loop.create_task(telemetries(remote=remote))
-            )
-            self.heartbeats_producers.append(hb_producer)
 
             if name == "ScriptQueue":
                 self.scriptqueue_clients.append(
-                    loop.create_task(self.start_scriptqueues())
+                    loop.create_task(
+                        scriptqueue(salindex, remote=remote)
+                    )
                 )
+            else:
+                self.telemetries_clients.append(
+                    loop.create_task(
+                        telemetries(remote=remote)
+                    )
+                )
+
 
         self.connection_error = False
 
