@@ -58,6 +58,34 @@ pipeline {
                 }
             }
         }
+
+        stage("Deploy documentation") {
+            when {
+                anyOf {
+                    changeset "docs/*"
+                }
+            }
+
+            steps {
+                withEnv(["HOME=${env.WORKSPACE}"]) {
+                    sh """
+                        source ${env.SAL_SETUP_FILE}
+                        pip install ltd-conveyor
+                        ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
+                    """
+                }
+            }
+        }
+
+        stage("Trigger develop deployment") {
+            when {
+                branch "develop"
+            }
+
+            steps {
+                build(job: '../LOVE-integration-tools/develop', wait: false)
+            }
+        }
     }
 
     post {

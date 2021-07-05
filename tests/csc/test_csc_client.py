@@ -99,5 +99,5 @@ class TestCSCClient(test_utils.WSClientTestCase):
             await self.client.close()
 
         await asyncio.wait_for(
-            self.harness(act_assert, arrange, cleanup), timeout=STD_TIMEOUT
+            self.harness(act_assert, arrange, cleanup), timeout=STD_TIMEOUT * 3
         )
