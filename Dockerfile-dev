@@ -8,7 +8,8 @@ USER root
 
 RUN source /opt/lsst/software/stack/loadLSST.bash && \
 	pip install kafkit[aiohttp] aiokafka && \
-	pip install -r requirements.txt
+	pip install -r requirements.txt && \
+	pip install -e .
 
 USER saluser
 
