@@ -6,7 +6,8 @@ from love.producer.love_csc.csc import LOVECsc
 
 
 class LOVEWSClient(BaseWSClient):
-    """Handles the websocket client connection between the Telemetries&Events Producer and the LOVE-manager."""
+    """Handles the websocket client connection
+    between the Telemetries&Events Producer and the LOVE-manager."""
 
     def __init__(self):
         super().__init__(name="LOVE CSC")
