@@ -174,6 +174,7 @@ class ScriptQueueProducer:
         self.log.info(f"Setting callback for {evt}")
 
         def do_callback_and_send(event):
+            self.log.info(f"Calling callback for {evt}")
             callback(event)
             m = self.get_state_message()
             self.send_message_callback(m)
