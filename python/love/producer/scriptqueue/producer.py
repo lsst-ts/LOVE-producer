@@ -142,6 +142,23 @@ class ScriptQueueProducer:
             "log_level": -1,
         }
 
+    def is_script_salindex_in_range(self, evt):
+        """Check if the evt.ScriptID is related to the current ScriptQueue producer salindex
+
+        Returns
+        -------
+        bool
+            True if evt.ScriptID is related to the current ScriptQueue producer
+        """
+        if (
+            int(self.salindex) * 100000
+            <= int(evt.ScriptID)
+            < (int(self.salindex) + 1) * 100000
+        ):
+            return True
+        else:
+            return False
+
     # --- Event callbacks ----
 
     def set_callback(self, evt, callback):
@@ -281,6 +298,8 @@ class ScriptQueueProducer:
         event: SALPY_Script.Script_logevent_metadataC
             The SAL Event
         """
+        if not self.is_script_salindex_in_range(event):
+            return
         salindex = event.ScriptID
         self.scripts[salindex]["expected_duration"] = event.duration
 
@@ -292,6 +311,8 @@ class ScriptQueueProducer:
         event: SALPY_Script.Script_logevent_metadataC
             The SAL Event
         """
+        if not self.is_script_salindex_in_range(event):
+            return
         salindex = event.ScriptID
         self.scripts[salindex]["script_state"] = ScriptState(event.state).name
         self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
@@ -304,6 +325,8 @@ class ScriptQueueProducer:
         event: SALPY_Script.Script_logevent_metadataC
             The SAL Event
         """
+        if not self.is_script_salindex_in_range(event):
+            return
         salindex = event.ScriptID
         self.scripts[salindex]["description"] = event.description
         self.scripts[salindex]["classname"] = event.classname
@@ -317,6 +340,8 @@ class ScriptQueueProducer:
         event: SALPY_Script.Script_logevent_metadataC
             The SAL Event
         """
+        if not self.is_script_salindex_in_range(event):
+            return
         salindex = event.ScriptID
         self.scripts[salindex]["pause_checkpoints"] = event.pause
         self.scripts[salindex]["stop_checkpoints"] = event.stop
@@ -329,6 +354,8 @@ class ScriptQueueProducer:
         event: SALPY_Script.Script_logevent_metadataC
             The SAL Event
         """
+        if not self.is_script_salindex_in_range(event):
+            return
         salindex = event.ScriptID
         self.scripts[salindex]["log_level"] = event.level
 
