@@ -56,17 +56,12 @@ class CSCWSClient(BaseWSClient):
 
             if name == "ScriptQueue":
                 self.scriptqueue_clients.append(
-                    loop.create_task(
-                        scriptqueue(salindex, remote=remote)
-                    )
+                    loop.create_task(scriptqueue(salindex, remote=remote))
                 )
             else:
                 self.telemetries_clients.append(
-                    loop.create_task(
-                        telemetries(remote=remote)
-                    )
+                    loop.create_task(telemetries(remote=remote))
                 )
-
 
         self.connection_error = False
 

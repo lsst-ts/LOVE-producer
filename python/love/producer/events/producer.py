@@ -85,9 +85,18 @@ class EventsProducer:
                 self.initial_state_data[(remote_name, index, evt)] = evt_data
             except Exception:
                 self.initial_state_data[(remote_name, index, evt)] = None
-            evt_object.callback = self.make_callback(
-                remote.salinfo.name, remote.salinfo.index, evt
-            )
+            if evt_object.callback is None:
+                self.log.debug(
+                    f"Setting callback function for {remote.salinfo.name}:{remote.salinfo.index}:{evt}."
+                )
+                evt_object.callback = self.make_callback(
+                    remote.salinfo.name, remote.salinfo.index, evt
+                )
+            else:
+                self.log.warning(
+                    f"Callback function for {remote.salinfo.name}:{remote.salinfo.index}:{evt} "
+                    "already set. Skipping..."
+                )
 
     def make_callback(self, csc, salindex, evt_name):
         """Returns a callback that produces a message with the event data

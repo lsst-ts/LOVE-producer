@@ -55,10 +55,12 @@ class ScriptQueueWSClient(BaseWSClient):
     async def on_websocket_error(self, e):
         self.connection_error = True
 
+
 async def main(salindex, remote=None):
     """Main function, starts the client."""
     sqclient = ScriptQueueWSClient(salindex, remote=remote)
     await sqclient.start_ws_client()
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
