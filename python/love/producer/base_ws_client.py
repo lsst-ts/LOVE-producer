@@ -76,6 +76,18 @@ class BaseWSClient:
                         initial_state_subscribe_msg = {
                             "option": "subscribe",
                             "category": "initial_state",
+                            "csc": "ScriptQueueState",
+                            "salindex": "all",
+                            "stream": "all",
+                        }
+                        await self.send_message(initial_state_subscribe_msg)
+                        self.log.debug(
+                            f"### {self.name} | subscribed to initial state of ScriptQueState CSC"
+                        )
+
+                        initial_state_subscribe_msg = {
+                            "option": "subscribe",
+                            "category": "initial_state",
                             "csc": "Script",
                             "salindex": "all",
                             "stream": "all",

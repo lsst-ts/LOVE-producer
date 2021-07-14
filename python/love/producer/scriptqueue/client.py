@@ -23,7 +23,6 @@ class ScriptQueueWSClient(BaseWSClient):
 
     async def on_start_client(self):
         """Initializes the websocket client and producer callbacks """
-
         self.connection_error = False
         await self.producer.setup()
         await self.producer.update(showAvailable=True)
@@ -47,7 +46,6 @@ class ScriptQueueWSClient(BaseWSClient):
         message: dict
             The message
         """
-
         stream_exists = producer_utils.check_stream_from_last_message(
             message, "initial_state", "ScriptQueueState", self.salindex, "event_name"
         )
@@ -58,24 +56,10 @@ class ScriptQueueWSClient(BaseWSClient):
         self.connection_error = True
 
 
-async def init_client(salindex, remote=None):
-    """Initialize the client for a given ScriptQueue SAL index
-
-    Parameters
-    ----------
-    salindex: int
-        The SAL Index of the Script Queue
-    """
+async def main(salindex, remote=None):
+    """Main function, starts the client."""
     sqclient = ScriptQueueWSClient(salindex, remote=remote)
     await sqclient.start_ws_client()
-
-
-async def main(remote=None):
-    """Main function, starts the client."""
-    sq_list = BaseWSClient.read_config(BaseWSClient.path, "ScriptQueue")
-    print("List of Script Queues to listen:", sq_list)
-    for name, salindex in sq_list:
-        asyncio.create_task(init_client(salindex, remote=remote))
 
 
 if __name__ == "__main__":
