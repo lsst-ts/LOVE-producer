@@ -24,7 +24,7 @@ try:
 except ImportError:
     __version__ = "?"
 
-from .base_ws_client import *
-from .main import *
-from .producer_utils import *
-from .test_utils import *
+from .love_manager_message import *
+from .base_love_producer import *
+from .love_producer_factory import *
+from .love_manager_client import *

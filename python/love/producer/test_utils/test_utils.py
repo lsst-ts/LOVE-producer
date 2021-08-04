@@ -19,5 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from .client import *
-from .csc import *
+__all__ = ["cancel_task"]
+
+import asyncio
+
+
+async def cancel_task(task):
+
+    task.cancel()
+
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
