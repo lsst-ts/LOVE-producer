@@ -37,7 +37,7 @@ class CSCWSClient(BaseWSClient):
             self.log.info(
                 f"- CSCClient: Listening to events from CSC: {name}, {salindex}"
             )
-            remote = salobj.Remote(domain=self.domain, name=name, index=salindex)
+            remote = salobj.Remote(domain=self.domain, name=name, index=int(salindex))
 
             hb_producer = HeartbeatProducer(
                 self.domain, self.send_heartbeat, [(name, salindex)], remote=remote
