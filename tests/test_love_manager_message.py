@@ -48,13 +48,13 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
 
         self.assert_initial_state_message(initial_state_message, self.component_name)
 
-    def test_get_message_telemetry(self):
+    def test_get_message_category(self):
 
-        telemetry = self.love_manager_message.get_message_telemetry(
-            data=self.sample_telemetry
+        telemetry = self.love_manager_message.get_message_category(
+            category="telemetry", data=self.sample_telemetry
         )
 
-        self.assert_telemetry(telemetry)
+        self.assert_data_category(telemetry, "telemetry")
 
     def test_get_message_initial_state_as_json(self):
 
@@ -66,34 +66,34 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
             json.loads(initial_state_json), self.component_name
         )
 
-    def test_get_message_telemetry_as_json_empty_data(self):
+    def test_get_message_category_as_json_empty_data(self):
 
-        telemetry_json = self.love_manager_message.get_message_telemetry_as_json(
-            data=dict()
+        telemetry_json = self.love_manager_message.get_message_category_as_json(
+            category="telemetry", data=dict()
         )
 
-        self.assert_telemetry(json.loads(telemetry_json))
+        self.assert_data_category(json.loads(telemetry_json), "telemetry")
 
-    def test_get_message_telemetry_as_json(self):
+    def test_get_message_category_as_json(self):
 
-        telemetry_json = self.love_manager_message.get_message_telemetry_as_json(
-            data=self.sample_telemetry
+        telemetry_json = self.love_manager_message.get_message_category_as_json(
+            category="telemetry", data=self.sample_telemetry
         )
 
-        self.assert_telemetry(json.loads(telemetry_json))
+        self.assert_data_category(json.loads(telemetry_json), "telemetry")
 
     def test_add_metadata(self):
 
         self.love_manager_message.add_metadata(new_metadata="test_value")
 
-        telemetry_json = self.love_manager_message.get_message_telemetry_as_json(
-            data=self.sample_telemetry
+        telemetry_json = self.love_manager_message.get_message_category_as_json(
+            category="telemetry", data=self.sample_telemetry
         )
 
         self.log.debug(f"{telemetry_json}")
         telemetry_data = json.loads(telemetry_json)
 
-        self.assert_telemetry(telemetry_data)
+        self.assert_data_category(telemetry_data, "telemetry")
         self.assertIn("new_metadata", telemetry_data)
         self.assertEqual("test_value", telemetry_data["new_metadata"])
 
@@ -109,12 +109,12 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
             self.assertIn(key, initial_state_message)
             self.assertEqual(initial_state_message[key], value)
 
-    def assert_telemetry(self, telemetry):
+    def assert_data_category(self, data, category):
 
         for key in {"category", "data"}:
-            self.assertIn(key, telemetry)
+            self.assertIn(key, data)
 
-        self.assertEqual(telemetry["category"], "telemetry")
+        self.assertEqual(data["category"], category)
 
 
 if __name__ == "__main__":

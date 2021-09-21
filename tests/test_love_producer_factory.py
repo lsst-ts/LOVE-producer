@@ -21,7 +21,7 @@
 
 import unittest
 
-from love.producer import LoveProducerFactory, BaseLoveProducer
+from love.producer import LoveProducerFactory, LoveProducerBase
 
 
 class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):
@@ -29,7 +29,7 @@ class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):
 
         base_love_producer = LoveProducerFactory.get_love_producer_from_type("base")
 
-        self.assertIsInstance(base_love_producer, BaseLoveProducer)
+        self.assertIsInstance(base_love_producer, LoveProducerBase)
 
     async def test_get_love_producer_from_type_unspecified(self):
 
@@ -42,7 +42,7 @@ class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):
 
         love_producer = LoveProducerFactory.get_love_producer_from_name(component_name)
 
-        self.assertIsInstance(love_producer, BaseLoveProducer)
+        self.assertIsInstance(love_producer, LoveProducerBase)
         self.assertEqual(component_name, love_producer.component_name)
 
 

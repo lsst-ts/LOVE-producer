@@ -40,7 +40,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         cls.pool_timeout = 0.1
 
     def setUp(self):
-        self.love_manager_client = LoveManagerClient()
+        self.love_manager_client = LoveManagerClient(self.log)
         self.love_manager_message = LoveManagerMessage("UnitTest")
         self.received_data = dict()
 
@@ -101,7 +101,9 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
                 test_value_string="test",
                 test_value_float=1.0 / 3.0,
             )
-            message = self.love_manager_message.get_message_telemetry_as_json(data=data)
+            message = self.love_manager_message.get_message_category_as_json(
+                category="telemetry", data=data
+            )
 
             await self.love_manager_client.send_message(message)
 
@@ -121,6 +123,8 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
         async with self.setup_test_environment_to_handle_connection():
 
+            await asyncio.sleep(1.0)
+
             self.purge_received_data()
 
             self.log.debug("Request summary state from samples.")
@@ -135,7 +139,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
             await self.wait_for_number_of_samples(len(components))
 
-            self.assertEqual(len(components), len(self.received_data["telemetry"]))
+            self.assertEqual(len(components), len(self.received_data["event"]))
 
     def test_need_reply_from_producers(self):
 
@@ -196,7 +200,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
     def purge_received_data(self):
         self.received_data = dict()
 
-    async def wait_for_number_of_samples(self, number_of_samples):
+    async def wait_for_number_of_samples(self, number_of_samples, sample_type="event"):
 
         self.log.debug(
             f"Waiting for {number_of_samples} samples or {self.standard_timeout} seconds, "
@@ -206,14 +210,15 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         test_timeout_task = asyncio.create_task(asyncio.sleep(self.standard_timeout))
 
         while (not test_timeout_task.done()) and (
-            len(self.received_data) < number_of_samples
+            len(self.received_data.get(sample_type, [])) < number_of_samples
         ):
             await asyncio.sleep(self.pool_timeout)
 
         await cancel_task(test_timeout_task)
 
         self.log.debug(
-            f"Done waiting for {number_of_samples} samples. Got {len(self.received_data)}."
+            f"Done waiting for {number_of_samples} samples. "
+            f"Got {len(self.received_data.get(sample_type, []))}."
         )
 
     @contextlib.asynccontextmanager
@@ -301,7 +306,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
                 self.log.debug(f"Appending {data_message} to {data_category}")
                 self.received_data[data_category].append(
-                    data_message["data"] if "data" in data_message else data_message
+                    data_message["data"][0] if "data" in data_message else data_message
                 )
         except websockets.exceptions.ConnectionClosedError:
             self.log.debug("Connection closed.")

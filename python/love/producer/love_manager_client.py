@@ -24,6 +24,7 @@ import json
 import aiohttp
 import asyncio
 import logging
+import textwrap
 
 from typing import Optional
 
@@ -33,11 +34,13 @@ from love.producer import LoveProducerFactory
 class LoveManagerClient:
     """Provides connectivity between the LOVE manager and the producer."""
 
-    def __init__(self) -> None:
+    def __init__(self, log) -> None:
 
-        self.log: logging.Logger = logging.getLogger(__name__)
+        self.log: logging.Logger = log.getChild(type(self).__name__)
 
         self.connection_failed_wait_time: float = 3.0
+
+        self.text_width_max = 110
 
         self.websocket: Optional[aiohttp.ClientWebSocketResponse] = None
 
@@ -45,6 +48,8 @@ class LoveManagerClient:
         self.done_task: Optional[asyncio.Future] = None
 
         self.producers: list = []
+
+        self._send_message_lock = asyncio.Lock()
 
     async def handle_connection_with_manager(self) -> None:
         """Keep connection to manager alive and handle incomming requests.
@@ -91,7 +96,10 @@ class LoveManagerClient:
                     yield connection_attempt
 
                     connection_attempt = 0
-            except aiohttp.client_exceptions.ClientConnectorError:
+            except (
+                aiohttp.client_exceptions.ClientConnectorError,
+                aiohttp.client_exceptions.WSServerHandshakeError,
+            ):
 
                 if self.connected_task.done():
                     self.connected_task = asyncio.Future()
@@ -119,6 +127,7 @@ class LoveManagerClient:
     async def handle_connected(self) -> None:
         """Handle a recently established connection with the LOVE manager."""
         await self._register_producers()
+        await self._send_initial_data()
         await self._handle_message_reception()
 
     async def _register_producers(self) -> None:
@@ -126,8 +135,18 @@ class LoveManagerClient:
 
         for producer in self.producers:
             self.log.debug(f"Registering {producer.component_name} producer.")
-            initial_state_json = producer.get_initial_state_as_json()
-            await self.send_message(initial_state_json)
+
+            async for initial_state_message in producer.get_initial_state_messages_as_json():
+                await self.send_message(initial_state_message)
+
+    async def _send_initial_data(self) -> None:
+        """Send initial data from producers"""
+
+        for producer in self.producers:
+            self.log.debug(
+                f"Sending initial data for {producer.component_name} producer."
+            )
+            await producer.send_initial_data()
 
     async def _handle_message_reception(self) -> None:
         """Handle message reception from LOVE manager.
@@ -210,10 +229,13 @@ class LoveManagerClient:
             message_data["category"] == "initial_state"
         )
 
-    def create_producers(self, components: list) -> None:
+    def create_producers(self, components: list, **kwargs) -> None:
 
         for component in components:
-            producer = LoveProducerFactory.get_love_producer_from_name(component)
+            producer = LoveProducerFactory.get_love_producer_from_name(
+                component,
+                **kwargs,
+            )
             producer.send_message = self.send_message
             self.producers.append(producer)
 
@@ -227,15 +249,22 @@ class LoveManagerClient:
         """
         if self.websocket:
             try:
-                await asyncio.shield(self.websocket.send_str(message))
+                self.log.debug(
+                    f"send_message: {textwrap.shorten(message, width=self.text_width_max)}"
+                )
+                async with self._send_message_lock:
+                    await asyncio.shield(self.websocket.send_str(message))
             except Exception:
                 self.log.exception("Error sending message to manager.")
         else:
-            raise RuntimeError(
+            self.log.warning(
                 "No connection to manager. Run connect_to_manager before send_message."
             )
 
     async def close(self):
+
+        for producer in self.producers:
+            await producer.close()
 
         if self.done_task is not None and not self.done_task.done():
             self.done_task.set_result(True)

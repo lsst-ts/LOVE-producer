@@ -21,20 +21,33 @@
 
 __all__ = ["LoveProducerFactory"]
 
-from . import BaseLoveProducer
+from lsst.ts import salobj
+
+from . import LoveProducerBase
+from . import LoveProducerCSC
+from . import LoveProducerScriptQueue
+from . import get_available_components
 
 
 class LoveProducerFactory:
 
-    available_love_producer_type = dict(base=BaseLoveProducer)
+    available_love_producer_type = dict(
+        base=LoveProducerBase,
+        csc=LoveProducerCSC,
+        scriptqueue=LoveProducerScriptQueue,
+    )
 
-    named_love_producer_type = dict()
+    named_love_producer_type = dict(
+        ScriptQueue="scriptqueue",
+    )
 
     @classmethod
-    def get_love_producer_from_type(cls, love_producer_type: str) -> BaseLoveProducer:
+    def get_love_producer_from_type(
+        cls, love_producer_type: str, **kwargs
+    ) -> LoveProducerBase:
 
         if love_producer_type in cls.available_love_producer_type:
-            return cls.available_love_producer_type[love_producer_type]()
+            return cls.available_love_producer_type[love_producer_type](**kwargs)
         else:
             raise RuntimeError(
                 f"Unrecognized love producer type {love_producer_type}. "
@@ -42,10 +55,27 @@ class LoveProducerFactory:
             )
 
     @classmethod
-    def get_love_producer_from_name(cls, component_name: str) -> BaseLoveProducer:
+    def get_love_producer_from_name(
+        cls, component_name: str, **kwargs
+    ) -> LoveProducerBase:
+
+        csc_names = get_available_components()
+
+        name, index = salobj.name_to_name_index(component_name)
+
+        love_producer_from_type_kwargs = kwargs.copy()
+
+        for key in {"csc", "salindex"}:
+            if key in love_producer_from_type_kwargs:
+                love_producer_from_type_kwargs.pop(key)
 
         love_producer = cls.get_love_producer_from_type(
-            cls.named_love_producer_type.get(component_name, "base")
+            love_producer_type=cls.named_love_producer_type.get(
+                name, "csc" if name in csc_names else "base"
+            ),
+            csc=name,
+            salindex=index,
+            **love_producer_from_type_kwargs,
         )
-        love_producer.component_name = component_name
+        love_producer.component_name = name
         return love_producer

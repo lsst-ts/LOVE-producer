@@ -19,18 +19,26 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-__all__ = ["BaseLoveProducer"]
+__all__ = ["LoveProducerBase"]
 
 import asyncio
 import hashlib
 import logging
 
-from typing import Any, Callable, Optional, Tuple, List
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    List,
+    Optional,
+    Tuple,
+    AsyncIterator,
+)
 
 from . import LoveManagerMessage
 
 
-class BaseLoveProducer:
+class LoveProducerBase:
     """Base class for Love Producer.
 
     This base class implements the basic behavior required to produce messages
@@ -50,7 +58,10 @@ class BaseLoveProducer:
     """
 
     def __init__(
-        self, component_name: Optional[str] = None, log: Optional[logging.Logger] = None
+        self,
+        component_name: Optional[str] = None,
+        log: Optional[logging.Logger] = None,
+        **kwargs,
     ):
 
         self.log = (
@@ -73,12 +84,27 @@ class BaseLoveProducer:
         self._data_to_monitor_periodically_coroutines: list = []
 
         self._asynchronous_data_last_samples: dict = dict()
+        self._asynchronous_data_category: dict = dict()
+
+        self._additional_data_callbacks: dict = dict()
 
         self.done_task: asyncio.Future = asyncio.Future()
 
         self._monitor_periodic_data_task: asyncio.Task = asyncio.create_task(
             self._monitor_periodic_data()
         )
+
+    async def get_initial_state_messages_as_json(self) -> AsyncIterator[int]:
+        """Asynchronously generetate al initial state messages.
+
+        Yields
+        ------
+        initial_state : `str`
+            Initial state messages as json.
+        """
+
+        yield self.get_message_initial_state_all_as_json()
+        yield self.get_initial_state_as_json()
 
     def get_initial_state_as_json(self) -> str:
         """Return the initial subscription message for this producer.
@@ -99,6 +125,28 @@ class BaseLoveProducer:
 
         return self._love_manager_message.get_message_initial_state_as_json()
 
+    def get_message_initial_state_all_as_json(self) -> str:
+        """Return the initial subscription message for this producer.
+
+        Returns
+        -------
+        `str`
+            Initial state as a json string.
+        """
+        return self._love_manager_message.get_message_initial_state_all_as_json()
+
+    def get_message_initial_state_as_json_for_csc(self, csc: str) -> str:
+        """Return the initial subscription message for a given CSC.
+
+        Returns
+        -------
+        `str`
+            Initial state as a json string.
+        """
+        return self._love_manager_message.get_message_initial_state_as_json_for_csc(
+            csc=csc
+        )
+
     async def reply_to_message_data(self, message_data: dict) -> None:
         """Generate a reply based on the input message_data.
 
@@ -108,11 +156,9 @@ class BaseLoveProducer:
             Input dictionary with information used by the producer to determine
             some action to take.
         """
-        data_from_message_data = self.get_data_from_message_data(message_data)
-
-        if self.should_reply_to_message_data(data_from_message_data):
+        if self.should_reply_to_message_data(message_data=message_data):
             self.log.debug(f"Replying to message: {message_data}")
-            await self.send_reply_to_message_data(data_from_message_data)
+            await self.send_reply_to_message_data(message_data=message_data)
         else:
             self.log.debug(f"No reply needed for: {message_data}")
 
@@ -133,9 +179,14 @@ class BaseLoveProducer:
         `bool`
             Should reply to message data?
         """
-        return self.has_matched_metadata(message_data) and self.is_data_stream_stored(
-            message_data["stream"]
+        has_matched_metadata = self.has_matched_metadata(message_data)
+        is_data_stream_stored = self.is_data_stream_stored(
+            message_data["data"][0]["stream"]
         )
+        self.log.debug(
+            f"has_matched_metadata={has_matched_metadata}, is_data_stream_stored={is_data_stream_stored}"
+        )
+        return has_matched_metadata and is_data_stream_stored
 
     def has_matched_metadata(self, message_data: dict) -> bool:
         """Does the message data has the correct metadata?
@@ -149,20 +200,25 @@ class BaseLoveProducer:
         Returns
         -------
         `bool`
-            Does message_data and metada has matched information?
+            Does message_data and metadata has matched information?
         """
         metadata = self.get_metadata()
         metadata[self._component_name_in_manager_message] = self.component_name
 
+        data = message_data["data"][0]
+
+        self.log.debug(f"metadata: {metadata}")
+        self.log.debug(f"data: {data}")
+
         return (
             all(
                 [
-                    message_data[key] == metadata[key]
+                    data[key] == metadata[key]
                     for key in metadata
-                    if (key in message_data) and (key in metadata)
+                    if (key in data) and (key in metadata)
                 ]
             )
-            and "stream" in message_data
+            and "stream" in data
         )
 
     def is_data_stream_stored(self, data_stream: dict) -> bool:
@@ -187,14 +243,26 @@ class BaseLoveProducer:
 
     async def send_reply_to_message_data(self, message_data: dict) -> None:
         """Send reply to message data."""
-        sample_name = self.get_sample_name(message_data["stream"])
+        sample_name = self.get_sample_name(message_data)
 
         await self.send_message(
-            self.get_message_telemetry_as_json(self.retrieve_one_sample(sample_name))
+            self.get_message_category_as_json(
+                category="event", data_as_dict=self.retrieve_one_sample(sample_name)
+            )
         )
 
+    async def send_initial_data(self):
+        """Send initial data."""
+
+        for sample_name in self._asynchronous_data_last_samples:
+            await self.send_message(
+                self.get_message_category_as_json(
+                    category="event", data_as_dict=self.retrieve_one_sample(sample_name)
+                )
+            )
+
     def get_sample_name(self, data_stream: dict) -> str:
-        return next(iter(data_stream.values()))
+        return next(iter(data_stream["data"][0]["stream"].values()))
 
     def add_metadata(self, **kwargs) -> None:
         self._love_manager_message.add_metadata(**kwargs)
@@ -202,7 +270,9 @@ class BaseLoveProducer:
     def get_metadata(self) -> dict:
         return self._love_manager_message.metadata
 
-    def register_monitor_data_periodically(self, get_data: Callable[[], Any]) -> None:
+    def register_monitor_data_periodically(
+        self, get_data: Callable[[], Any], category: str
+    ) -> None:
         """Register a callable method so it is periodically pooled for data to
         be transimitted.
 
@@ -210,6 +280,10 @@ class BaseLoveProducer:
         ----------
         get_data: `func` or `coroutine`
             Function or coroutine to be called/awaited periodically for data.
+
+        category: `str`
+            The data category. Usual options are "telemetry" (default) and
+            "event".
 
         Notes
         -----
@@ -231,10 +305,10 @@ class BaseLoveProducer:
 
         if asyncio.iscoroutinefunction(get_data):
             self.log.debug("Setting awaitable monitor...")
-            self._data_to_monitor_periodically_coroutines.append(get_data)
+            self._data_to_monitor_periodically_coroutines.append((get_data, category))
         else:
             self.log.debug("Setting function monitor...")
-            self._data_to_monitor_periodically_functions.append(get_data)
+            self._data_to_monitor_periodically_functions.append((get_data, category))
 
     async def _monitor_periodic_data(self):
         """Internal asynchonous method to periodically pool for data and
@@ -243,25 +317,35 @@ class BaseLoveProducer:
 
         while not self.done_task.done():
 
-            data_to_send_from_functions = [
-                func() for func in self._data_to_monitor_periodically_functions
+            data_category_to_send_from_functions = [
+                (func(), category)
+                for func, category in self._data_to_monitor_periodically_functions
             ]
 
             data_to_send_from_coroutines = await asyncio.gather(
-                *[coro() for coro in self._data_to_monitor_periodically_coroutines]
+                *[coro() for coro, _ in self._data_to_monitor_periodically_coroutines]
             )
+            category_to_send_from_coroutines = [
+                category
+                for _, category in self._data_to_monitor_periodically_coroutines
+            ]
 
-            for data in data_to_send_from_functions:
-                await self.send_message(
-                    self.get_message_telemetry_as_json(
-                        self._convert_data_to_dict(data)[1]
+            for data, category in data_category_to_send_from_functions:
+                if data is not None:
+                    await self.send_message(
+                        self.get_message_category_as_json(
+                            category=category,
+                            data_as_dict=self._convert_data_to_dict(data)[1],
+                        )
                     )
-                )
 
-            for data in data_to_send_from_coroutines:
+            for data, category in zip(
+                data_to_send_from_coroutines, category_to_send_from_coroutines
+            ):
                 await self.send_message(
-                    self.get_message_telemetry_as_json(
-                        self._convert_data_to_dict(data)[1]
+                    self.get_message_category_as_json(
+                        category=category,
+                        data_as_dict=self._convert_data_to_dict(data)[1],
                     )
                 )
 
@@ -280,7 +364,21 @@ class BaseLoveProducer:
 
         self.store_samples(**{data_key: data_as_dict})
 
-        await self.send_message(self.get_message_telemetry_as_json(data_as_dict))
+        await self.send_message(
+            self.get_message_category_as_json(
+                category=self.get_asynchronous_data_category(data_key),
+                data_as_dict=data_as_dict,
+            )
+        )
+
+        if data_key in self._additional_data_callbacks:
+            await self._additional_data_callbacks[data_key](data)
+
+    def register_asynchronous_data_category(self, name: str, category: str) -> None:
+        self._asynchronous_data_category[name] = category
+
+    def get_asynchronous_data_category(self, name) -> str:
+        return self._asynchronous_data_category.get(name, "event")
 
     def store_samples(self, **kwargs: dict) -> None:
         """Store samples in internal asynchronous table.
@@ -324,9 +422,11 @@ class BaseLoveProducer:
         """
         return self._asynchronous_data_last_samples[sample_name]
 
-    def get_message_telemetry_as_json(self, data_as_dict: dict) -> str:
+    def get_message_category_as_json(self, category: str, data_as_dict: dict) -> str:
         """"""
-        return self._love_manager_message.get_message_telemetry_as_json(data_as_dict)
+        return self._love_manager_message.get_message_category_as_json(
+            category=category, data=data_as_dict
+        )
 
     def _convert_data_to_dict(self, data: Any) -> Tuple[str, dict]:
         """Convert data to dictionary.
@@ -410,6 +510,22 @@ class BaseLoveProducer:
 
         assert self._component_name is not None, f"Component name is not set. {message}"
 
+    def register_additional_action(
+        self, data_key: str, additional_action: Coroutine
+    ) -> None:
+        """Register additional actions to take for specific data key.
+
+        Parameters
+        ----------
+        data_key : `str`
+            Data key.
+        additional_action : `coroutine`
+            Function to call when specified data is received.
+        """
+
+        self.log.debug(f"Registering additional action for {data_key}.")
+        self._additional_data_callbacks[data_key] = additional_action
+
     @property
     def period_default_in_seconds(self) -> float:
         return self._period_monitor
@@ -447,3 +563,24 @@ class BaseLoveProducer:
 
         self._component_name = component_name
         self._love_manager_message = LoveManagerMessage(component_name=component_name)
+
+    async def close(self):
+        if not self.done_task.done():
+            self.done_task.set_result(True)
+
+        try:
+            await asyncio.wait_for(
+                self._monitor_periodic_data_task, timeout=self._period_monitor * 2
+            )
+        except asyncio.TimeoutError:
+            self._monitor_periodic_data_task.close()
+            try:
+                await self._monitor_periodic_data_task
+            except asyncio.CancelledError:
+                pass
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, type, value, traceback):
+        await self.close()
