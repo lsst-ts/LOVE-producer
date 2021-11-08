@@ -19,7 +19,8 @@ class TestScriptqueueAvailableScripts(asynctest.TestCase):
     maxDiff = None
 
     async def tearDown(self):
-        nkilled = len(await self.queue.model.terminate_all())
+        #nkilled = len(await self.queue.model.terminate_all()) #For versions of lsstts/develop-env: > c0021.007
+        nkilled = len(self.queue.model.terminate_all())
         if nkilled > 0:
             warnings.warn(f"Killed {nkilled} subprocesses")
         await asyncio.wait_for(self.queue.close(), TIMEOUT)
