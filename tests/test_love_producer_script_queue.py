@@ -20,6 +20,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+from typing import Dict
+import yaml
 import pytest
 import shutil
 import asyncio
@@ -247,6 +249,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 logLevel=logging.DEBUG,
                 pauseCheckpoint="pause love",
                 stopCheckpoint="stop love",
+                timeout=self.standard_timeout,
             )
 
             self.log.debug(f"{ack}")
@@ -257,6 +260,98 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 category="event",
                 minimum_samples=log_messages_minimum_samples,
             )
+
+    async def test_scriptqueue_state_message_data(self):
+
+        state_minimum_samples = 4
+        # self.standard_timeout = 10
+
+        async with self.enable_script_queue() as remote:
+
+            await self.assert_minimum_samples_of(
+                topic_name="stream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                minimum_samples=state_minimum_samples,
+            )
+
+            script_queue_state_sample = self.get_script_queue_state_sample()
+
+            await self.assert_last_sample(
+                topic_name="stream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                topic_sample=script_queue_state_sample,
+            )
+
+            # pause the queue and check new status
+            await remote.cmd_pause.start(timeout=self.standard_timeout)
+            script_queue_state_sample["running"] = False
+
+            await self.assert_last_sample(
+                topic_name="stream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                topic_sample=script_queue_state_sample,
+            )
+
+    def get_script_queue_state_sample(self) -> Dict:
+        return {
+            "enabled": True,
+            "running": True,
+            "available_scripts": [
+                {
+                    "type": "standard",
+                    "path": "love_std_script.py",
+                    "configSchema": yaml.safe_dump(
+                        yaml.safe_load(
+                            """
+$schema: http://json-schema.org/draft-07/schema#
+$id: https://github.com/lsst-ts/LOVE-producer/blob/develop/tests/data/standard/love_std_script.py
+title: LoveStdScript v1
+description: Configuration for LoveStdScript.
+type: object
+properties:
+    sleep_time:
+        description: How long to sleep for.
+        type: number
+        default: 0.0
+additionalProperties: false
+        """
+                        )
+                    )
+                    + "\n",
+                },
+                {
+                    "type": "external",
+                    "path": "love_ext_script.py",
+                    "configSchema": yaml.safe_dump(
+                        yaml.safe_load(
+                            """
+$schema: http://json-schema.org/draft-07/schema#
+$id: https://github.com/lsst-ts/LOVE-producer/blob/develop/tests/data/external/love_ext_script.py
+title: LoveExtScript v1
+description: Configuration for LoveExtScript.
+type: object
+properties:
+    sleep_time:
+        description: How long to sleep for.
+        type: number
+        default: 0.0
+additionalProperties: false
+        """
+                        )
+                    )
+                    + "\n",
+                },
+            ],
+            "waitingIndices": [],
+            "finishedIndices": [],
+            "currentIndex": 0,
+            "finished_scripts": [],
+            "waiting_scripts": [],
+            "current": "None",
+        }
 
     async def asyncTearDown(self):
 
@@ -298,6 +393,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         self.log.debug(
             f"Last sample of {category}-{name_index}-{topic_name}: {last_sample}"
         )
+        self.log.debug(f"Expected last sample: {topic_sample}")
         for key in topic_sample:
             self.assertEqual(topic_sample[key], last_sample[key])
 
