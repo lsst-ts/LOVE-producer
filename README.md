@@ -51,7 +51,7 @@ To develop and test the LOVE-producer with conda do the following procedure:
 conda create -y --name love-dev python=3.8
 conda activate love-dev
 conda install -y gevent greenlet six websocket-client websockets eventlet
-conda install -y -c lsstts ts-salobj=6.4.1 ts-idl=3.1.3_9.1.1_5.1.1 ts-ddsconfig=0.6.2 ts-dds=6.10.4=py38_0 ts-conda-build
+conda install -y -c lsstts ts-salobj=6.4.1 ts-idl=3.1.3_9.1.1_5.1.1 ts-ddsconfig=0.6.2 ts-dds=6.10.4=py38_0 ts-conda-build ts-scriptqueue
 pip install kafkit[aiohttp] aiokafka
 export TS_CONFIG_OCS_DIR=...
 ```
