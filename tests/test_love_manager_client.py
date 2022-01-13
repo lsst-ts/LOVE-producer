@@ -77,6 +77,15 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(component, producer.component_name)
 
     async def test_handle_connection_with_manager_no_producers(self):
+        """Base connectivity test.
+
+        This test verify that when the manager client connects with server,
+        the connected_task result is True and `done_task` is not done, meaning,
+        the manager is running.
+
+        Since this is a basic conectivity test, there's no reason to create
+        producers.
+        """
 
         async with self.setup_test_environment_to_handle_connection():
 
