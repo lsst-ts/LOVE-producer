@@ -60,7 +60,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             domain=domain,
             csc="ScriptQueue",
             log=log,
-            remote_readyonly=False,
+            remote_readonly=False,
             **kwargs_reformatted,
         )
 
@@ -195,7 +195,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         sample_name = self.get_sample_name(message_data)
 
     async def get_initial_state_messages_as_json(self) -> AsyncIterator[int]:
-        """Asynchronously generetate al initial state messages.
+        """Asynchronously generetate all initial state messages.
 
         Yields
         ------
@@ -357,7 +357,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             await self.send_scriptqueue_state()
 
     async def handle_event_script_state(self, event: Any) -> None:
-        """Callback for the Script_logevet_state event.
+        """Callback for the Script_logevent_state event.
 
         Used to update the state of the script.
 
@@ -377,7 +377,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     async def handle_event_script_description(self, event: Any) -> None:
         """Callback for the logevent_description.
 
-        Used to extract the expected duration of the script.
+        Used to extract Script's description, classname and remotes.
 
         Parameters
         ----------
@@ -395,11 +395,11 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     async def handle_event_script_checkpoints(self, event: Any) -> None:
         """Callback for the logevent_checkpoints.
 
-        Used to extract the expected duration of the script.
+        Used to extract Script's checkpoint pause and stop information.
 
         Parameters
         ----------
-        event : `Script_logevent_checkpoint`
+        event : `Script_logevent_checkpoints`
             Event data.
         """
         if event.ScriptID in self.scripts:
@@ -442,7 +442,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             for script_path in self.available_scripts["external"]
         ]
 
-        for show_schema in asyncio.as_completed(show_schema_all):
+        for show_schema in show_schema_all:
             try:
                 await show_schema
             except asyncio.CancelledError:
@@ -542,7 +542,10 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
     @property
     def scriptqueue_state_message_data(self) -> dict:
-        """ """
+        """Script queue state message.
+
+        The data structure matches the required by the manager/frontend view.
+        """
 
         available_scripts = [
             dict(

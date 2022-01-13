@@ -51,10 +51,17 @@ class LoveProducerBase:
 
     Parameters
     ----------
-    component_name: `str`, optional
+    component_name : `str`, optional
         Name of the component for which data will be produced.
-    log: `logging.Logger`, optional
+    log : `logging.Logger`, optional
         Logger facility.
+
+    Attributes
+    ----------
+    log : `logging.Logger`
+        Logger facility.
+    done_task : `asyncio.Future`
+        An asyncio future to keep the producer running.
     """
 
     def __init__(
@@ -95,7 +102,7 @@ class LoveProducerBase:
         )
 
     async def get_initial_state_messages_as_json(self) -> AsyncIterator[int]:
-        """Asynchronously generetate al initial state messages.
+        """Asynchronously generetate all initial state messages.
 
         Yields
         ------
@@ -104,9 +111,9 @@ class LoveProducerBase:
         """
 
         yield self.get_message_initial_state_all_as_json()
-        yield self.get_initial_state_as_json()
+        yield self.get_message_initial_state_as_json()
 
-    def get_initial_state_as_json(self) -> str:
+    def get_message_initial_state_as_json(self) -> str:
         """Return the initial subscription message for this producer.
 
         Returns
@@ -126,7 +133,7 @@ class LoveProducerBase:
         return self._love_manager_message.get_message_initial_state_as_json()
 
     def get_message_initial_state_all_as_json(self) -> str:
-        """Return the initial subscription message for this producer.
+        """Return the initial subscription message to all producers
 
         Returns
         -------
@@ -457,7 +464,6 @@ class LoveProducerBase:
             asynchonous data.
         register_monitor_data_periodically: Register data to be produced
             periodically.
-        _convert_data_to_dict: Convert data type to dictionary.
         _monitor_periodic_data: Method running in the background pooling for
             data.
         """
@@ -547,7 +553,6 @@ class LoveProducerBase:
 
     @send_message.setter
     def send_message(self, coro: Optional[Callable[[str], None]]) -> None:
-
         if coro is not None and not asyncio.iscoroutinefunction(coro):
             raise TypeError(f"coro={coro} not a coroutine function.")
 
@@ -560,7 +565,6 @@ class LoveProducerBase:
 
     @component_name.setter
     def component_name(self, component_name: str) -> None:
-
         self._component_name = component_name
         self._love_manager_message = LoveManagerMessage(component_name=component_name)
 

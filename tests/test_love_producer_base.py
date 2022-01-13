@@ -68,19 +68,19 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         except asyncio.CancelledError:
             pass
 
-    def test_get_initial_state_as_json_no_component_name(self):
+    def test_get_message_initial_state_as_json_no_component_name(self):
 
         with self.assertRaises(AssertionError):
-            self.producer.get_initial_state_as_json()
+            self.producer.get_message_initial_state_as_json()
 
-    def test_get_initial_state_as_json(self):
+    def test_get_message_initial_state_as_json(self):
 
         component_name = "Test"
 
         self.producer.component_name = component_name
 
         initial_state_subscribe_msg = json.loads(
-            self.producer.get_initial_state_as_json()
+            self.producer.get_message_initial_state_as_json()
         )
 
         for key, value in [
@@ -95,9 +95,7 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
 
     def test_add_metadata(self):
 
-        self.setup_for_data_handling_test()
-
-        self.producer.add_metadata(component_index=1)
+        self.setup_for_data_handling_test(component_index=1)
 
         message = self.producer.get_message_category_as_json(
             category="telemetry", data_as_dict=dict()

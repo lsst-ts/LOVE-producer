@@ -48,7 +48,7 @@ class LoveProducerCSC(LoveProducerBase):
             domain,
             csc,
             index=kwargs.get("salindex", 0),
-            readonly=kwargs.get("remote_readyonly", True),
+            readonly=kwargs.get("remote_readonly", True),
         )
 
         self._events_special_cases = {"evt_heartbeat"}
@@ -120,7 +120,7 @@ class LoveProducerCSC(LoveProducerBase):
         topic_prefix = self._get_topic_prefix(topic_name=topic_name)
         return f"{topic_prefix}_{topic_name}"
 
-    def get_periodic_data(self, **kwargs) -> list:
+    def get_periodic_data(self, **kwargs) -> dict:
 
         return dict(
             set(
@@ -130,7 +130,7 @@ class LoveProducerCSC(LoveProducerBase):
             )
         )
 
-    def get_asynchronous_data(self, **kwargs) -> list:
+    def get_asynchronous_data(self, **kwargs) -> dict:
 
         return dict(
             set(
@@ -143,7 +143,7 @@ class LoveProducerCSC(LoveProducerBase):
             - self._events_special_cases
         )
 
-    def get_event_attribute_names_and_category(self, **kwargs) -> list:
+    def get_event_attribute_names_and_category(self) -> list:
         return [
             (f"evt_{event_name}", "event")
             for event_name in self.remote.salinfo.event_names
@@ -192,7 +192,7 @@ class LoveProducerCSC(LoveProducerBase):
 
         return prefix
 
-    def generate_valid_topic_attribute_names(self, periodic_data: list) -> None:
+    def generate_valid_topic_attribute_names(self, periodic_data: list) -> list:
         """For each entry in `periodic_data` check that is it part of the
         producer list of topics and return a valid list.
 
@@ -320,8 +320,14 @@ class LoveProducerCSC(LoveProducerBase):
 
         self._set_template_manager_message(topic_name=topic_name, topic=topic)
 
-    def _set_template_manager_message(self, topic_name, topic) -> None:
-        """ """
+    def _set_template_manager_message(self, topic_name: str, topic: object) -> None:
+        """Cache manager message template for future use.
+
+        Parameters
+        ----------
+        topic_name : `str`
+            Name of the topic. This will
+        """
         topic_data = topic.DataType().get_vars()
 
         self._template_manager_message[topic_name] = {
@@ -425,7 +431,7 @@ class LoveProducerCSC(LoveProducerBase):
 
         await self.handle_asynchronous_data_callback(last_sample)
 
-    def _get_heartbeat_message(self):
+    def _get_heartbeat_message(self) -> dict:
         """Heartbeat message data structure.
 
         Returns
