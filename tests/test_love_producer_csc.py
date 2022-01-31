@@ -140,7 +140,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         async with self.setup_test_csc():
 
             heartbeat_minimum_samples = 5
-            self.standard_timeout = 8
+            self.standard_timeout = 20
 
             await self.assert_minimum_samples_of(
                 topic_name="stream",
