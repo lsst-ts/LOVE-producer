@@ -47,8 +47,11 @@ def run_script_queue(request):
     index = 1
 
     datadir = pathlib.Path(__file__).parents[1].joinpath("tests", "data")
-    standardpath = datadir / "standard"
-    externalpath = datadir / "external"
+    standardpath = datadir / "standard/"
+    externalpath = datadir / "external/"
+
+    print(f"standard scripts: {standardpath}")
+    print(f"external scripts: {externalpath}")
 
     process = subprocess.Popen(
         [
@@ -58,6 +61,8 @@ def run_script_queue(request):
             f"{standardpath}",
             "--external",
             f"{externalpath}",
+            "--state",
+            "enabled",
         ]
     )
 
@@ -77,6 +82,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         cls.standard_timeout = 5
         cls.time_pooling = 0.1
         cls.csc_construction_timeout = 30.0
+        cls.maxDiff = None
 
     async def asyncSetUp(self):
 
@@ -85,6 +91,19 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         self.messages_received = {}
 
         self.domain = salobj.Domain()
+
+        self.remote = salobj.Remote(
+            self.domain,
+            "ScriptQueue",
+            index=self.salindex,
+            include=["heartbeat", "summaryState", "queue"],
+        )
+
+        await self.remote.start_task
+
+        await self.remote.evt_heartbeat.next(
+            flush=True, timeout=self.csc_construction_timeout
+        )
 
         self.producer = LoveProducerScriptQueue(
             salindex=self.salindex,
@@ -148,6 +167,8 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             minimum_samples=1,
         )
 
+        await salobj.set_summary_state(self.remote, salobj.State.STANDBY)
+
         async with self.enable_script_queue():
 
             expected_events_samples = [
@@ -172,12 +193,12 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
 
     async def test_handle_event_scriptqueue_script(self):
 
-        async with self.enable_script_queue() as remote:
+        async with self.enable_script_queue():
 
             # Pause queue so script won't execute.
-            await remote.cmd_pause.start()
+            await self.remote.cmd_pause.start()
 
-            await remote.cmd_add.set_start(
+            await self.remote.cmd_add.set_start(
                 isStandard=True,
                 path="love_std_script.py",
                 location=ScriptQueue.Location.LAST,
@@ -212,12 +233,12 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         heartbeat_minimum_samples = 5
         self.standard_timeout = 20
 
-        async with self.enable_script_queue() as remote:
+        async with self.enable_script_queue():
 
             # Pause queue so script won't execute.
-            await remote.cmd_pause.start()
+            await self.remote.cmd_pause.start()
 
-            ack = await remote.cmd_add.set_start(
+            ack = await self.remote.cmd_add.set_start(
                 isStandard=True,
                 path="love_std_script.py",
                 location=ScriptQueue.Location.LAST,
@@ -240,9 +261,9 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         log_messages_minimum_samples = 4
         self.standard_timeout = 20
 
-        async with self.enable_script_queue() as remote:
+        async with self.enable_script_queue():
 
-            ack = await remote.cmd_add.set_start(
+            ack = await self.remote.cmd_add.set_start(
                 isStandard=True,
                 path="love_std_script.py",
                 location=ScriptQueue.Location.LAST,
@@ -263,16 +284,17 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
 
     async def test_scriptqueue_state_message_data(self):
 
-        state_minimum_samples = 4
-        # self.standard_timeout = 10
+        state_minimum_samples = 3
+        self.standard_timeout = 10
 
-        async with self.enable_script_queue() as remote:
+        async with self.enable_script_queue():
 
             await self.assert_minimum_samples_of(
                 topic_name="stream",
                 name_index="ScriptQueueState:1",
                 category="event",
                 minimum_samples=state_minimum_samples,
+                additional_samples=5,
             )
 
             script_queue_state_sample = self.get_script_queue_state_sample()
@@ -285,7 +307,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
             # pause the queue and check new status
-            await remote.cmd_pause.start(timeout=self.standard_timeout)
+            await self.remote.cmd_pause.start(timeout=self.standard_timeout)
             script_queue_state_sample["running"] = False
 
             await self.assert_last_sample(
@@ -346,23 +368,28 @@ additionalProperties: false
                 },
             ],
             "waitingIndices": [],
-            "finishedIndices": [],
             "currentIndex": 0,
-            "finished_scripts": [],
             "waiting_scripts": [],
             "current": "None",
         }
 
     async def asyncTearDown(self):
 
+        await self.remote.close()
         await self.producer.close()
+        await self.domain.close()
 
     async def assert_minimum_samples_of(
-        self, topic_name, name_index, category, minimum_samples
+        self,
+        topic_name,
+        name_index,
+        category,
+        minimum_samples,
+        additional_samples=0,
     ):
 
         await self.wait_for_number_of_samples_of_topic(
-            number_of_samples=minimum_samples,
+            number_of_samples=minimum_samples + additional_samples,
             topic_name=topic_name,
             name_index=name_index,
             category=category,
@@ -395,7 +422,13 @@ additionalProperties: false
         )
         self.log.debug(f"Expected last sample: {topic_sample}")
         for key in topic_sample:
-            self.assertEqual(topic_sample[key], last_sample[key])
+            self.assertEqual(
+                topic_sample[key],
+                last_sample[key],
+                f"Mismatched item '{key}' in {topic_name}. "
+                f"Expected: {topic_sample[key]}"
+                f"Got: {last_sample[key]}",
+            )
 
     async def wait_for_number_of_samples_of_topic(
         self, number_of_samples, topic_name, name_index, category
@@ -504,82 +537,57 @@ additionalProperties: false
         try:
 
             self.log.debug("Waiting for CSC to become alive")
-            async with salobj.Remote(
-                self.domain,
-                "ScriptQueue",
-                index=self.salindex,
-                include=["heartbeat", "summaryState", "queue"],
-            ) as r:
-                try:
-                    await r.evt_heartbeat.next(
-                        flush=True, timeout=self.csc_construction_timeout
-                    )
-                except asyncio.TimeoutError:
-                    self.log.error(
-                        f"No heartbeat from ScriptQueue in the last {self.csc_construction_timeout}. "
-                        "Unit tests will probably fail. Continuing."
-                    )
-                except Exception:
-                    self.log.exception(
-                        "Error getting heartbeat from ScriptQueue. Unit tests will probably fail. "
-                        "Continuing."
-                    )
-                else:
-                    self.log.debug("Received heartbeat from csc.")
 
-                self.log.debug("Enabling ScriptQueue.")
-                try:
-                    await salobj.set_summary_state(
-                        r, salobj.State.ENABLED, timeout=self.csc_construction_timeout
-                    )
-                except Exception:
-                    self.log.exception(
-                        "Error trying to enable ScriptQueue. Unit test will probably fail. Continuing."
-                    )
+            try:
+                await self.remote.evt_heartbeat.next(
+                    flush=True, timeout=self.csc_construction_timeout
+                )
+            except asyncio.TimeoutError:
+                self.log.error(
+                    f"No heartbeat from ScriptQueue in the last {self.csc_construction_timeout}. "
+                    "Unit tests will probably fail. Continuing."
+                )
+            except Exception:
+                self.log.exception(
+                    "Error getting heartbeat from ScriptQueue. Unit tests will probably fail. "
+                    "Continuing."
+                )
+            else:
+                self.log.debug("Received heartbeat from csc.")
 
-                await r.cmd_resume.start(timeout=self.csc_construction_timeout)
+            await salobj.set_summary_state(self.remote, salobj.State.ENABLED)
 
-                yield r
+            await self.remote.cmd_resume.start(timeout=self.csc_construction_timeout)
 
-                await r.cmd_pause.start(timeout=self.csc_construction_timeout)
-
-                self.log.debug("Terminate any running script.")
-
-                queue = r.evt_queue.get()
-
-                if queue is not None:
-
-                    if queue.length > 0:
-                        await r.cmd_stopScripts.set_start(
-                            salIndices=queue.salIndices,
-                            length=queue.length,
-                            terminate=True,
-                            timeout=self.csc_construction_timeout,
-                        )
-
-                    if queue.currentSalIndex > 0:
-                        sal_indices = [0 for i in queue.salIndices]
-                        sal_indices[0] = queue.currentSalIndex
-
-                        await r.cmd_stopScripts.set_start(
-                            salIndices=sal_indices,
-                            length=1,
-                            terminate=True,
-                            timeout=self.csc_construction_timeout,
-                        )
-
-                self.log.debug("Put ScriptQueue in standby.")
-                try:
-                    await salobj.set_summary_state(
-                        r, salobj.State.STANDBY, timeout=self.csc_construction_timeout
-                    )
-                except Exception:
-                    self.log.exception(
-                        "Error trying to transition ScriptQueue to standby. Ignoring."
-                    )
+            yield
 
         finally:
-            self.log.debug("Finished enable script queue.")
+            await self.remote.cmd_pause.start(timeout=self.csc_construction_timeout)
+
+            self.log.debug("Terminate any running script.")
+
+            queue = self.remote.evt_queue.get()
+
+            if queue is not None:
+
+                if queue.length > 0:
+                    await self.remote.cmd_stopScripts.set_start(
+                        salIndices=queue.salIndices,
+                        length=queue.length,
+                        terminate=True,
+                        timeout=self.csc_construction_timeout,
+                    )
+
+                if queue.currentSalIndex > 0:
+                    sal_indices = [0 for i in queue.salIndices]
+                    sal_indices[0] = queue.currentSalIndex
+
+                    await self.remote.cmd_stopScripts.set_start(
+                        salIndices=sal_indices,
+                        length=1,
+                        terminate=True,
+                        timeout=self.csc_construction_timeout,
+                    )
 
 
 if __name__ == "__main__":
