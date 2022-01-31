@@ -53,6 +53,8 @@ pipeline {
                         # Install in development mode
                         pip install -e .
 
+                        export OSPL_URI=\$(python -c "from lsst.ts import ddsconfig; print( (ddsconfig.get_config_dir() / 'ospl-std.xml').as_uri())")
+                        
                         pytest --cov-report html --cov="${env.MODULE_NAME}" --junitxml=${env.XML_REPORT}
                     """
                 }
