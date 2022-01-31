@@ -15,7 +15,7 @@ setuptools.setup(
         "write_to": "python/love/producer/version.py",
         "write_to_template": scm_version_template,
     },
-    scripts=["bin/run_love_producer", "bin/run_love_csc"],
+    scripts=["bin/run_love_producer"],
     package_dir={"": "python"},
     packages=setuptools.find_namespace_packages(where="python"),
     include_package_data=True,

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of ts_salobj.
 #
 # Developed for the Rubin Observatory Telescope and Site System.
@@ -20,8 +19,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
+import unittest
 
-from love.producer import LoveProducerSet
 
-asyncio.run(LoveProducerSet.amain())
+class TestLoveProducerSet(unittest.IsolatedAsyncioTestCase):
+    async def test_amain(self):
+        pass
+
+    async def test_iteration(self):
+        pass
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # This file is part of ts_salobj.
 #
 # Developed for the Rubin Observatory Telescope and Site System.
@@ -20,8 +19,32 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
+import unittest
 
-from love.producer import LoveProducerSet
+from love.producer import LoveProducerFactory, LoveProducerBase
 
-asyncio.run(LoveProducerSet.amain())
+
+class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):
+    async def test_get_love_producer_from_type_base(self):
+
+        base_love_producer = LoveProducerFactory.get_love_producer_from_type("base")
+
+        self.assertIsInstance(base_love_producer, LoveProducerBase)
+
+    async def test_get_love_producer_from_type_unspecified(self):
+
+        with self.assertRaises(RuntimeError):
+            LoveProducerFactory.get_love_producer_from_type("unspecified")
+
+    async def test_get_love_producer_from_name(self):
+
+        component_name = "UnitTest1"
+
+        love_producer = LoveProducerFactory.get_love_producer_from_name(component_name)
+
+        self.assertIsInstance(love_producer, LoveProducerBase)
+        self.assertEqual(component_name, love_producer.component_name)
+
+
+if __name__ == "__main__":
+    unittest.main()
