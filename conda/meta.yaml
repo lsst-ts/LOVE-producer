@@ -16,14 +16,15 @@ requirements:
     - setuptools_scm
     - setuptools
   run:
+    - aiohttp
+    - eventlet
+    - gevent
+    - greenlet
     - python
     - setuptools
     - setuptools_scm
-    - ts-salobj
-    - ts-idl
-    - gevent
-    - greenlet
     - six
+    - ts-idl
+    - ts-salobj
     - websocket-client
     - websockets
-    - eventlet

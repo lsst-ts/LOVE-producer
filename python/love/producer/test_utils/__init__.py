@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-# This file is part of ts_salobj.
+# This file is part of LOVE-producer.
 #
-# Developed for the Rubin Observatory Telescope and Site System.
+# Developed for Vera C. Rubin Observatory Telescope and Site Systems.
 # This product includes software developed by the LSST Project
 # (https://www.lsst.org).
 # See the COPYRIGHT file at the top-level directory of this distribution
@@ -20,8 +19,4 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
-
-from love.producer import LoveProducerSet
-
-asyncio.run(LoveProducerSet.amain())
+from .test_utils import *
