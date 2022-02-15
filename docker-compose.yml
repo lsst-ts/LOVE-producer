@@ -12,7 +12,6 @@ services:
     image: love-producer-image-mount
     volumes:
       - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
     stdin_open: true
     tty: true
 
@@ -20,25 +19,11 @@ services:
     container_name: producer
     build:
       context: .
-      dockerfile: Dockerfile-deploy
+      dockerfile: Dockerfile
       args:
         cycle: ${cycle}
     image: ts-dockerhub.lsst.org/love-producer:${cycle}
     volumes:
       - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
-    stdin_open: true
-    tty: true
-
-  love-csc-deploy:
-    build:
-      context: .
-      dockerfile: Dockerfile-lovecsc-deploy
-      args:
-        cycle: ${cycle}
-    image: ts-dockerhub.lsst.org/love-csc:${cycle}
-    volumes:
-      - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
     stdin_open: true
     tty: true
