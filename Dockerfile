@@ -6,6 +6,7 @@ COPY . .
 RUN source /opt/lsst/software/stack/loadLSST.bash && \
 	pip install kafkit[aiohttp] aiokafka && \
 	pip install -r requirements.txt && \
+	pip install /usr/src/love/ && \
 	pip install /home/saluser/repos/ts_utils
 
 WORKDIR /home/saluser

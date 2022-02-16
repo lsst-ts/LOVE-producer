@@ -9,4 +9,4 @@ RUN source /opt/lsst/software/stack/loadLSST.bash && \
 	pip install /home/saluser/repos/ts_utils
 
 WORKDIR /home/saluser
-CMD ["/usr/src/love/start-daemon.sh"]
+CMD ["/usr/src/love/start-daemon-dev.sh"]
