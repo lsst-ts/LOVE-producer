@@ -465,13 +465,16 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         salindex : `int`
             The SAL index of the stript
         """
-        if salindex in self.scripts:
-            self.log.warning(
-                f"Script {salindex} already in the internal database. Overriding..."
+        if salindex not in self.scripts:
+            self.scripts[salindex] = self.get_empty_script(salindex)
+
+        if salindex not in self.scripts_heartbeat:
+            self.scripts_heartbeat[salindex] = self.get_empty_script_heartbeat(salindex)
+
+        if salindex not in self.scripts_log_messages:
+            self.scripts_log_messages[salindex] = deque(
+                [], self.max_script_log_messages
             )
-        self.scripts[salindex] = self.get_empty_script(salindex)
-        self.scripts_heartbeat[salindex] = self.get_empty_script_heartbeat(salindex)
-        self.scripts_log_messages[salindex] = deque([], self.max_script_log_messages)
 
     def get_empty_script(self, salindex: int) -> dict:
         """Return an empty script data structure.
@@ -628,12 +631,15 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             Payload of the message with the request to send script log message.
         """
 
-        for log_message in self.scripts_log_messages.get(
-            self.state["currentIndex"], []
-        ):
-            await self.send_message(
-                self._love_manager_message.get_message_as_json(log_message)
-            )
+        log_messages = self.scripts_log_messages.get(self.state["currentIndex"], [])
+
+        try:
+            for message in log_messages:
+                await self.send_message(
+                    self._love_manager_message.get_message_as_json(message)
+                )
+        except Exception:
+            self.log.exception("Error sending script log message.")
 
     def _get_script_heartbeat_message(self, salindex: int) -> Dict:
         """Get script heartbeat message.
@@ -648,6 +654,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         script_heartbeat_message : `dict`
             Script heartbeat message.
         """
+        if salindex not in self.scripts_heartbeat:
+            self.add_new_script(salindex)
         script_heartbeat_message = self.scripts_heartbeat[salindex]
         last_heartbeat_timestamp = script_heartbeat_message["data"][0]["data"][
             "stream"
@@ -685,11 +693,20 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     async def _produce_script_heartbeat(self) -> None:
         """Produce script heartbeat messages."""
         while not self.done_task.done():
-            if self.state["currentIndex"] > 0:
-                await self.send_script_heartbeat(self.state["currentIndex"])
 
-            for script_id in self.state["waitingIndices"]:
-                await self.send_script_heartbeat(script_id)
+            try:
+                current_index = self.state["currentIndex"]
+                if current_index > 0:
+                    self.log.debug(f"Sending hb for current script: {current_index}.")
+                    await self.send_script_heartbeat(current_index)
+
+                waiting_indices = self.state["waitingIndices"]
+                self.log.debug(f"Sending HB for scripts: {waiting_indices}.")
+
+                for script_id in waiting_indices:
+                    await self.send_script_heartbeat(script_id)
+            except Exception:
+                self.log.exception("Error sending script heartbeats.")
 
             await asyncio.sleep(self.heartbeat_timeout)
 
