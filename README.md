@@ -19,7 +19,8 @@ This docker-compose does not copy the code into the image, but instead it mounts
 Follow these instructions to run the application in a docker container and get into it:
 
 ```
-docker-compose up -d
+cd docker/
+docker-compose up -d --build
 docker-compose exec producer bash
 ```
 
@@ -28,11 +29,9 @@ docker-compose exec producer bash
 Once inside the container and in the `love` folder you can run the tests as follows:
 
 ```
-source .setup_dev.sh
+source .setup_dev.sh #Here some configurations will be loaded and you will enter another bash. Press [Ctrl + D] to exit the current console, then the love-producer package will be installed and you can continue with the following step
 pytest /usr/src/love/tests
 ```
-
-Then press `Ctrl + D`
 
 ### 2.3 Build documentation
 
