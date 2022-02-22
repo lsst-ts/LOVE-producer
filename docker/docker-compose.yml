@@ -1,44 +1,14 @@
 version: "3.7"
 
 services:
-
   producer:
-    container_name: producer-local
+    container_name: love-producer-mount
     build:
-      context: .
-      dockerfile: Dockerfile-dev
+      context: ..
+      dockerfile: docker/Dockerfile-dev
       args:
         dev_cycle: ${dev_cycle}
-    image: love-producer-image-mount
+    image: love-producer-mount-image
     volumes:
-      - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
-    stdin_open: true
-    tty: true
-
-  producer-deploy:
-    container_name: producer
-    build:
-      context: .
-      dockerfile: Dockerfile-deploy
-      args:
-        cycle: ${cycle}
-    image: ts-dockerhub.lsst.org/love-producer:${cycle}
-    volumes:
-      - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
-    stdin_open: true
-    tty: true
-
-  love-csc-deploy:
-    build:
-      context: .
-      dockerfile: Dockerfile-lovecsc-deploy
-      args:
-        cycle: ${cycle}
-    image: ts-dockerhub.lsst.org/love-csc:${cycle}
-    volumes:
-      - .:/usr/src/love
-    command: "/usr/src/love/setup.sh"
-    stdin_open: true
-    tty: true
+      - ..:/usr/src/love
+    command: "/usr/src/love/docker/setup-dev.sh"

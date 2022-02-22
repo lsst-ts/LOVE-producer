@@ -10,7 +10,7 @@ In order to use the LOVE-producer as part of the LOVE system we recommend to use
 
 ## 2. Local load for development
 
-We provide a docker image and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.
+We provide docker images and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.
 
 This docker-compose does not copy the code into the image, but instead it mounts the repository inside the image, this way you can edit the code from outside the docker container with no need to rebuild or restart.
 
@@ -20,7 +20,7 @@ Follow these instructions to run the application in a docker container and get i
 
 ```
 docker-compose up -d
-docker-exec producer bash
+docker-compose exec producer bash
 ```
 
 ### 2.2 Run tests
@@ -28,7 +28,8 @@ docker-exec producer bash
 Once inside the container and in the `love` folder you can run the tests as follows:
 
 ```
-/usr/src/love/producer/run-tests.sh
+source .setup_dev.sh
+pytest /usr/src/love/tests
 ```
 
 Then press `Ctrl + D`
