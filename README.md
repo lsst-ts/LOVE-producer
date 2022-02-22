@@ -20,6 +20,7 @@ Follow these instructions to run the application in a docker container and get i
 
 ```
 cd docker/
+export dev_cycle=develop #Here you can set a specified version of the lsstts/develop-env image
 docker-compose up -d --build
 docker-compose exec producer bash
 ```

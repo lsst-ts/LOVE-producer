@@ -9,6 +9,8 @@ services:
       args:
         dev_cycle: ${dev_cycle}
     image: love-producer-mount-image
+    environment:
+      - LSST_DDS_PARTITION_PREFIX=local
     volumes:
       - ..:/usr/src/love
     command: "/usr/src/love/docker/setup-dev.sh"
