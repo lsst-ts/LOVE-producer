@@ -30,7 +30,8 @@ docker-compose exec producer bash
 Once inside the container and in the `love` folder you can run the tests as follows:
 
 ```
-source .setup_dev.sh #Here some configurations will be loaded and you will enter another bash. Press [Ctrl + D] to exit the current console, then the love-producer package will be installed and you can continue with the following step
+source /home/saluser/.setup_dev.sh # Here some configurations will be loaded and you will enter another bash. Press [Ctrl + D] to exit the current console, then the love-producer package will be installed and you can continue with the following step
+pip install /usr/src/love # This step is necessary in order to install the last version of the package code 
 pytest /usr/src/love/tests
 ```
 
@@ -39,7 +40,7 @@ pytest /usr/src/love/tests
 Once inside the container and in the `love` folder you can build the documentation as follows:
 
 ```
-source .setup_dev.sh
+source /home/saluser/.setup_dev.sh
 cd /usr/src/love/docsrc
 ./create_docs.sh
 ```
