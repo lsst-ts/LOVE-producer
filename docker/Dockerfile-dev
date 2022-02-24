@@ -3,11 +3,10 @@ FROM lsstts/develop-env:${dev_cycle}
 
 WORKDIR /usr/src/love/
 COPY requirements.txt .
-COPY docker/start-daemon-dev.sh .
 
 RUN source /opt/lsst/software/stack/loadLSST.bash && \
 	pip install /home/saluser/repos/ts_utils && \
 	pip install -r requirements.txt
 
 WORKDIR /home/saluser
-CMD ["/usr/src/love/start-daemon-dev.sh"]
+CMD ["/usr/src/love/docker/start-daemon-dev.sh"]
