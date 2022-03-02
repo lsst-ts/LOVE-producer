@@ -10,7 +10,7 @@ In order to use the LOVE-producer as part of the LOVE system we recommend to use
 
 ## 2. Local load for development
 
-We provide a docker image and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.
+We provide docker images and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.
 
 This docker-compose does not copy the code into the image, but instead it mounts the repository inside the image, this way you can edit the code from outside the docker container with no need to rebuild or restart.
 
@@ -19,8 +19,10 @@ This docker-compose does not copy the code into the image, but instead it mounts
 Follow these instructions to run the application in a docker container and get into it:
 
 ```
-docker-compose up -d
-docker-exec producer bash
+cd docker/
+export dev_cycle=develop #Here you can set a specified version of the lsstts/develop-env image
+docker-compose up -d --build
+docker-compose exec producer bash
 ```
 
 ### 2.2 Run tests
@@ -28,17 +30,17 @@ docker-exec producer bash
 Once inside the container and in the `love` folder you can run the tests as follows:
 
 ```
-/usr/src/love/producer/run-tests.sh
+source /home/saluser/.setup_dev.sh # Here some configurations will be loaded and you will enter another bash. Press [Ctrl + D] to exit the current console, then the love-producer package will be installed and you can continue with the following step
+pip install /usr/src/love # This step is necessary in order to install the last version of the package code 
+pytest /usr/src/love/tests
 ```
-
-Then press `Ctrl + D`
 
 ### 2.3 Build documentation
 
 Once inside the container and in the `love` folder you can build the documentation as follows:
 
 ```
-source .setup_dev.sh
+source /home/saluser/.setup_dev.sh
 cd /usr/src/love/docsrc
 ./create_docs.sh
 ```
