@@ -4,7 +4,11 @@ FROM lsstts/develop-env:${dev_cycle}
 WORKDIR /usr/src/love
 COPY . .
 
-RUN source /opt/lsst/software/stack/loadLSST.bash && \
+USER root
+RUN chown -R saluser:saluser /usr/src/love
+USER saluser
+
+RUN source /home/saluser/.setup_dev.sh && \
 	pip install -r requirements.txt && \
 	pip install /usr/src/love
 
