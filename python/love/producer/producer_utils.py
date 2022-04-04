@@ -104,6 +104,15 @@ class MissingMessageStream(Exception):
     pass
 
 
+class ConnectedTaskDone(Exception):
+    """Exception raised by the LoveManagerclient.connect_to_manager method
+    internally to handle condition where the connection to the manager was
+    closed unexpectedly.
+    """
+
+    pass
+
+
 def get_data_type(value):
     if isinstance(value, (np.ndarray)) and value.ndim == 0:
         return "Array<%s>" % get_data_type(value.item())
