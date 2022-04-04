@@ -33,6 +33,7 @@ import subprocess
 
 
 from lsst.ts.idl.enums import ScriptQueue
+from lsst.ts import utils
 from lsst.ts import salobj
 
 from love.producer import LoveProducerScriptQueue
@@ -68,7 +69,8 @@ def run_script_queue(request):
 
     request.cls.index = index
 
-    yield
+    with utils.modify_environ(LSST_SITE="test"):
+        yield
 
     process.terminate()
     process.wait()
