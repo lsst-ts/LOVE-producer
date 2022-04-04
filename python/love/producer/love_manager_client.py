@@ -29,6 +29,7 @@ import textwrap
 from typing import Optional
 
 from love.producer import LoveProducerFactory
+from .producer_utils import ConnectedTaskDone
 
 
 class LoveManagerClient:
@@ -91,25 +92,38 @@ class LoveManagerClient:
                 async with aiohttp.ClientSession() as session:
                     self.websocket = await session.ws_connect(self.url)
 
-                    self.connected_task.set_result(True)
+                    if self.connected_task.done():
+                        raise ConnectedTaskDone("Connected task unexpectedly done.")
+                    else:
+                        self.connected_task.set_result(True)
 
-                    yield connection_attempt
+                        yield connection_attempt
 
-                    connection_attempt = 0
+                        connection_attempt = 0
             except (
                 aiohttp.client_exceptions.ClientConnectorError,
                 aiohttp.client_exceptions.WSServerHandshakeError,
             ):
-
-                if self.connected_task.done():
-                    self.connected_task = asyncio.Future()
-
                 connection_attempt += 1
                 self.log.debug(
                     f"Could not connect to manager. Attempt {connection_attempt}. "
                     f"Waiting {self.connection_failed_wait_time} seconds before next attempt."
                 )
-                await asyncio.sleep(self.connection_failed_wait_time)
+                await self.handle_wait_retry()
+            except ConnectedTaskDone:
+                connection_attempt = 0
+                self.log.debug(
+                    "Connection with managed unexpectedly closed. "
+                    f"Waiting {self.connection_failed_wait_time} seconds before trying to connect again."
+                )
+                await self.handle_wait_retry()
+
+    async def handle_wait_retry(self) -> None:
+        """Handle retrying to connect to manager."""
+        if self.connected_task.done():
+            self.connected_task = asyncio.Future()
+
+        await asyncio.sleep(self.connection_failed_wait_time)
 
     def reset_tasks(self) -> None:
         """Reset both the `connected_task` and `done_task` futures.
