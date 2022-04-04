@@ -93,13 +93,13 @@ class NumpyEncoder(json.JSONEncoder):
 
 
 class MissingMessageParameter(Exception):
-    """ Exception class to be raised on missing message parameter """
+    """Exception class to be raised on missing message parameter"""
 
     pass
 
 
 class MissingMessageStream(Exception):
-    """ Exception class to be raised on missing message stream """
+    """Exception class to be raised on missing message stream"""
 
     pass
 
@@ -129,7 +129,7 @@ def get_data_type(value):
 
 
 def onemsg_generator(category, csc, salindex, streams_dict):
-    """Generates one msg for the LOVE-manager from a single (csc,salindex) source """
+    """Generates one msg for the LOVE-manager from a single (csc,salindex) source"""
 
     return {
         "category": category,
