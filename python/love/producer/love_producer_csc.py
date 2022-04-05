@@ -96,23 +96,27 @@ class LoveProducerCSC(LoveProducerBase):
         csc = data.get("csc", None)
         salindex = data.get("salindex", 0)
 
-        self.log.debug(
-            "Should reply to message_data: "
-            f"{category in self._need_reply_category}, "
-            f"{csc in self.reply_names}, "
-            f"{salindex == self.remote.salinfo.index}, "
-            f"{self.is_data_stream_stored(dict(stream=self.get_sample_name(message_data)))}. "
-            f"stream={self.get_sample_name(message_data)}"
-        )
-
-        return (
-            (category in self._need_reply_category)
-            and csc in self.reply_names
-            and salindex == self.remote.salinfo.index
-            and self.is_data_stream_stored(
-                dict(stream=self.get_sample_name(message_data))
+        try:
+            self.log.debug(
+                "Should reply to message_data: "
+                f"{category in self._need_reply_category}, "
+                f"{csc in self.reply_names}, "
+                f"{salindex == self.remote.salinfo.index}, "
+                f"{self.is_data_stream_stored(dict(stream=self.get_sample_name(message_data)))}. "
+                f"stream={self.get_sample_name(message_data)}"
             )
-        )
+
+            return (
+                (category in self._need_reply_category)
+                and csc in self.reply_names
+                and salindex == self.remote.salinfo.index
+                and self.is_data_stream_stored(
+                    dict(stream=self.get_sample_name(message_data))
+                )
+            )
+        except Exception:
+            self.log.exception("Error in should reply to message. Won't reply.")
+            return False
 
     def get_sample_name(self, data_stream: dict) -> str:
         """Override base class default behavior."""
