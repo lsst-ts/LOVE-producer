@@ -19,6 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import json
 import asyncio
 import unittest
@@ -42,6 +43,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
 
         salobj.set_random_lsst_dds_partition_prefix()
+        os.environ["LSST_SITE"] = "test"
 
         self.salindex = 1
         self.csc = "Test"
