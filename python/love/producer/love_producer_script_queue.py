@@ -188,11 +188,13 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         if csc != "Script":
             await super().send_reply_to_message_data(message_data)
         else:
-            sample_name = self.get_sample_name(message_data)
+            try:
+                sample_name = self.get_sample_name(message_data)
+            except RuntimeError:
+                self.log.exception("Error getting sample. Ignoring.")
+                return
             if sample_name in self.script_reply:
                 await self.script_reply[sample_name](message_data)
-
-        sample_name = self.get_sample_name(message_data)
 
     async def get_initial_state_messages_as_json(self) -> AsyncIterator[int]:
         """Asynchronously generetate all initial state messages.
