@@ -171,10 +171,13 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         data = message_data.get("data", [dict()])[0]
         csc = data.get("csc", None)
 
-        if (
-            csc == "Script"
-            and self.get_sample_name(message_data) in self.script_messages_to_reply
-        ):
+        try:
+            sample_name = self.get_sample_name(message_data)
+        except RuntimeError:
+            self.log.debug(f"Error getting sample name for message_data.")
+            return False
+
+        if csc == "Script" and sample_name in self.script_messages_to_reply:
             return True
         else:
             return super().should_reply_to_message_data(message_data=message_data)
