@@ -219,30 +219,30 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `ScriptQueue_logevent_script`
             ScriptQueue_logevent_script event data.
         """
-        if event.salIndex not in self.scripts:
-            self.scripts[event.salIndex] = self.get_empty_script(event.salIndex)
+        if event.scriptSalIndex not in self.scripts:
+            self.scripts[event.scriptSalIndex] = self.get_empty_script(event.scriptSalIndex)
 
-        self.scripts[event.salIndex]["type"] = (
+        self.scripts[event.scriptSalIndex]["type"] = (
             "standard" if event.isStandard else "external"
         )
-        self.scripts[event.salIndex]["path"] = event.path
-        self.scripts[event.salIndex]["process_state"] = ScriptQueue.ScriptProcessState(
+        self.scripts[event.scriptSalIndex]["path"] = event.path
+        self.scripts[event.scriptSalIndex]["process_state"] = ScriptQueue.ScriptProcessState(
             event.processState
         ).name
-        self.scripts[event.salIndex]["script_state"] = Script.ScriptState(
+        self.scripts[event.scriptSalIndex]["script_state"] = Script.ScriptState(
             event.scriptState
         ).name
-        self.scripts[event.salIndex][
+        self.scripts[event.scriptSalIndex][
             "timestampConfigureEnd"
         ] = event.timestampConfigureEnd
-        self.scripts[event.salIndex][
+        self.scripts[event.scriptSalIndex][
             "timestampConfigureStart"
         ] = event.timestampConfigureStart
-        self.scripts[event.salIndex]["timestampProcessEnd"] = event.timestampProcessEnd
-        self.scripts[event.salIndex][
+        self.scripts[event.scriptSalIndex]["timestampProcessEnd"] = event.timestampProcessEnd
+        self.scripts[event.scriptSalIndex][
             "timestampProcessStart"
         ] = event.timestampProcessStart
-        self.scripts[event.salIndex]["timestampRunStart"] = event.timestampRunStart
+        self.scripts[event.scriptSalIndex]["timestampRunStart"] = event.timestampRunStart
 
         self.store_samples(_stream=self.scriptqueue_state_message_data)
         await self.send_scriptqueue_state()
@@ -356,8 +356,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `Script_logevent_metadata`
             Event data.
         """
-        if event.ScriptID in self.scripts:
-            self.scripts[event.ScriptID]["expected_duration"] = event.duration
+        if event.salIndex in self.scripts:
+            self.scripts[event.salIndex]["expected_duration"] = event.duration
             self.store_samples(_stream=self.scriptqueue_state_message_data)
             await self.send_scriptqueue_state()
 
@@ -371,11 +371,11 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `Script_logevent_state`
             Event data.
         """
-        if event.ScriptID in self.scripts:
-            self.scripts[event.ScriptID]["script_state"] = Script.ScriptState(
+        if event.salIndex in self.scripts:
+            self.scripts[event.salIndex]["script_state"] = Script.ScriptState(
                 event.state
             ).name
-            self.scripts[event.ScriptID]["last_checkpoint"] = event.lastCheckpoint
+            self.scripts[event.salIndex]["last_checkpoint"] = event.lastCheckpoint
             self.store_samples(_stream=self.scriptqueue_state_message_data)
             await self.send_scriptqueue_state()
 
@@ -389,8 +389,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event: `Script_logevent_description`
             Event data.
         """
-        if event.ScriptID in self.scripts:
-            salindex = event.ScriptID
+        if event.salIndex in self.scripts:
+            salindex = event.salIndex
             self.scripts[salindex]["description"] = event.description
             self.scripts[salindex]["classname"] = event.classname
             self.scripts[salindex]["remotes"] = event.remotes
@@ -407,8 +407,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `Script_logevent_checkpoints`
             Event data.
         """
-        if event.ScriptID in self.scripts:
-            salindex = event.ScriptID
+        if event.salIndex in self.scripts:
+            salindex = event.salIndex
             self.scripts[salindex]["pause_checkpoints"] = event.pause
             self.scripts[salindex]["stop_checkpoints"] = event.stop
             self.store_samples(_stream=self.scriptqueue_state_message_data)
@@ -422,8 +422,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `Script_logevent_logLevel`
             Event data.
         """
-        if event.ScriptID in self.scripts:
-            salindex = event.ScriptID
+        if event.salIndex in self.scripts:
+            salindex = event.salIndex
             self.scripts[salindex]["log_level"] = event.level
             self.store_samples(_stream=self.scriptqueue_state_message_data)
             await self.send_scriptqueue_state()
@@ -724,8 +724,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             Script heartbeat topic sample.
         """
 
-        if data.ScriptID in self.scripts_heartbeat:
-            self.scripts_heartbeat[data.ScriptID]["data"][0]["data"]["stream"][
+        if data.salIndex in self.scripts_heartbeat:
+            self.scripts_heartbeat[data.salIndex]["data"][0]["data"]["stream"][
                 "script_heartbeat"
             ]["last_heartbeat_timestamp"] = datetime.now().timestamp()
 
@@ -737,10 +737,10 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         data :  `Script_logevent_logMessage`
         """
 
-        if data.ScriptID in self.scripts_log_messages:
+        if data.salIndex in self.scripts_log_messages:
             _, data_as_dict = self._convert_data_to_dict(data)
             data_as_dict["csc"] = "Script"
-            data_as_dict["salindex"] = data.ScriptID
+            data_as_dict["salindex"] = data.salIndex
 
             message_as_dict = dict(
                 category="event",
@@ -750,12 +750,12 @@ class LoveProducerScriptQueue(LoveProducerCSC):
                 ],
             )
 
-            self.scripts_log_messages[data.ScriptID].append(message_as_dict)
+            self.scripts_log_messages[data.salIndex].append(message_as_dict)
 
             self.log.debug(f"Received script log message: {data.message}")
             if (
-                data.ScriptID == self.state["currentIndex"]
-                or data.ScriptID in self.state["waitingIndices"]
+                data.salIndex == self.state["currentIndex"]
+                or data.salIndex in self.state["waitingIndices"]
             ):
                 await self.send_message(
                     self._love_manager_message.get_message_as_json(message_as_dict)
