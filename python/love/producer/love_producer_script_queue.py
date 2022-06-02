@@ -220,15 +220,17 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             ScriptQueue_logevent_script event data.
         """
         if event.scriptSalIndex not in self.scripts:
-            self.scripts[event.scriptSalIndex] = self.get_empty_script(event.scriptSalIndex)
+            self.scripts[event.scriptSalIndex] = self.get_empty_script(
+                event.scriptSalIndex
+            )
 
         self.scripts[event.scriptSalIndex]["type"] = (
             "standard" if event.isStandard else "external"
         )
         self.scripts[event.scriptSalIndex]["path"] = event.path
-        self.scripts[event.scriptSalIndex]["process_state"] = ScriptQueue.ScriptProcessState(
-            event.processState
-        ).name
+        self.scripts[event.scriptSalIndex][
+            "process_state"
+        ] = ScriptQueue.ScriptProcessState(event.processState).name
         self.scripts[event.scriptSalIndex]["script_state"] = Script.ScriptState(
             event.scriptState
         ).name
@@ -238,11 +240,15 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         self.scripts[event.scriptSalIndex][
             "timestampConfigureStart"
         ] = event.timestampConfigureStart
-        self.scripts[event.scriptSalIndex]["timestampProcessEnd"] = event.timestampProcessEnd
+        self.scripts[event.scriptSalIndex][
+            "timestampProcessEnd"
+        ] = event.timestampProcessEnd
         self.scripts[event.scriptSalIndex][
             "timestampProcessStart"
         ] = event.timestampProcessStart
-        self.scripts[event.scriptSalIndex]["timestampRunStart"] = event.timestampRunStart
+        self.scripts[event.scriptSalIndex][
+            "timestampRunStart"
+        ] = event.timestampRunStart
 
         self.store_samples(_stream=self.scriptqueue_state_message_data)
         await self.send_scriptqueue_state()
