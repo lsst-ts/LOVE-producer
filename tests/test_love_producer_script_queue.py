@@ -56,7 +56,7 @@ def run_script_queue(request):
 
     process = subprocess.Popen(
         [
-            shutil.which("run_script_queue.py"),
+            shutil.which("run_script_queue"),
             f"{index}",
             "--standard",
             f"{standardpath}",
