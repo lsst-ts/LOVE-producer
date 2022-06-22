@@ -267,7 +267,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
 
             self.log.debug("Starting test csc process...")
             run_test_csc_task = await asyncio.create_subprocess_exec(
-                "run_test_csc.py",
+                "run_test_csc",
                 str(self.salindex),
             )
 
