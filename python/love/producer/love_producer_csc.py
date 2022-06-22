@@ -244,8 +244,8 @@ class LoveProducerCSC(LoveProducerBase):
         await self.set_monitor_heartbeat()
 
     def set_topic_name_revcode_mapping(self) -> None:
-        """Create a mapping between topic name and revcode for all topics so the
-        producer can assign the name of the topics from the samples.
+        """Create a mapping between topic name and revcode for all topics so
+        the producer can assign the name of the topics from the samples.
         """
         for periodic_topic in self.periodic_data:
             self.log.debug(f"creating mapping for {periodic_topic}")

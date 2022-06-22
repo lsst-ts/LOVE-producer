@@ -129,7 +129,9 @@ def get_data_type(value):
 
 
 def onemsg_generator(category, csc, salindex, streams_dict):
-    """Generates one msg for the LOVE-manager from a single (csc,salindex) source"""
+    """Generates one msg for the LOVE-manager from a single (csc,salindex)
+    source.
+    """
 
     return {
         "category": category,
@@ -145,8 +147,8 @@ def onemsg_generator(category, csc, salindex, streams_dict):
 
 def get_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex,stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return
@@ -163,8 +165,8 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
 
 def check_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex,stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return False
@@ -179,8 +181,8 @@ def get_parameter_from_last_message(
     message, category, csc, salindex, stream, parameter
 ):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex, stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return
@@ -239,8 +241,9 @@ def check_event_stream(message, category, csc, salindex, stream_name):
 
 
 def make_stream_message(category, csc, salindex, stream, content):
-    """Returns a message for the LOVE-manager group (category-csc-salindex-stream) with
-    a given content"""
+    """Returns a message for the LOVE-manager group
+    (category-csc-salindex-stream) with a given content.
+    """
 
     return {
         "category": category,
