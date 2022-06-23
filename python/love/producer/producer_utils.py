@@ -92,19 +92,19 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class MissingMessageParameter(Exception):
+class MissingMessageParameterError(Exception):
     """Exception class to be raised on missing message parameter"""
 
     pass
 
 
-class MissingMessageStream(Exception):
+class MissingMessageStreamError(Exception):
     """Exception class to be raised on missing message stream"""
 
     pass
 
 
-class ConnectedTaskDone(Exception):
+class ConnectedTaskDoneError(Exception):
     """Exception raised by the LoveManagerclient.connect_to_manager method
     internally to handle condition where the connection to the manager was
     closed unexpectedly.
@@ -156,7 +156,7 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream]
 
-    raise MissingMessageStream(
+    raise MissingMessageStreamError(
         "Stream {}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream
         )
@@ -190,7 +190,7 @@ def get_parameter_from_last_message(
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream][parameter]
 
-    raise MissingMessageParameter(
+    raise MissingMessageParameterError(
         "Parameter {}-{}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream, parameter
         )

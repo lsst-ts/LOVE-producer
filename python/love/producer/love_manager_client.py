@@ -29,7 +29,7 @@ import textwrap
 from typing import Optional
 
 from love.producer import LoveProducerFactory
-from .producer_utils import ConnectedTaskDone
+from .producer_utils import ConnectedTaskDoneError
 
 
 class LoveManagerClient:
@@ -93,7 +93,9 @@ class LoveManagerClient:
                     self.websocket = await session.ws_connect(self.url)
 
                     if self.connected_task.done():
-                        raise ConnectedTaskDone("Connected task unexpectedly done.")
+                        raise ConnectedTaskDoneError(
+                            "Connected task unexpectedly done."
+                        )
                     else:
                         self.connected_task.set_result(True)
 
@@ -110,7 +112,7 @@ class LoveManagerClient:
                     f"Waiting {self.connection_failed_wait_time} seconds before next attempt."
                 )
                 await self.handle_wait_retry()
-            except ConnectedTaskDone:
+            except ConnectedTaskDoneError:
                 connection_attempt = 0
                 self.log.debug(
                     "Connection with managed unexpectedly closed. "
