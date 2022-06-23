@@ -92,19 +92,19 @@ class NumpyEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-class MissingMessageParameter(Exception):
+class MissingMessageParameterError(Exception):
     """Exception class to be raised on missing message parameter"""
 
     pass
 
 
-class MissingMessageStream(Exception):
+class MissingMessageStreamError(Exception):
     """Exception class to be raised on missing message stream"""
 
     pass
 
 
-class ConnectedTaskDone(Exception):
+class ConnectedTaskDoneError(Exception):
     """Exception raised by the LoveManagerclient.connect_to_manager method
     internally to handle condition where the connection to the manager was
     closed unexpectedly.
@@ -129,7 +129,9 @@ def get_data_type(value):
 
 
 def onemsg_generator(category, csc, salindex, streams_dict):
-    """Generates one msg for the LOVE-manager from a single (csc,salindex) source"""
+    """Generates one msg for the LOVE-manager from a single (csc,salindex)
+    source.
+    """
 
     return {
         "category": category,
@@ -145,8 +147,8 @@ def onemsg_generator(category, csc, salindex, streams_dict):
 
 def get_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex,stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return
@@ -154,7 +156,7 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream]
 
-    raise MissingMessageStream(
+    raise MissingMessageStreamError(
         "Stream {}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream
         )
@@ -163,8 +165,8 @@ def get_stream_from_last_message(message, category, csc, salindex, stream):
 
 def check_stream_from_last_message(message, category, csc, salindex, stream):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex,stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return False
@@ -179,8 +181,8 @@ def get_parameter_from_last_message(
     message, category, csc, salindex, stream, parameter
 ):
     """
-    Takes a message and returns a parameter for a given (category,csc,salindex,stream)
-    If not found then it will throw an error
+    Takes a message and returns a parameter for a given (category, csc,
+    salindex, stream). If not found then it will throw an error.
     """
     if message["category"] != category:
         return
@@ -188,7 +190,7 @@ def get_parameter_from_last_message(
         if m["csc"] == csc and m["salindex"] == salindex:
             return m["data"][stream][parameter]
 
-    raise MissingMessageParameter(
+    raise MissingMessageParameterError(
         "Parameter {}-{}-{}-{}-{} not found in message".format(
             category, csc, salindex, stream, parameter
         )
@@ -239,8 +241,9 @@ def check_event_stream(message, category, csc, salindex, stream_name):
 
 
 def make_stream_message(category, csc, salindex, stream, content):
-    """Returns a message for the LOVE-manager group (category-csc-salindex-stream) with
-    a given content"""
+    """Returns a message for the LOVE-manager group
+    (category-csc-salindex-stream) with a given content.
+    """
 
     return {
         "category": category,
