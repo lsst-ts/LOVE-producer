@@ -11,7 +11,7 @@ urls = { documentation = "https://jira.lsstcorp.org/secure/Dashboard.jspa", repo
 dynamic = [ "version" ]
 
 [project.scripts]
-run_love_producer = "lsst.ts.love.producer:run_love_producer"
+run_love_producer = "love.producer:run_love_producer"
 
 [tool.setuptools.dynamic]
 version = { attr = "setuptools_scm.get_version" }
