@@ -9,7 +9,7 @@ source:
 build:
   script: python -m pip install --no-deps --ignore-installed .
   entry_points:
-    - run_love_producer = lsst.ts.love.producer:run_love_producer
+    - run_love_producer = love.producer:run_love_producer
 
 requirements:
   host:
