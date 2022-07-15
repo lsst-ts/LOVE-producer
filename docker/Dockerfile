@@ -1,5 +1,6 @@
 ARG dev_cycle=develop
-FROM lsstts/develop-env:${dev_cycle}
+ARG docker_registry=lsstts
+FROM ${docker_registry}/develop-env:${dev_cycle}
 
 WORKDIR /usr/src/love
 COPY . .
