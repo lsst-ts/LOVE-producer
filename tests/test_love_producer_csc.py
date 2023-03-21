@@ -41,7 +41,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         cls.csc_construction_timeout = 30.0
 
     async def asyncSetUp(self):
-
         salobj.set_random_lsst_dds_partition_prefix()
         os.environ["LSST_SITE"] = "test"
 
@@ -63,11 +62,9 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         await self.producer.start_task
 
     async def asyncTearDown(self):
-
         await self.producer.close()
 
     async def test_get_telemetry_attribute_names(self):
-
         telemetry_attribute_names = [
             name
             for name, _ in self.producer.get_telemetry_attribute_names_and_category()
@@ -77,7 +74,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             self.assertIn(f"tel_{telemetry_name}", telemetry_attribute_names)
 
     async def test_get_event_attribute_names_and_category(self):
-
         event_attribute_names_and_category = (
             self.producer.get_event_attribute_names_and_category()
         )
@@ -88,7 +84,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             self.assertIn(f"evt_{event_name}", event_attribute_names)
 
     async def test_generate_valid_topic_names_from_good_data(self):
-
         telemetry_attribute_names = (
             self.producer.get_telemetry_attribute_names_and_category()
         )
@@ -103,7 +98,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(hasattr(self.producer.remote, topic_attribute_name))
 
     async def test_generate_valid_topic_names_from_bad_data(self):
-
         attribute_names = self.producer.get_telemetry_attribute_names_and_category()
 
         attribute_names.append(("tel_unitTestBadName", "telemetry"))
@@ -119,7 +113,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(hasattr(self.producer.remote, topic_attribute_name))
 
     async def test_get_topic_attribute_name(self):
-
         rev_code = self.producer.remote.evt_heartbeat.rev_code
 
         self.assertEqual(
@@ -127,9 +120,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_summary_state(self):
-
         async with self.setup_test_csc():
-
             await self.assert_minimum_samples_of(
                 topic_name="summaryState",
                 name_index="Test:1",
@@ -138,9 +129,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_heartbeat(self):
-
         async with self.setup_test_csc():
-
             heartbeat_minimum_samples = 5
             self.standard_timeout = 20
 
@@ -152,9 +141,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_telemetry(self):
-
         async with self.setup_test_csc() as remote:
-
             await salobj.set_summary_state(remote, salobj.State.ENABLED)
 
             await remote.cmd_setScalars.set_start(
@@ -171,7 +158,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
     async def assert_minimum_samples_of(
         self, topic_name, name_index, category, minimum_samples
     ):
-
         await self.wait_for_number_of_samples_of_topic(
             number_of_samples=minimum_samples,
             topic_name=topic_name,
@@ -193,7 +179,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
     async def wait_for_number_of_samples_of_topic(
         self, number_of_samples, topic_name, name_index, category
     ):
-
         self.log.debug(
             f"Waiting for {number_of_samples} samples of {topic_name} or "
             f"{self.standard_timeout} seconds, "
@@ -222,7 +207,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         )
 
     def get_number_of_samples(self, topic_name, category, name_index):
-
         return (
             len(self.messages_received[category][name_index][topic_name])
             if category in self.messages_received
@@ -250,7 +234,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             self.messages_received[data_category][name_index] = dict()
 
         for topic in data_message["data"][0]["data"]:
-
             if topic not in self.messages_received[data_category][name_index]:
                 self.log.debug(f"Adding topic {topic} to {data_category}::{name_index}")
                 self.messages_received[data_category][name_index][topic] = []
@@ -264,7 +247,6 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
     @contextlib.asynccontextmanager
     async def setup_test_csc(self):
         try:
-
             self.log.debug("Starting test csc process...")
             run_test_csc_task = await asyncio.create_subprocess_exec(
                 "run_test_csc",

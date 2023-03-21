@@ -84,7 +84,6 @@ additionalProperties: false
         metadata.duration = self.sleep_time
 
     async def run(self):
-
         self.log.info("Run started")
         await self.checkpoint("start")
 

@@ -38,7 +38,6 @@ class LoveProducerSet:
     """Container class to configure and host a list of LOVE producers."""
 
     def __init__(self, components, log_level=logging.INFO) -> None:
-
         self.log = logging.getLogger()
 
         if not self.log.hasHandlers():
@@ -62,7 +61,6 @@ class LoveProducerSet:
         self._wait_forever_task = None
 
     async def run_producer(self):
-
         start_task = asyncio.create_task(
             self.love_manager_client.handle_connection_with_manager()
         )

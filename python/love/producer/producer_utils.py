@@ -47,7 +47,6 @@ def get_available_components():
 
 
 class Settings:
-
     _trace = None
     _ws_host = None
     _ws_pass = None

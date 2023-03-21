@@ -1,0 +1,80 @@
+===============
+Version History
+===============
+
+v6.0.1
+------
+
+* `<https://github.com/lsst-ts/LOVE-producer/pull/127>`_ In ScriptQueue producer:
+
+    * Fix issue when producer is sending log messages for a script when the script finishes executing.
+    * Fix handling Script heartbeats monitor.
+
+v6.0.0
+------
+
+* Tickets/dm 31183 `<https://github.com/lsst-ts/LOVE-producer/pull/125>`_
+
+v5.1.5
+------
+
+* Upgrade dev-cycle to c0021.007 `<https://github.com/lsst-ts/LOVE-producer/pull/124>`_
+* Remove editable mode for pip install `<https://github.com/lsst-ts/LOVE-producer/pull/123>`_
+* Rollback package installation to runtime `<https://github.com/lsst-ts/LOVE-producer/pull/122>`_
+
+v5.1.3
+------
+
+* ScriptQueue initialization is not compliant with the new version of the LOVE-producer `<https://github.com/lsst-ts/LOVE-producer/pull/121>`_
+
+v5.1.2
+------
+
+* Refactor to install package at build time `<https://github.com/lsst-ts/LOVE-producer/pull/120>`_
+
+v5.1.1
+------
+
+* Tickets/dm 30852 `<https://github.com/lsst-ts/LOVE-producer/pull/119>`_
+* Bump websockets from 8.1 to 9.1 `<https://github.com/lsst-ts/LOVE-producer/pull/118>`_
+* Bump websockets from 8.1 to 9.1 in /python/love/producer/love_csc `<https://github.com/lsst-ts/LOVE-producer/pull/117>`_
+* Remove .egg-info folder `<https://github.com/lsst-ts/LOVE-producer/pull/115>`_
+
+v5.1.0
+------
+
+* Refactor LOVE-producer code base so it is better organized as a python package. `<https://github.com/lsst-ts/LOVE-producer/pull/114>`_
+* Upgrade dev-cycle to c0020.001 `<https://github.com/lsst-ts/LOVE-producer/pull/113>`_
+* Bump eventlet from 0.24.1 to 0.31.0 in /producer `<https://github.com/lsst-ts/LOVE-producer/pull/112>`_
+
+v5.0.0
+------
+
+* Release/5.0.0 `<https://github.com/lsst-ts/LOVE-producer/pull/111>`_
+* Fix failing tests due to new LOVE-producer `<https://github.com/lsst-ts/LOVE-producer/pull/110>`_
+* Reduce heartbeat timeout to solve performance issue `<https://github.com/lsst-ts/LOVE-producer/pull/109>`_
+* Update test due to a recent change on the CSC client `<https://github.com/lsst-ts/LOVE-producer/pull/108>`_
+* Script logMessages is not compatible with the new Producer version `<https://github.com/lsst-ts/LOVE-producer/pull/107>`_
+* Upload producer diagram `<https://github.com/lsst-ts/LOVE-producer/pull/106>`_
+* Upgrade develop-env to c0018.001 `<https://github.com/lsst-ts/LOVE-producer/pull/104>`_
+
+v4.0.0
+------
+
+* Rollback to dev env version c0017.000 `<https://github.com/lsst-ts/LOVE-producer/pull/103>`_
+* Upgrade to lsstts/develop-env:c0018.000 `<https://github.com/lsst-ts/LOVE-producer/pull/102>`_
+* Build from tickets branches `<https://github.com/lsst-ts/LOVE-producer/pull/101>`_
+* Stop installing ts-idl in the Dockerfile-deploy as that is already … `<https://github.com/lsst-ts/LOVE-producer/pull/100>`_
+* Include pre-commit config file `<https://github.com/lsst-ts/LOVE-producer/pull/99>`_
+* Add lsstts/develop-env to docker-compose `<https://github.com/lsst-ts/LOVE-producer/pull/98>`_
+* Fix ScriptQueue not properly setting up callbacks `<https://github.com/lsst-ts/LOVE-producer/pull/97>`_
+* Black formatter fixes `<https://github.com/lsst-ts/LOVE-producer/pull/96>`_
+* Sonarqube fixes `<https://github.com/lsst-ts/LOVE-producer/pull/95>`_
+* Update jenkinsfile to publish documentation `<https://github.com/lsst-ts/LOVE-producer/pull/94>`_
+* Xml version fix `<https://github.com/lsst-ts/LOVE-producer/pull/93>`_
+* Build love-producer with deployment image. `<https://github.com/lsst-ts/LOVE-producer/pull/92>`_
+* Add dynamic way to set lsstts/develop-env image version `<https://github.com/lsst-ts/LOVE-producer/pull/91>`_
+* Script heartbeats fix `<https://github.com/lsst-ts/LOVE-producer/pull/90>`_
+* Csc producer fixes `<https://github.com/lsst-ts/LOVE-producer/pull/89>`_
+* Get schema fix `<https://github.com/lsst-ts/LOVE-producer/pull/88>`_
+* Remotes refactor `<https://github.com/lsst-ts/LOVE-producer/pull/87>`_
