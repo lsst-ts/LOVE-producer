@@ -50,12 +50,10 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         await self.love_manager_client.close()
 
     async def test_url(self):
-
         async with self.configure_environment_with_websocket_host():
             self.assertIsInstance(self.love_manager_client.url, str)
 
     def test_url_no_manager_hostname(self):
-
         back_up_websocket_host = (
             os.environ.pop("WEBSOCKET_HOST") if "WEBSOCKET_HOST" in os.environ else None
         )
@@ -68,7 +66,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
                 os.environ["WEBSOCKET_HOST"] = back_up_websocket_host
 
     async def test_create_producers(self):
-
         components = self.create_producers()
 
         self.assertEqual(len(components), len(self.love_manager_client.producers))
@@ -88,22 +85,17 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         """
 
         async with self.setup_test_environment_to_handle_connection():
-
             self.assertTrue(self.love_manager_client.connected_task.result())
             self.assertFalse(self.love_manager_client.done_task.done())
 
     async def test_handle_connection_with_manager_with_producers(self):
-
         components = self.create_producers()
 
         async with self.setup_test_environment_to_handle_connection():
-
             self.assert_initial_state_subscribe_messages_sent(components)
 
     async def test_send_message(self):
-
         async with self.setup_test_environment_to_handle_connection():
-
             data = dict(
                 name="test_data",
                 test_value_int=10,
@@ -125,13 +117,11 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(data, self.received_data["telemetry"][0])
 
     async def test_handle_message_reception(self):
-
         components = self.create_producers()
 
         self.add_summary_state_samples()
 
         async with self.setup_test_environment_to_handle_connection():
-
             await asyncio.sleep(1.0)
 
             self.purge_received_data()
@@ -151,7 +141,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(components), len(self.received_data["event"]))
 
     def test_need_reply_from_producers(self):
-
         self.assertFalse(self.love_manager_client.need_reply_from_producers(dict()))
 
         self.assertFalse(
@@ -169,7 +158,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         )
 
     def create_producers(self):
-
         components = ["UnitTest1", "UnitTest2"]
 
         self.love_manager_client.create_producers(components=components)
@@ -193,14 +181,12 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
             producer.store_samples(summaryState=self.sample_summary_state)
 
     def assert_initial_state_subscribe_messages_sent(self, components):
-
         initial_state_messages = self.gather_initial_state_messages()
 
         for component in components:
             self.assertIn(component, initial_state_messages)
 
     def gather_initial_state_messages(self):
-
         return {
             initial_state_message["csc"]
             for initial_state_message in self.received_data.get("initial_state", [])
@@ -210,7 +196,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         self.received_data = dict()
 
     async def wait_for_number_of_samples(self, number_of_samples, sample_type="event"):
-
         self.log.debug(
             f"Waiting for {number_of_samples} samples or {self.standard_timeout} seconds, "
             "whatever comes first."
@@ -239,7 +224,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
     @contextlib.asynccontextmanager
     async def configure_environment_with_websocket_host(self):
-
         back_up_websocket_host = (
             os.environ.pop("WEBSOCKET_HOST") if "WEBSOCKET_HOST" in os.environ else None
         )
@@ -256,7 +240,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
     @contextlib.asynccontextmanager
     async def start_mock_manager(self):
-
         self._run_wesocket_server = True
 
         socket = websockets.serve(
@@ -275,14 +258,12 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
 
     @contextlib.asynccontextmanager
     async def handle_connection_with_manager(self):
-
         try:
             start_task = asyncio.create_task(
                 self.love_manager_client.handle_connection_with_manager()
             )
 
             while self.love_manager_client.connected_task is None:
-
                 await asyncio.sleep(self.pool_timeout)
 
             await asyncio.wait_for(
@@ -299,7 +280,6 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
     async def handle_websocket_server_received_message(
         self, websocket, *args, **kwargs
     ):
-
         self.websocket = websocket
 
         try:

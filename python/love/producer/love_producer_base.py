@@ -70,7 +70,6 @@ class LoveProducerBase:
         log: Optional[logging.Logger] = None,
         **kwargs,
     ):
-
         self.log = (
             logging.getLogger(type(self).__name__)
             if log is None
@@ -323,7 +322,6 @@ class LoveProducerBase:
         """
 
         while not self.done_task.done():
-
             data_category_to_send_from_functions = [
                 (func(), category)
                 for func, category in self._data_to_monitor_periodically_functions

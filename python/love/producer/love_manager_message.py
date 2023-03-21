@@ -45,7 +45,6 @@ class NumpyEncoder(json.JSONEncoder):
 
 class LoveManagerMessage:
     def __init__(self, component_name: str) -> None:
-
         self.component_name: str = component_name
         self.metadata: dict = dict()
 
