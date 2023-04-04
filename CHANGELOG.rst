@@ -2,6 +2,42 @@
 Version History
 ===============
 
+v6.4.2
+------
+
+* tickets/SITCOM-432 `<https://github.com/lsst-ts/LOVE-producer/pull/135>`_
+
+v6.4.1
+------
+
+* Fix entrypoints `<https://github.com/lsst-ts/LOVE-producer/pull/134>`_
+
+v6.4.0
+------
+
+* Update build to pyproject.toml `<https://github.com/lsst-ts/LOVE-producer/pull/133>`_
+
+v6.3.0
+------
+
+* Rename {CSC}ID field to salIndex `<https://github.com/lsst-ts/LOVE-producer/pull/132>`_
+
+v6.2.2
+------
+
+* In ScriptQueue producer, skip reply to message if it fails to determine the sample name `<https://github.com/lsst-ts/LOVE-producer/pull/131>`_
+
+v6.2.1
+------
+
+* Tickets/dm 34255 `<https://github.com/lsst-ts/LOVE-producer/pull/130>`_
+* Adjust permissions on Dockerfile `<https://github.com/lsst-ts/LOVE-producer/pull/129>`_
+
+v6.2.0
+------
+
+* Refactor docker files path `<https://github.com/lsst-ts/LOVE-producer/pull/128>`_
+
 v6.0.1
 ------
 
