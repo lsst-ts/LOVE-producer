@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.4.3
+-------
+
+* Add repository version history `<https://github.com/lsst-ts/LOVE-producer/pull/136>`_
+
 v6.4.2
 ------
 
