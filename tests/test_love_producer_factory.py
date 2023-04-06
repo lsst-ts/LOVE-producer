@@ -26,18 +26,15 @@ from love.producer import LoveProducerFactory, LoveProducerBase
 
 class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):
     async def test_get_love_producer_from_type_base(self):
-
         base_love_producer = LoveProducerFactory.get_love_producer_from_type("base")
 
         self.assertIsInstance(base_love_producer, LoveProducerBase)
 
     async def test_get_love_producer_from_type_unspecified(self):
-
         with self.assertRaises(RuntimeError):
             LoveProducerFactory.get_love_producer_from_type("unspecified")
 
     async def test_get_love_producer_from_name(self):
-
         component_name = "UnitTest1"
 
         love_producer = LoveProducerFactory.get_love_producer_from_name(component_name)

@@ -69,12 +69,10 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
             pass
 
     def test_get_message_initial_state_as_json_no_component_name(self):
-
         with self.assertRaises(AssertionError):
             self.producer.get_message_initial_state_as_json()
 
     def test_get_message_initial_state_as_json(self):
-
         component_name = "Test"
 
         self.producer.component_name = component_name
@@ -94,7 +92,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(initial_state_subscribe_msg[key], value)
 
     def test_add_metadata(self):
-
         self.setup_for_data_handling_test(component_index=1)
 
         message = self.producer.get_message_category_as_json(
@@ -107,7 +104,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(data_as_dict["component_index"], 1)
 
     async def test_register_monitor_data_periodically_with_function(self):
-
         self.setup_for_data_handling_test()
 
         self.producer.register_monitor_data_periodically(
@@ -123,7 +119,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_register_monitor_data_periodically_with_coroutine(self):
-
         self.setup_for_data_handling_test()
 
         self.producer.register_monitor_data_periodically(
@@ -133,7 +128,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         await self.assert_monitored_data("async_get_random_data", 2)
 
     async def test_handle_asynchronous_data_callback(self):
-
         self.setup_for_data_handling_test()
 
         self.setup_data_generation_loop()
@@ -145,7 +139,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         await self.assert_monitored_data("async_get_random_data_randomly", 3)
 
     async def test_register_additional_action(self):
-
         self.setup_for_data_handling_test()
 
         self.setup_data_generation_loop()
@@ -167,27 +160,22 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.producer._additional_data_callbacks["none"].assert_not_awaited()
 
     def test_send_message_not_set(self):
-
         with self.assertRaises(RuntimeError):
             self.producer.send_message("test")
 
     def test_send_message_set_bad_type_int(self):
-
         with self.assertRaises(TypeError):
             self.producer.send_message = 1
 
     def test_send_message_set_bad_type_string(self):
-
         with self.assertRaises(TypeError):
             self.producer.send_message = "test"
 
     def test_send_message_set_bad_type_function(self):
-
         with self.assertRaises(TypeError):
             self.producer.send_message = self.send_message
 
     async def test_send_message_set_as_coroutine(self):
-
         self.producer.send_message = self.async_send_message
 
         await self.producer.send_message("test")
@@ -195,7 +183,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.assertIn("test", self.messages_received)
 
     async def test_should_reply_to_message_data(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -207,7 +194,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_should_reply_to_message_data_no_reply_different_csc(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -221,7 +207,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_should_reply_to_message_data_no_reply_different_salindex(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -235,7 +220,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_should_reply_to_message_data_no_reply_no_stream(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -251,7 +235,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_send_reply_to_message_data(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -268,7 +251,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_reply_to_message_data(self):
-
         self.setup_for_data_handling_test(salindex=1)
 
         self.producer.store_samples(summaryState=self.sample_summary_state)
@@ -283,7 +265,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_store_and_retrieve_samples(self):
-
         self.producer.store_samples(summaryState=self.sample_summary_state)
 
         sample_summary_state = self.producer.retrieve_samples("summaryState")
@@ -291,7 +272,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(sample_summary_state[0], self.sample_summary_state)
 
     async def assert_monitored_data(self, name, minimum_samples):
-
         await self.wait_for_number_of_samples(number_of_samples=minimum_samples)
 
         self.assertGreaterEqual(len(self.messages_received), minimum_samples)
@@ -301,7 +281,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(json.loads(message_received)["data"][0]["name"], name)
 
     async def wait_for_number_of_samples(self, number_of_samples):
-
         timeout = (number_of_samples + 1) * self.producer.period_default_in_seconds
 
         self.log.debug(
@@ -317,7 +296,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
                 await asyncio.sleep(self.time_pooling)
 
     def setup_for_data_handling_test(self, **kwargs):
-
         self.producer.send_message = self.async_send_message
 
         component_name = "Test"
@@ -327,7 +305,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.producer.add_metadata(**kwargs)
 
     def setup_data_generation_loop(self):
-
         self._run_data_generator_loop = True
 
         self.data_generator_task = asyncio.create_task(self._generate_data_loop())
@@ -336,9 +313,7 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self._run_data_generator_loop = False
 
     async def _generate_data_loop(self):
-
         while self._run_data_generator_loop:
-
             if self.generate_async_data_callback is not None:
                 await self.generate_async_data_callback(
                     await self.async_get_random_data_randomly()
@@ -354,7 +329,6 @@ class TestLoveProducerBase(unittest.IsolatedAsyncioTestCase):
         self.messages_received.append(message)
 
     async def async_get_random_data_randomly(self):
-
         await asyncio.sleep(np.random.random())
         return self.get_random_data(name="async_get_random_data_randomly")
 

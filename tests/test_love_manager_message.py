@@ -43,13 +43,11 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         )
 
     def test_get_message_initial_state(self):
-
         initial_state_message = self.love_manager_message.get_message_initial_state()
 
         self.assert_initial_state_message(initial_state_message, self.component_name)
 
     def test_get_message_category(self):
-
         telemetry = self.love_manager_message.get_message_category(
             category="telemetry", data=self.sample_telemetry
         )
@@ -57,7 +55,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         self.assert_data_category(telemetry, "telemetry")
 
     def test_get_message_initial_state_as_json(self):
-
         initial_state_json = (
             self.love_manager_message.get_message_initial_state_as_json()
         )
@@ -67,7 +64,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         )
 
     def test_get_message_category_as_json_empty_data(self):
-
         telemetry_json = self.love_manager_message.get_message_category_as_json(
             category="telemetry", data=dict()
         )
@@ -75,7 +71,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         self.assert_data_category(json.loads(telemetry_json), "telemetry")
 
     def test_get_message_category_as_json(self):
-
         telemetry_json = self.love_manager_message.get_message_category_as_json(
             category="telemetry", data=self.sample_telemetry
         )
@@ -83,7 +78,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         self.assert_data_category(json.loads(telemetry_json), "telemetry")
 
     def test_add_metadata(self):
-
         self.love_manager_message.add_metadata(new_metadata="test_value")
 
         telemetry_json = self.love_manager_message.get_message_category_as_json(
@@ -98,7 +92,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
         self.assertEqual("test_value", telemetry_data["new_metadata"])
 
     def assert_initial_state_message(self, initial_state_message, component_name):
-
         for key, value in [
             ("option", "subscribe"),
             ("category", "initial_state"),
@@ -110,7 +103,6 @@ class TestLoveManagerMessage(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(initial_state_message[key], value)
 
     def assert_data_category(self, data, category):
-
         for key in {"category", "data"}:
             self.assertIn(key, data)
 

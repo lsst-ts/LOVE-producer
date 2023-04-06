@@ -46,7 +46,6 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     def __init__(
         self, domain: Domain, log: Optional[logging.Logger] = None, **kwargs
     ) -> None:
-
         if "salindex" not in kwargs:
             raise RuntimeError(
                 "ScriptQueue is an indexed component, `salindex` must be specified."
@@ -693,7 +692,6 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         return await super().close()
 
     async def set_script_heartbeat_producer(self) -> None:
-
         if self._script_heartbeat_producer_task is not None:
             raise RuntimeError("Script hearbeat producer already set.")
 
@@ -704,7 +702,6 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     async def _produce_script_heartbeat(self) -> None:
         """Produce script heartbeat messages."""
         while not self.done_task.done():
-
             try:
                 current_index = self.state["currentIndex"]
                 if current_index > 0:

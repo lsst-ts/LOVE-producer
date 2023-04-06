@@ -30,7 +30,6 @@ from . import get_available_components
 
 
 class LoveProducerFactory:
-
     available_love_producer_type = dict(
         base=LoveProducerBase,
         csc=LoveProducerCSC,
@@ -45,7 +44,6 @@ class LoveProducerFactory:
     def get_love_producer_from_type(
         cls, love_producer_type: str, **kwargs
     ) -> LoveProducerBase:
-
         if love_producer_type in cls.available_love_producer_type:
             return cls.available_love_producer_type[love_producer_type](**kwargs)
         else:
@@ -58,7 +56,6 @@ class LoveProducerFactory:
     def get_love_producer_from_name(
         cls, component_name: str, **kwargs
     ) -> LoveProducerBase:
-
         csc_names = get_available_components()
 
         name, index = salobj.name_to_name_index(component_name)

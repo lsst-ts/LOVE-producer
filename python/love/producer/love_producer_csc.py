@@ -125,7 +125,6 @@ class LoveProducerCSC(LoveProducerBase):
         return f"{topic_prefix}_{topic_name}"
 
     def get_periodic_data(self, **kwargs) -> dict:
-
         return dict(
             set(
                 self.get_telemetry_attribute_names_and_category()
@@ -135,7 +134,6 @@ class LoveProducerCSC(LoveProducerBase):
         )
 
     def get_asynchronous_data(self, **kwargs) -> dict:
-
         return dict(
             set(
                 self.get_event_attribute_names_and_category()
@@ -154,7 +152,6 @@ class LoveProducerCSC(LoveProducerBase):
         ]
 
     def get_telemetry_attribute_names_and_category(self) -> list:
-
         return [
             (f"tel_{telemetry_name}", "telemetry")
             for telemetry_name in self.remote.salinfo.telemetry_names
@@ -236,7 +233,6 @@ class LoveProducerCSC(LoveProducerBase):
         return periodic_data_list
 
     async def start(self) -> None:
-
         await self.remote.start_task
 
         await self.set_monitor_periodic_data()
@@ -300,7 +296,6 @@ class LoveProducerCSC(LoveProducerBase):
         self._revcode_topic_attribute_name_map[rev_code] = topic_attribute_name
 
     async def set_monitor_periodic_data(self) -> None:
-
         for periodic_data_name in self.periodic_data:
             self.register_monitor_data_periodically(
                 getattr(self.remote, periodic_data_name).get,
@@ -344,7 +339,6 @@ class LoveProducerCSC(LoveProducerBase):
         }
 
     async def set_monitor_asynchronous_data(self) -> None:
-
         await asyncio.gather(
             *[
                 self.set_asynchronous_monitor_for(
@@ -359,7 +353,6 @@ class LoveProducerCSC(LoveProducerBase):
     async def set_asynchronous_monitor_for(
         self, asynchronous_data_name: str, asynchronous_data_category: str
     ) -> None:
-
         self.log.debug(
             f"Getting last sample of {asynchronous_data_name} before setting callback."
         )
@@ -374,7 +367,6 @@ class LoveProducerCSC(LoveProducerBase):
         ).callback = self.handle_asynchronous_data_callback
 
     async def set_monitor_heartbeat(self):
-
         if hasattr(self.remote, "evt_heartbeat"):
             self.log.debug(
                 f"Adding heartbeat monitor for {self.remote.salinfo.name}:{self.remote.salinfo.index}"
@@ -388,7 +380,6 @@ class LoveProducerCSC(LoveProducerBase):
             )
 
     async def _monitor_heartbeat(self):
-
         heartbeat_message = self._get_heartbeat_message()
 
         heartbeat_send_timer = asyncio.create_task(
@@ -396,7 +387,6 @@ class LoveProducerCSC(LoveProducerBase):
         )
 
         while not self.done_task.done():
-
             (
                 heartbeat_message["data"][0]["data"]["stream"]["lost"],
                 heartbeat_message["data"][0]["data"]["stream"][
@@ -424,7 +414,6 @@ class LoveProducerCSC(LoveProducerBase):
                 raise e
 
     async def store_last_sample(self, sample_name: str) -> None:
-
         try:
             last_sample = await getattr(self.remote, sample_name).aget(
                 timeout=self.store_last_sample_timeout

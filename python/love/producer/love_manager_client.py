@@ -36,7 +36,6 @@ class LoveManagerClient:
     """Provides connectivity between the LOVE manager and the producer."""
 
     def __init__(self, log) -> None:
-
         self.log: logging.Logger = log.getChild(type(self).__name__)
 
         self.connection_failed_wait_time: float = 3.0
@@ -87,7 +86,6 @@ class LoveManagerClient:
         connection_attempt = 0
 
         while not self.done_task.done():
-
             try:
                 async with aiohttp.ClientSession() as session:
                     self.websocket = await session.ws_connect(self.url)
@@ -246,7 +244,6 @@ class LoveManagerClient:
         )
 
     def create_producers(self, components: list, **kwargs) -> None:
-
         for component in components:
             producer = LoveProducerFactory.get_love_producer_from_name(
                 component,
@@ -278,7 +275,6 @@ class LoveManagerClient:
             )
 
     async def close(self):
-
         for producer in self.producers:
             await producer.close()
 

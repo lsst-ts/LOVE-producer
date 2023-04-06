@@ -42,7 +42,6 @@ from love.producer.test_utils import cancel_task
 
 @pytest.fixture(scope="class")
 def run_script_queue(request):
-
     salobj.set_random_lsst_dds_partition_prefix()
 
     index = 1
@@ -87,7 +86,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         cls.maxDiff = None
 
     async def asyncSetUp(self):
-
         self.salindex = 1
 
         self.messages_received = {}
@@ -117,7 +115,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         await self.producer.start_task
 
     async def test_heartbeat(self):
-
         heartbeat_minimum_samples = 3
         self.standard_timeout = 10
 
@@ -141,7 +138,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         )
 
     async def test_initial_subscription_messages(self):
-
         initial_state_messages_received = []
 
         async for initial_state_message in self.producer.get_initial_state_messages_as_json():
@@ -161,7 +157,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             initial_state_csc_expected.remove(initial_state_message["csc"])
 
     async def test_standard_state_transition(self):
-
         await self.assert_minimum_samples_of(
             topic_name="summaryState",
             name_index="ScriptQueue:1",
@@ -172,7 +167,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
         await salobj.set_summary_state(self.remote, salobj.State.STANDBY)
 
         async with self.enable_script_queue():
-
             expected_events_samples = [
                 ("summaryState", 3),
                 ("availableScripts", 1),
@@ -185,7 +179,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             ]
 
             for event_name, minimum_samples in expected_events_samples:
-
                 await self.assert_minimum_samples_of(
                     topic_name=event_name,
                     name_index="ScriptQueue:1",
@@ -194,9 +187,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_handle_event_scriptqueue_script(self):
-
         async with self.enable_script_queue():
-
             # Pause queue so script won't execute.
             await self.remote.cmd_pause.start()
 
@@ -217,11 +208,8 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_reply_initial_state_request(self):
-
         async with self.enable_script_queue():
-
             async for initial_state_request_msg in self.get_initial_state_request_msg():
-
                 assert self.producer.should_reply_to_message_data(
                     initial_state_request_msg
                 )
@@ -231,12 +219,10 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 )
 
     async def test_script_heartbeat(self):
-
         heartbeat_minimum_samples = 5
         self.standard_timeout = 20
 
         async with self.enable_script_queue():
-
             # Pause queue so script won't execute.
             await self.remote.cmd_pause.start()
 
@@ -259,12 +245,10 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_script_log_message(self):
-
         log_messages_minimum_samples = 4
         self.standard_timeout = 20
 
         async with self.enable_script_queue():
-
             ack = await self.remote.cmd_add.set_start(
                 isStandard=True,
                 path="love_std_script.py",
@@ -285,12 +269,10 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_scriptqueue_state_message_data(self):
-
         state_minimum_samples = 3
         self.standard_timeout = 10
 
         async with self.enable_script_queue():
-
             await self.assert_minimum_samples_of(
                 topic_name="stream",
                 name_index="ScriptQueueState:1",
@@ -376,7 +358,6 @@ additionalProperties: false
         }
 
     async def asyncTearDown(self):
-
         await self.remote.close()
         await self.producer.close()
         await self.domain.close()
@@ -389,7 +370,6 @@ additionalProperties: false
         minimum_samples,
         additional_samples=0,
     ):
-
         await self.wait_for_number_of_samples_of_topic(
             number_of_samples=minimum_samples + additional_samples,
             topic_name=topic_name,
@@ -435,7 +415,6 @@ additionalProperties: false
     async def wait_for_number_of_samples_of_topic(
         self, number_of_samples, topic_name, name_index, category
     ):
-
         self.log.debug(
             f"Waiting for {number_of_samples} samples of {topic_name} or "
             f"{self.standard_timeout} seconds, "
@@ -464,7 +443,6 @@ additionalProperties: false
         )
 
     def get_number_of_samples(self, topic_name, category, name_index):
-
         return (
             len(self.messages_received[category][name_index][topic_name])
             if category in self.messages_received
@@ -474,7 +452,6 @@ additionalProperties: false
         )
 
     async def async_send_message(self, message):
-
         self.log.debug(f"send_message: {message}")
         data_message = json.loads(message)
         data_category = data_message["category"]
@@ -493,7 +470,6 @@ additionalProperties: false
             self.messages_received[data_category][name_index] = dict()
 
         for topic in data_message["data"][0]["data"]:
-
             if topic not in self.messages_received[data_category][name_index]:
                 self.log.debug(f"Adding topic {topic} to {data_category}::{name_index}")
                 self.messages_received[data_category][name_index][topic] = []
@@ -505,7 +481,6 @@ additionalProperties: false
             )
 
     async def get_initial_state_request_msg(self):
-
         initial_state_request_msgs = [
             dict(
                 category="initial_state",
@@ -537,7 +512,6 @@ additionalProperties: false
     @contextlib.asynccontextmanager
     async def enable_script_queue(self):
         try:
-
             self.log.debug("Waiting for CSC to become alive")
 
             try:
@@ -571,7 +545,6 @@ additionalProperties: false
             queue = self.remote.evt_queue.get()
 
             if queue is not None:
-
                 if queue.length > 0:
                     await self.remote.cmd_stopScripts.set_start(
                         salIndices=queue.salIndices,
