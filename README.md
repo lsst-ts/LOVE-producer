@@ -45,6 +45,16 @@ cd /usr/src/love/docsrc
 ./create_docs.sh
 ```
 
+Once the docs folder is generated succesfully you will have to adjust the permissions of the `docsrc` and `docs` folder, as Docker makes some changes. You have to exit the container before running the following commands:
+
+```
+cd /usr/src/love/
+sudo chown -R 1000:1000 docsrc
+sudo chown -R 1000:1000 docs
+```
+
+If you faced any problem due to write permission problems on the `docs` folder, please remove the folder and repeat the 2.2 steps.
+
 ## 3. Developing/Testing with conda/pip
 
 To develop and test the LOVE-producer with conda do the following procedure:
