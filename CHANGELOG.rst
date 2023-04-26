@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.4.4
+-------
+
+* Update Sphinx dependencies `<https://github.com/lsst-ts/LOVE-producer/pull/137>`_
+
 v6.4.3
 -------
 

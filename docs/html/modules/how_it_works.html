@@ -1,86 +1,46 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>How it works &mdash; LOVE-producer 0.2.1 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How it works &mdash; LOVE-producer 6.4.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-        <script type="text/javascript" src="../_static/jquery.js"></script>
-        <script type="text/javascript" src="../_static/underscore.js"></script>
-        <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Readme File" href="readme_link.html" />
     <link rel="prev" title="Overview and configuration" href="introduction.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> LOVE-producer
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            LOVE-producer
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How it works</a><ul>
@@ -100,157 +60,101 @@
 <li class="toctree-l1"><a class="reference internal" href="../apidoc/modules.html">ApiDoc</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">LOVE-producer</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html">Docs</a> &raquo;</li>
-        
-      <li>How it works</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">How it works</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="../_sources/modules/how_it_works.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="how-it-works">
-<h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="producer">
-<h2>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="how-it-works">
+<h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h1>
+<section id="producer">
+<h2>Producer<a class="headerlink" href="#producer" title="Permalink to this heading"></a></h2>
 <img alt="../_images/Producer-details.svg" src="../_images/Producer-details.svg" /><p>The LOVE-Producer consists of several python classes (<code class="code docutils literal notranslate"><span class="pre">Telemetries</span> <span class="pre">and</span> <span class="pre">Events</span></code>, <code class="code docutils literal notranslate"><span class="pre">Heartbeats</span></code>, <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span> <span class="pre">State</span></code>, <code class="code docutils literal notranslate"><span class="pre">Command</span> <span class="pre">Receiver</span></code> and <code class="code docutils literal notranslate"><span class="pre">Initial</span> <span class="pre">State</span></code>), each refered to as “a Producer”, and a <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager.</p>
-<div class="section" id="the-main-py-file">
-<h3>The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file<a class="headerlink" href="#the-main-py-file" title="Permalink to this headline">¶</a></h3>
+<section id="the-main-py-file">
+<h3>The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file<a class="headerlink" href="#the-main-py-file" title="Permalink to this heading"></a></h3>
 <p>It uses the <code class="code docutils literal notranslate"><span class="pre">websocket</span></code> library to send messages to the <code class="code docutils literal notranslate"><span class="pre">ws://&lt;WS_HOST&gt;/?password=&lt;WS_PASS&gt;</span></code> URL, where  <code class="code docutils literal notranslate"><span class="pre">WS_HOST</span></code> and <code class="code docutils literal notranslate"><span class="pre">WS_PASS</span></code> are read from environment variables. It configures each Producer according to the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> and extracts data by either passing callbacks or making direct calls to message getters functions to send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is consistent with the what the LOVE-manager expects and has this structure:</p>
-</div>
-<div class="section" id="telemetries-and-events-producer">
-<h3>Telemetries and Events producer<a class="headerlink" href="#telemetries-and-events-producer" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="telemetries-and-events-producer">
+<h3>Telemetries and Events producer<a class="headerlink" href="#telemetries-and-events-producer" title="Permalink to this heading"></a></h3>
 <p>It creates a <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> object for a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pair given as input (created in the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> from the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file). It provides a <code class="code docutils literal notranslate"><span class="pre">get_telemetry_message</span></code> that returns a dict containing the last value of each telemetry on each <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code>, and a <code class="code docutils literal notranslate"><span class="pre">get_events_message</span></code> that similarly extracts all events data a The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code>. These two methods are called by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> every two seconds.</p>
-</div>
-<div class="section" id="heartbeats-producer">
-<h3>Heartbeats producer<a class="headerlink" href="#heartbeats-producer" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="heartbeats-producer">
+<h3>Heartbeats producer<a class="headerlink" href="#heartbeats-producer" title="Permalink to this heading"></a></h3>
 <p>Reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> through a callback message containing info about the <code class="code docutils literal notranslate"><span class="pre">heartbeat</span></code> (generic) event of a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pairs. The information contained in a heartbeat message consists of :</p>
 <ul class="simple">
 <li><p>Number of consecutive heartbeat lost, i.e., count of times <code class="code docutils literal notranslate"><span class="pre">remote.evt_heartbeat.next</span></code> throws a <code class="code docutils literal notranslate"><span class="pre">Timeout</span></code> error.</p></li>
 <li><p>Timestamp of the last received heartbeat. Defaults to <code class="code docutils literal notranslate"><span class="pre">-1</span></code> (never received heartbeat) and <code class="code docutils literal notranslate"><span class="pre">-2</span></code> if the topic does not have a <code class="code docutils literal notranslate"><span class="pre">heartbeat</span></code> event.</p></li>
 <li><p>Maximum number of heartbeats configured to be acceptable by the frontend.</p></li>
 </ul>
-</div>
-<div class="section" id="scriptqueue-state-producer">
-<h3>ScriptQueue State producer<a class="headerlink" href="#scriptqueue-state-producer" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="scriptqueue-state-producer">
+<h3>ScriptQueue State producer<a class="headerlink" href="#scriptqueue-state-producer" title="Permalink to this heading"></a></h3>
 <p>Monitors the <code class="code docutils literal notranslate"><span class="pre">queue</span></code> state, creating instances of the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and <code class="code docutils literal notranslate"><span class="pre">Script</span></code> <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> objects, storing their states. It configures several callbacks that allow to update the stored state, and reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> with a callback that sends a message with the state whenever any of these are called. It also monitors heartbeats of each script similarly to the <code class="code docutils literal notranslate"><span class="pre">heartbeats</span></code> Producer. Finally, additional to callbacks, it provides an <code class="code docutils literal notranslate"><span class="pre">update</span></code> method that sends <code class="code docutils literal notranslate"><span class="pre">show</span></code> commands to the SAL for the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and each <cite>Script</cite> remote, triggering updates of the queue state. This <code class="code docutils literal notranslate"><span class="pre">update</span></code> method is called every 2 seconds by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script.</p>
-</div>
-<div class="section" id="commands-receiver">
-<h3>Commands receiver<a class="headerlink" href="#commands-receiver" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="commands-receiver">
+<h3>Commands receiver<a class="headerlink" href="#commands-receiver" title="Permalink to this heading"></a></h3>
 <p>It provides a <code class="code docutils literal notranslate"><span class="pre">process_message</span></code> function that the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script calls whenever it receives a command message from the <cite>LOVE-manager</cite>. This method uses this information to produce a command with <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> and then returns back to the manager an acknowledgment message if the command runs succesfuly.</p>
-</div>
-<div class="section" id="initial-state-producer">
-<h3>Initial State Producer<a class="headerlink" href="#initial-state-producer" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="initial-state-producer">
+<h3>Initial State Producer<a class="headerlink" href="#initial-state-producer" title="Permalink to this heading"></a></h3>
 <p>Produces LOVE messages with the latest info of an event. It first loads several remotes in the constructor and then produces messages for the LOVE-manager through the process_message function everytime a request is received in the websocket <code class="code docutils literal notranslate"><span class="pre">on_message</span></code> event.</p>
-</div>
-</div>
-<div class="section" id="love-csc">
-<h2>LOVE CSC<a class="headerlink" href="#love-csc" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="love-csc">
+<h2>LOVE CSC<a class="headerlink" href="#love-csc" title="Permalink to this heading"></a></h2>
 <p>The LOVE CSC module is split into a client and a CSC <code class="code docutils literal notranslate"><span class="pre">controller</span></code>. The client opens a websocket connection to the LOVE manager and listens to incoming observing log messages. The websocket connection is kept alive via a reconnection protocol as well as kept monitored via a heartbeat message every 3 seconds.</p>
 <p>The LOVE <code class="code docutils literal notranslate"><span class="pre">controller</span></code> inherits from <code class="code docutils literal notranslate"><span class="pre">salobj.Controller</span></code> and uses its <code class="code docutils literal notranslate"><span class="pre">evt_observingLog</span></code> field to publish the observing logs to SAL. The controller is called by the client whenever it receives a new observing log message.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="readme_link.html" class="btn btn-neutral float-right" title="Readme File" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Overview and configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Overview and configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="readme_link.html" class="btn btn-neutral float-right" title="Readme File" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2019, Inria Chile
-
-    </p>
+    <p>&#169; Copyright 2023, Inria Chile.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
