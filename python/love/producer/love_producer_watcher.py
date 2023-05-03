@@ -54,6 +54,18 @@ class LoveProducerWatcher(LoveProducerCSC):
 
         self.register_asynchronous_data_category("stream", "_stream")
         self.store_samples(_stream=self.alarms_state_message_data)
+    
+    def add_new_alarm(self, alarm: dict) -> None:
+        """Add a new alarm to the alarms state."""
+        try:
+            existent_alarm_index = [a.name for a in self.alarms_state].index(alarm["name"])
+            self.alarms_state[existent_alarm_index] = alarm
+        except ValueError:
+            self.alarms_state.append(alarm)
+        
+        # Truncate the alarms state to the last 30 alarms.
+        if len(self.alarms_state) > 30:
+            self.alarms_state = self.alarms_state[-30:]
 
     async def handle_event_watcher_alarm(self, event: Any) -> None:
         """Handle the Watcher_logevent_alarm event.
@@ -71,7 +83,7 @@ class LoveProducerWatcher(LoveProducerCSC):
         """
         _, data_as_dict = self._convert_data_to_dict(event)
         new_alarm = data_as_dict["data"]["alarm"][0].copy()
-        self.alarms_state.append(new_alarm)
+        self.add_new_alarm(new_alarm)
         self.store_samples(_stream=self.alarms_state_message_data)
         await self.send_watcher_alarms()
 
