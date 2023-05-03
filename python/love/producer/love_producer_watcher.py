@@ -31,7 +31,9 @@ from . import LoveProducerCSC
 class LoveProducerWatcher(LoveProducerCSC):
     """Specialized LOVE producer to deal with the Watcher CSC."""
 
-    def __init__(self, domain: Domain, log: Optional[logging.Logger] = None, **kwargs) -> None:
+    def __init__(
+        self, domain: Domain, log: Optional[logging.Logger] = None, **kwargs
+    ) -> None:
         kwargs_reformatted = kwargs.copy()
         if "csc" in kwargs_reformatted:
             kwargs_reformatted.pop("csc")
@@ -45,24 +47,24 @@ class LoveProducerWatcher(LoveProducerCSC):
         )
 
         self.alarms_state = []
-        
+
         self._non_topic_data_stream = {"stream"}
 
-        self.register_additional_action(
-            "evt_alarm", self.handle_event_watcher_alarm
-        )
+        self.register_additional_action("evt_alarm", self.handle_event_watcher_alarm)
 
         self.register_asynchronous_data_category("stream", "_stream")
         self.store_samples(_stream=self.alarms_state_message_data)
-    
+
     def add_new_alarm(self, alarm: dict) -> None:
         """Add a new alarm to the alarms state."""
         try:
-            existent_alarm_index = [a.name for a in self.alarms_state].index(alarm["name"])
+            existent_alarm_index = [a.name for a in self.alarms_state].index(
+                alarm["name"]
+            )
             self.alarms_state[existent_alarm_index] = alarm
         except ValueError:
             self.alarms_state.append(alarm)
-        
+
         # Truncate the alarms state to the last 30 alarms.
         if len(self.alarms_state) > 30:
             self.alarms_state = self.alarms_state[-30:]
@@ -74,7 +76,7 @@ class LoveProducerWatcher(LoveProducerCSC):
         ----------
         event : `Watcher_logevent_script`
             Watcher_logevent_script event data.
-        
+
         Notes
         -----
         This method is registered as an additional action for the
@@ -90,14 +92,14 @@ class LoveProducerWatcher(LoveProducerCSC):
     async def send_watcher_alarms(self) -> None:
         """Send the watcher alarms to the LOVE manager."""
         await self.send_message(self.get_alarms_state_as_json())
-    
+
     def get_alarms_state_as_json(self) -> str:
         """Get the alarms state as a JSON string."""
         return self._love_manager_message.get_message_category_as_json(
             category="event",
             data=self.alarms_state_message_data,
         )
-    
+
     @property
     def alarms_state_message_data(self) -> dict:
         """Get the alarms state as a dictionary."""
@@ -109,4 +111,3 @@ class LoveProducerWatcher(LoveProducerCSC):
             salindex=self.remote.salinfo.index,
             data=dict(stream=data),
         )
-
