@@ -69,10 +69,8 @@ class LoveProducerWatcher(LoveProducerCSC):
         Watcher_logevent_alarm event. It stores alarms in the
         `alarms_state` attribute and sends them to the LOVE manager.
         """
-        new_alarm = dict()
-        new_alarm["name"] = event.name
-        new_alarm["severity"] = event.severity
-        new_alarm["max_severity"] = event.maxSeverity
+        _, data_as_dict = self._convert_data_to_dict(event)
+        new_alarm = data_as_dict["data"]["alarm"][0].copy()
         self.alarms_state.append(new_alarm)
         self.store_samples(_stream=self.alarms_state_message_data)
         await self.send_watcher_alarms()
