@@ -46,7 +46,7 @@ class LoveProducerWatcher(LoveProducerCSC):
             **kwargs_reformatted,
         )
 
-        self.alarms_state = []
+        self.alarms_state = {}
 
         self._non_topic_data_stream = {"stream"}
 
@@ -57,17 +57,7 @@ class LoveProducerWatcher(LoveProducerCSC):
 
     def add_new_alarm(self, alarm: dict) -> None:
         """Add a new alarm to the alarms state."""
-        try:
-            existent_alarm_index = [a.name for a in self.alarms_state].index(
-                alarm["name"]
-            )
-            self.alarms_state[existent_alarm_index] = alarm
-        except ValueError:
-            self.alarms_state.append(alarm)
-
-        # Truncate the alarms state to the last 30 alarms.
-        if len(self.alarms_state) > 30:
-            self.alarms_state = self.alarms_state[-30:]
+        self.alarms_state[alarm["name"]["value"]] = alarm
 
     async def handle_event_watcher_alarm(self, event: Any) -> None:
         """Handle the Watcher_logevent_alarm event.
@@ -84,10 +74,9 @@ class LoveProducerWatcher(LoveProducerCSC):
         `alarms_state` attribute and sends them to the LOVE manager.
         """
         _, data_as_dict = self._convert_data_to_dict(event)
-        new_alarm = data_as_dict["data"]["alarm"][0].copy()
+        new_alarm = data_as_dict["data"]["alarm"][0]
         self.add_new_alarm(new_alarm)
         self.store_samples(_stream=self.alarms_state_message_data)
-        await self.send_watcher_alarms()
 
     async def send_watcher_alarms(self) -> None:
         """Send the watcher alarms to the LOVE manager."""
@@ -109,5 +98,5 @@ class LoveProducerWatcher(LoveProducerCSC):
         return dict(
             csc="Watcher",
             salindex=self.remote.salinfo.index,
-            data=dict(stream=data),
+            data=dict(stream=[data]),
         )
