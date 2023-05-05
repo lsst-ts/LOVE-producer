@@ -98,5 +98,5 @@ class LoveProducerWatcher(LoveProducerCSC):
         return dict(
             csc="Watcher",
             salindex=self.remote.salinfo.index,
-            data=dict(stream=[data]),
+            data=dict(stream=data),
         )
