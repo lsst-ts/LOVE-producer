@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.5.0
+-------
+
+* Refactor Watcher alarms handling `<https://github.com/lsst-ts/LOVE-producer/pull/138>`_
+
 v6.4.4
 -------
 
