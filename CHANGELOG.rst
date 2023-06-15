@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.5.1
+-------
+
+* Add changelog checker `<https://github.com/lsst-ts/LOVE-producer/pull/139>`_
+
 v6.5.0
 -------
 
