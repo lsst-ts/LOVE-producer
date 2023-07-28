@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Readme File &mdash; LOVE-producer 6.4.2 documentation</title>
+  <title>Readme File &mdash; LOVE-producer 0.2.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -129,16 +129,13 @@
 <span class="o">./</span><span class="n">create_docs</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>If the build was successful proceed to adjust the docs folder permissions as it was created by Docker:</p>
+<p>Once the docs folder is generated succesfully you will have to adjust the permissions of the <code class="docutils literal notranslate"><span class="pre">docsrc</span></code> and <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder, as Docker makes some changes. You have to exit the container before running the following commands:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">love</span><span class="o">/</span>
-<span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span> <span class="n">docs</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span> <span class="n">docsrc</span>
+<span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span> <span class="n">docs</span>
 </pre></div>
 </div>
-<p>If you faced problems with the build due to the docs folder permission, erase it and follow the steps again.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">love</span><span class="o">/</span>
-<span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span> <span class="n">docs</span>
-</pre></div>
-</div>
+<p>If you faced any problem due to write permission problems on the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder, please remove the folder and repeat the 2.2 steps.</p>
 </section>
 </section>
 <section id="developing-testing-with-conda-pip">
@@ -184,7 +181,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Inria Chile.</p>
+    <p>&#169; Copyright 2019, Inria Chile.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

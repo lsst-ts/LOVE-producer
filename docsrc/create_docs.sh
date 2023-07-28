@@ -8,3 +8,4 @@ make html
 touch ../docs/.nojekyll
 echo "<meta http-equiv='refresh' content='0; url=./html/index.html' />" > ../docs/index.html
 chown -R 1000:1000 ../docs
+chown -R 1000:1000 .
