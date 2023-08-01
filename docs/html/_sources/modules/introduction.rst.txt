@@ -1,52 +1,42 @@
 *****************************
-Overview and configuration
+Overview
 *****************************
-This repository contains two software components: the LOVE Producer and the LOVE CSC. Both of these components are part of the LSST Operators Visualization Environment (L.O.V.E) and provide the necessary communication between the LOVE Manager and SAL. 
 
-################
-Producer
-################
+Introduction
+------------
 
-.. image:: ../assets/Producer-overview.svg
+The LOVE-producer is part of the LSST Operators Visualization Environment (L.O.V.E).
+It provides the necessary communication system to conect the LOVE-manager and SAL.
+It produce DDS messages to LOVE for one or more components of the LSST system.
 
-The LOVE-producer is a python module that uses salobj and websockets to produce messages between SAL and the LOVE-manager. "Messages" can be understood without distinction as events, telemetries or commands parameters and their acknowledgements.
+.. image:: ../assets/producer-overview.svg
 
-As shown in the figure, the :code:`config.json` gives information of which SAL topics (and their indices) to read data from using the salobj library so this data can be forwarded to the LOVE-manager. Environment variables are also read to configure the communication with the SAL and the LOVE-manager. At the same time, the LOVE-manager can send commands parameters to execute commands with :code:`salobj`, returning a message acknowledging the successful reception of said command or an error message. 
-
-
-Choosing SAL topics with :code:`config.json`
---------------------------------------------
-The LOVE-producer reads a :code:`config.json` file (located in the :code:`producer/config/` folder) to create the instances of the :code:`salobj.Remote` class that are used to read SAL data and send commands. This file specifies each topic name and the SAL index for which messages will be produced. For example:
-
-.. code-block:: json
-
-    {
-        "Test": [
-            { "index": 1, "source": "command_sim" }
-        ],
-        "ScriptQueue": [
-            { "index": 1, "source": "command_sim" },
-            { "index": 2, "source": "command_sim" }
-        ]
-    }
-
-configures the Producer to produce messages from/to the :code:`Test` CSC with index :code:`1` and the :code:`ScriptQueue` CSCs with indices :code:`1` and :code:`2`. The `source` parameter is ignored but kept for consistency in the integration with the `LOVE-simulator`.
+It is a Python package and uses :code:`asyncio` and the :code:`salobj` library to handle asynchronous communication between the LOVE-manager and SAL.
+It generates a websocket client, reads telemetries and events from SAL and then produces the messages to be sent to the LOVE-manager server.
+The producer is configured with the name and the salindex of a specific CSC in order to connect to the respective `salobj.Remote`.
 
 
-Configuring communications with environment variables
------------------------------------------------------
-Three environment variables must be set to allow the producer communicate with the SAL and the LOVE-manager:
+Configurations
+--------------
 
-- :code:`LSST_DDS_DOMAIN`: Used by :code:`salobj` to filter SAL messages in the network.
-- :code:`WS_HOST`: Hostname or IP adcress of the LOVE-manager.
-- :code:`WS_PASS`: Password used by the LOVE-manager to allow the reception of messages from the LOVE-producer.
+Three environment variables must be set to allow the producer communicate with SAL and the LOVE-manager:
 
+- :code:`LSST_DDS_PARTITION_PREFIX`: Used by :code:`salobj` to filter SAL messages in the network.
+- :code:`PROCESS_CONNECTION_PASS`: Password used by the LOVE-manager to allow the reception of messages from the LOVE-producer.
+- :code:`WEBSOCKET_HOST`: Hostname or IP address of the LOVE-manager service.
 
-################
-LOVE CSC
-################
+How to run
+----------
 
-.. image:: ../assets/LOVE-CSC.svg
+To run a love producer you need first to export the environment variables described above. Then you need to execute the following commands:
 
-The LOVE CSC component is a python module that listens to messages (currently limited to observation logs) sent from the LOVE Manager and publishes them to SAL through :code:`salobj`.
+.. code-block:: bash
+
+    $ pip install <love_producer_folder>
+    $ run_love_producer --components <csc_name>:<salindex> --log-level <log_level>
+
+You need to first install the package from :code:`<love_producer_folder>` which is the root folder of the code.
+Then to run one (or more) producer(s) use the :code:`run_love_producer` with the :code:`--components` argument.
+The :code:`<csc_name>` is the name of the CSC and :code:`<salindex>` is the salindex of the CSC, if running more than one producer just use a comma separated list with the previously described params.
+You can also configure the logging level with the :code:`--log-level` argument where :code:`<log_level>` is the log level in numeric form.
 

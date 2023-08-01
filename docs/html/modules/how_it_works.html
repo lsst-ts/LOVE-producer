@@ -18,7 +18,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Readme File" href="readme_link.html" />
-    <link rel="prev" title="Overview and configuration" href="introduction.html" /> 
+    <link rel="prev" title="Overview" href="introduction.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,18 +42,16 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How it works</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#producer">Producer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-main-py-file">The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#telemetries-and-events-producer">Telemetries and Events producer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#heartbeats-producer">Heartbeats producer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#scriptqueue-state-producer">ScriptQueue State producer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#commands-receiver">Commands receiver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#initial-state-producer">Initial State Producer</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#love-csc">LOVE CSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lovemanagerclient">LoveManagerClient</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lovemanagermessage">LoveManagerMessage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducerbase">LoveProducerBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducercsc">LoveProducerCSC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducerscriptqueue">LoveProducerScriptqueue</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducerwatcher">LoveProducerWatcher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducerfactory">LoveProducerFactory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#loveproducerset">LoveProducerSet</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="readme_link.html">Readme File</a></li>
@@ -86,43 +84,144 @@
              
   <section id="how-it-works">
 <h1>How it works<a class="headerlink" href="#how-it-works" title="Permalink to this heading"></a></h1>
-<section id="producer">
-<h2>Producer<a class="headerlink" href="#producer" title="Permalink to this heading"></a></h2>
-<img alt="../_images/Producer-details.svg" src="../_images/Producer-details.svg" /><p>The LOVE-Producer consists of several python classes (<code class="code docutils literal notranslate"><span class="pre">Telemetries</span> <span class="pre">and</span> <span class="pre">Events</span></code>, <code class="code docutils literal notranslate"><span class="pre">Heartbeats</span></code>, <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span> <span class="pre">State</span></code>, <code class="code docutils literal notranslate"><span class="pre">Command</span> <span class="pre">Receiver</span></code> and <code class="code docutils literal notranslate"><span class="pre">Initial</span> <span class="pre">State</span></code>), each refered to as “a Producer”, and a <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> python script . Each Producer provides an interface to extract specific information from the SAL parsed into a dictionary with a fixed schema. These messages are given to/requested by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script which is the main driver of the LOVE-producer program in charge of handling the websockets communication with the LOVE-manager, converting these messages to JSON format and forwarding them to the LOVE-manager.</p>
-<section id="the-main-py-file">
-<h3>The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> file<a class="headerlink" href="#the-main-py-file" title="Permalink to this heading"></a></h3>
-<p>It uses the <code class="code docutils literal notranslate"><span class="pre">websocket</span></code> library to send messages to the <code class="code docutils literal notranslate"><span class="pre">ws://&lt;WS_HOST&gt;/?password=&lt;WS_PASS&gt;</span></code> URL, where  <code class="code docutils literal notranslate"><span class="pre">WS_HOST</span></code> and <code class="code docutils literal notranslate"><span class="pre">WS_PASS</span></code> are read from environment variables. It configures each Producer according to the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> and extracts data by either passing callbacks or making direct calls to message getters functions to send a dictionary in JSON format to the specified address. This is detailed in the next sections and also on the diagram at the top of the page. The JSON schema is consistent with the what the LOVE-manager expects and has this structure:</p>
-</section>
-<section id="telemetries-and-events-producer">
-<h3>Telemetries and Events producer<a class="headerlink" href="#telemetries-and-events-producer" title="Permalink to this heading"></a></h3>
-<p>It creates a <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> object for a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pair given as input (created in the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> from the <code class="code docutils literal notranslate"><span class="pre">config.json</span></code> file). It provides a <code class="code docutils literal notranslate"><span class="pre">get_telemetry_message</span></code> that returns a dict containing the last value of each telemetry on each <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code>, and a <code class="code docutils literal notranslate"><span class="pre">get_events_message</span></code> that similarly extracts all events data a The <code class="code docutils literal notranslate"><span class="pre">main.py</span></code>. These two methods are called by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> every two seconds.</p>
-</section>
-<section id="heartbeats-producer">
-<h3>Heartbeats producer<a class="headerlink" href="#heartbeats-producer" title="Permalink to this heading"></a></h3>
-<p>Reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> through a callback message containing info about the <code class="code docutils literal notranslate"><span class="pre">heartbeat</span></code> (generic) event of a list of <code class="code docutils literal notranslate"><span class="pre">(CSC,</span> <span class="pre">salindex)</span></code> pairs. The information contained in a heartbeat message consists of :</p>
+<img alt="../_images/producer-details.svg" src="../_images/producer-details.svg" /><p>The LOVE-Producer base code consists of several python classes (<code class="code docutils literal notranslate"><span class="pre">LoveManagerClient</span></code>, <code class="code docutils literal notranslate"><span class="pre">LoveManagerMessage</span></code>, <code class="code docutils literal notranslate"><span class="pre">LoveProducerBase</span></code>, <code class="code docutils literal notranslate"><span class="pre">LoveProducerCSC</span></code>, <code class="code docutils literal notranslate"><span class="pre">LoveProducerFactory</span></code> and <code class="code docutils literal notranslate"><span class="pre">LoveProducerSet</span></code>).
+Also there are special classes for custom CSC behavior: <code class="code docutils literal notranslate"><span class="pre">LoveProducerScriptqueue</span></code> and <code class="code docutils literal notranslate"><span class="pre">LoveProducerWatcher</span></code>.</p>
+<section id="lovemanagerclient">
+<h2>LoveManagerClient<a class="headerlink" href="#lovemanagerclient" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveManagerClient</span></code> class is in charge of handling the communication with the LOVE-manager.
+This class is responsible of three things:</p>
 <ul class="simple">
-<li><p>Number of consecutive heartbeat lost, i.e., count of times <code class="code docutils literal notranslate"><span class="pre">remote.evt_heartbeat.next</span></code> throws a <code class="code docutils literal notranslate"><span class="pre">Timeout</span></code> error.</p></li>
-<li><p>Timestamp of the last received heartbeat. Defaults to <code class="code docutils literal notranslate"><span class="pre">-1</span></code> (never received heartbeat) and <code class="code docutils literal notranslate"><span class="pre">-2</span></code> if the topic does not have a <code class="code docutils literal notranslate"><span class="pre">heartbeat</span></code> event.</p></li>
-<li><p>Maximum number of heartbeats configured to be acceptable by the frontend.</p></li>
+<li><p>Handle connections by generating a websocket client to the LOVE-manager server.</p></li>
+<li><p>Send messages to the LOVE-manager through the websocket client.</p></li>
+<li><p>Create one or more producers of choice by using the <code class="code docutils literal notranslate"><span class="pre">LoveProducerFactory</span></code> class.</p></li>
 </ul>
 </section>
-<section id="scriptqueue-state-producer">
-<h3>ScriptQueue State producer<a class="headerlink" href="#scriptqueue-state-producer" title="Permalink to this heading"></a></h3>
-<p>Monitors the <code class="code docutils literal notranslate"><span class="pre">queue</span></code> state, creating instances of the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and <code class="code docutils literal notranslate"><span class="pre">Script</span></code> <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> objects, storing their states. It configures several callbacks that allow to update the stored state, and reports to the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> with a callback that sends a message with the state whenever any of these are called. It also monitors heartbeats of each script similarly to the <code class="code docutils literal notranslate"><span class="pre">heartbeats</span></code> Producer. Finally, additional to callbacks, it provides an <code class="code docutils literal notranslate"><span class="pre">update</span></code> method that sends <code class="code docutils literal notranslate"><span class="pre">show</span></code> commands to the SAL for the <code class="code docutils literal notranslate"><span class="pre">ScriptQueue</span></code> and each <cite>Script</cite> remote, triggering updates of the queue state. This <code class="code docutils literal notranslate"><span class="pre">update</span></code> method is called every 2 seconds by the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script.</p>
+<section id="lovemanagermessage">
+<h2>LoveManagerMessage<a class="headerlink" href="#lovemanagermessage" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveManagerMessage</span></code> class is used to create messages to be sent to the LOVE-manager.
+Messages can be of two types: subscription and data.</p>
+<p>Subscription messages are used to subscribe to a specific channel which the LOVE-manager will use when a new client connects to tell the producer to send the specificied stream data.
+This is done by sending a message with the following structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;option&quot;</span><span class="p">:</span> <span class="s2">&quot;subscribe&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;initial_state&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;csc&quot;</span><span class="p">:</span> <span class="s2">&quot;ScriptQueue&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;salindex&quot;</span><span class="p">:</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="s2">&quot;availableScripts&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;producer_snd&quot;</span><span class="p">:</span> <span class="mi">1690852640</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Data messages are used to send the data of a stream to the LOVE-manager.
+These messages have the following structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;csc&quot;</span><span class="p">:</span> <span class="s2">&quot;ScriptQueue&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;salindex&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;availableScripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;standard&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
+                    <span class="s2">&quot;external&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+                <span class="p">},</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </section>
-<section id="commands-receiver">
-<h3>Commands receiver<a class="headerlink" href="#commands-receiver" title="Permalink to this heading"></a></h3>
-<p>It provides a <code class="code docutils literal notranslate"><span class="pre">process_message</span></code> function that the <code class="code docutils literal notranslate"><span class="pre">main.py</span></code> script calls whenever it receives a command message from the <cite>LOVE-manager</cite>. This method uses this information to produce a command with <code class="code docutils literal notranslate"><span class="pre">salobj.Remote</span></code> and then returns back to the manager an acknowledgment message if the command runs succesfuly.</p>
+<section id="loveproducerbase">
+<h2>LoveProducerBase<a class="headerlink" href="#loveproducerbase" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveProducerBase</span></code> class provides the basic behavior to produce messages to be sent through the <code class="code docutils literal notranslate"><span class="pre">LoveManagerClient</span></code>.
+It can be used as a generic template to create new producers with custom behavior to read data from SAL (or even other source).
+It is responsible of the following things:</p>
+<ul class="simple">
+<li><p>Sets the component which will be monitored.</p></li>
+<li><p>Defines the <code class="code docutils literal notranslate"><span class="pre">send_message</span></code> method to send messages to the LOVE-manager.</p></li>
+<li><p>Runs a task to periodic monitoring telemetries and defines callbacks for asynchronous events.</p></li>
+<li><p>Provides structures to store the data to be sent to the LOVE-manager.</p></li>
+</ul>
 </section>
-<section id="initial-state-producer">
-<h3>Initial State Producer<a class="headerlink" href="#initial-state-producer" title="Permalink to this heading"></a></h3>
-<p>Produces LOVE messages with the latest info of an event. It first loads several remotes in the constructor and then produces messages for the LOVE-manager through the process_message function everytime a request is received in the websocket <code class="code docutils literal notranslate"><span class="pre">on_message</span></code> event.</p>
+<section id="loveproducercsc">
+<h2>LoveProducerCSC<a class="headerlink" href="#loveproducercsc" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveProducerCSC</span></code> class inherits from <code class="code docutils literal notranslate"><span class="pre">LoveProducerBase</span></code>.
+It provides the basic functionality for CSC connection by using the <code class="code docutils literal notranslate"><span class="pre">salobj</span></code> library to read telemetries and events from the specified CSC.
+Then it collects the data and produces the messages to be sent through the <code class="code docutils literal notranslate"><span class="pre">LoveManagerClient</span></code>.</p>
 </section>
+<section id="loveproducerscriptqueue">
+<h2>LoveProducerScriptqueue<a class="headerlink" href="#loveproducerscriptqueue" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveProducerScriptqueue</span></code> class inherits from <code class="code docutils literal notranslate"><span class="pre">LoveProducerCSC</span></code>.
+It provides custom functionality to read data from the ScriptQueue CSC.
+It gerenates a custom message to be sent to the LOVE-manager, which contains the following data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;csc&quot;</span><span class="p">:</span> <span class="s2">&quot;ScriptQueueState&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;salindex&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;enabled&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
+                    <span class="s2">&quot;running&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+                    <span class="s2">&quot;waitingIndices&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+                    <span class="s2">&quot;finishedIndices&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="o">...</span> <span class="p">],</span>
+                    <span class="s2">&quot;currentIndex&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;available_scripts&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
+                    <span class="s2">&quot;finished_scripts&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">},</span>
+                    <span class="s2">&quot;waiting_scripts&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>It also provides methods to send ScriptQueue heartbeats back to the LOVE-manager.</p>
 </section>
-<section id="love-csc">
-<h2>LOVE CSC<a class="headerlink" href="#love-csc" title="Permalink to this heading"></a></h2>
-<p>The LOVE CSC module is split into a client and a CSC <code class="code docutils literal notranslate"><span class="pre">controller</span></code>. The client opens a websocket connection to the LOVE manager and listens to incoming observing log messages. The websocket connection is kept alive via a reconnection protocol as well as kept monitored via a heartbeat message every 3 seconds.</p>
-<p>The LOVE <code class="code docutils literal notranslate"><span class="pre">controller</span></code> inherits from <code class="code docutils literal notranslate"><span class="pre">salobj.Controller</span></code> and uses its <code class="code docutils literal notranslate"><span class="pre">evt_observingLog</span></code> field to publish the observing logs to SAL. The controller is called by the client whenever it receives a new observing log message.</p>
+<section id="loveproducerwatcher">
+<h2>LoveProducerWatcher<a class="headerlink" href="#loveproducerwatcher" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveProducerWatcher</span></code> class inherits from <code class="code docutils literal notranslate"><span class="pre">LoveProducerCSC</span></code>.
+It provides custom functionality to read data from the Watcher CSC.
+It generates a custom message to be sent to the LOVE-manager, which contains the following data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;event&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;csc&quot;</span><span class="p">:</span> <span class="s2">&quot;Watcher&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;salindex&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;stream&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;alarms&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="loveproducerfactory">
+<h2>LoveProducerFactory<a class="headerlink" href="#loveproducerfactory" title="Permalink to this heading"></a></h2>
+<p>The <code class="code docutils literal notranslate"><span class="pre">LoveProducerFactory</span></code> class was implemented using the <cite>factory patter</cite> to instantiate different types of producers.
+It provides two static methods:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">get_love_producer_from_type</span></code>: to create a producer by setting the type: <code class="code docutils literal notranslate"><span class="pre">base</span></code>, <code class="code docutils literal notranslate"><span class="pre">csc</span></code>, <code class="code docutils literal notranslate"><span class="pre">scriptqueue</span></code>, <code class="code docutils literal notranslate"><span class="pre">watcher</span></code>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">get_love_producer_from_name</span></code>: to create a producer by setting the name and salindex of the CSC in the form <code class="code docutils literal notranslate"><span class="pre">&lt;CSC&gt;:&lt;salindex&gt;</span></code>.</p></li>
+</ul>
+</section>
+<section id="loveproducerset">
+<h2>LoveProducerSet<a class="headerlink" href="#loveproducerset" title="Permalink to this heading"></a></h2>
+<p>The <cite>LoveProducerSet</cite> class is used to run the LOVE-producer code, by creating a LOVE-manager client and a set of producers.
+It also calls the <code class="code docutils literal notranslate"><span class="pre">salobj.Domain</span></code> method to configure the lsst domain.</p>
+<p>It provides the <code class="code docutils literal notranslate"><span class="pre">run_love_producer</span></code> method to run the configured producers using <code class="code docutils literal notranslate"><span class="pre">asyncio</span></code>.
+This method is a wrapper of the <code class="code docutils literal notranslate"><span class="pre">amain</span></code> one, which is the one that actually reads the params and runs the producers.
+It receives the following params:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">components</span></code>: list of CSCs to be monitored, e.g. <cite>ATDome, ATDomeTrajectory, MTHexapod:1</cite>.</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">log_level</span></code>: log level to be used by the LOVE-producer.</p></li>
+</ul>
 </section>
 </section>
 
@@ -130,7 +229,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Overview and configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="readme_link.html" class="btn btn-neutral float-right" title="Readme File" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

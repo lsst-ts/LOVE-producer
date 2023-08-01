@@ -42,18 +42,19 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Readme File</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#love-producer">LOVE-producer</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#use-as-part-of-the-love-system">1. Use as part of the LOVE system</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#local-load-for-development">2. Local load for development</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#load-and-get-into-the-docker-image">2.1 Load and get into the docker image</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#run-tests">2.2 Run tests</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#build-documentation">2.3 Build documentation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initialize-environment-variables">Initialize Environment variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-as-part-of-the-love-system">Use as part of the LOVE system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#local-load-for-development">Local load for development</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#load-and-get-into-the-docker-image">Load and get into the docker image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#run-tests">Run tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-documentation">Build documentation</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#developing-testing-with-conda-pip">3. Developing/Testing with conda/pip</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#developing-testing-with-conda-pip">Developing/Testing with conda/pip</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#linting-formatting">Linting &amp; Formatting</a></li>
 </ul>
 </li>
@@ -93,17 +94,27 @@
 <section id="love-producer">
 <h2>LOVE-producer<a class="headerlink" href="#love-producer" title="Permalink to this heading"></a></h2>
 <p>This repository contains the code of the LOVE-producer application, that acts as middleware between the LOVE-manager and SAL.</p>
-<p>See the documentation here: <a class="reference external" href="https://lsst-ts.github.io/LOVE-producer/html/index.html">https://lsst-ts.github.io/LOVE-producer/html/index.html</a></p>
+<p>See the documentation here: <a class="reference external" href="https://lsst-ts.github.io/LOVE-producer/html/index.html">https://lsst-ts.github.io/LOVE-producer/html/index.html</a>.</p>
+<section id="initialize-environment-variables">
+<h3>Initialize Environment variables<a class="headerlink" href="#initialize-environment-variables" title="Permalink to this heading"></a></h3>
+<p>In order to use the LOVE-producer, some environment variables must be defined before it is run.
+All these variables are initialized with default variables defined in the <code class="code docutils literal notranslate"><span class="pre">.env</span></code> file defined in the corresponding deployment environment at the <a class="reference external" href="https://github.com/lsst-ts/LOVE-integration-tools">LOVE-integration-tools</a>. These are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LSST_DDS_PARTITION_PREFIX</span></code>: Prefix of the DDS partition to use.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PROCESS_CONNECTION_PASS</span></code>: Password use to authenticate connections with the LOVE-manager.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LOVE_CSC_PRODUCER</span></code>: Name and salindex of the CSC to connect in the format <code class="docutils literal notranslate"><span class="pre">&lt;CSC&gt;:&lt;salindex&gt;</span></code>. E.g. <code class="docutils literal notranslate"><span class="pre">ATDome:0</span></code>.</p></li>
+</ul>
+</section>
 <section id="use-as-part-of-the-love-system">
-<h3>1. Use as part of the LOVE system<a class="headerlink" href="#use-as-part-of-the-love-system" title="Permalink to this heading"></a></h3>
+<h3>Use as part of the LOVE system<a class="headerlink" href="#use-as-part-of-the-love-system" title="Permalink to this heading"></a></h3>
 <p>In order to use the LOVE-producer as part of the LOVE system we recommend to use the docker-compose and configuration files provided in the <a class="reference external" href="https://github.com/lsst-ts/LOVE-integration-tools">LOVE-integration-tools</a> repo. Please follow the instructions there.</p>
 </section>
 <section id="local-load-for-development">
-<h3>2. Local load for development<a class="headerlink" href="#local-load-for-development" title="Permalink to this heading"></a></h3>
+<h3>Local load for development<a class="headerlink" href="#local-load-for-development" title="Permalink to this heading"></a></h3>
 <p>We provide docker images and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.</p>
 <p>This docker-compose does not copy the code into the image, but instead it mounts the repository inside the image, this way you can edit the code from outside the docker container with no need to rebuild or restart.</p>
 <section id="load-and-get-into-the-docker-image">
-<h4>2.1 Load and get into the docker image<a class="headerlink" href="#load-and-get-into-the-docker-image" title="Permalink to this heading"></a></h4>
+<h4>Load and get into the docker image<a class="headerlink" href="#load-and-get-into-the-docker-image" title="Permalink to this heading"></a></h4>
 <p>Follow these instructions to run the application in a docker container and get into it:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">docker</span><span class="o">/</span>
 <span class="n">export</span> <span class="n">dev_cycle</span><span class="o">=</span><span class="n">develop</span> <span class="c1">#Here you can set a specified version of the lsstts/develop-env image</span>
@@ -113,7 +124,7 @@
 </div>
 </section>
 <section id="run-tests">
-<h4>2.2 Run tests<a class="headerlink" href="#run-tests" title="Permalink to this heading"></a></h4>
+<h4>Run tests<a class="headerlink" href="#run-tests" title="Permalink to this heading"></a></h4>
 <p>Once inside the container and in the <code class="docutils literal notranslate"><span class="pre">love</span></code> folder you can run the tests as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">saluser</span><span class="o">/.</span><span class="n">setup_dev</span><span class="o">.</span><span class="n">sh</span> <span class="c1"># Here some configurations will be loaded and you will enter another bash. Press [Ctrl + D] to exit the current console, then the love-producer package will be installed and you can continue with the following step</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">love</span> <span class="c1"># This step is necessary in order to install the last version of the package code</span>
@@ -122,24 +133,17 @@
 </div>
 </section>
 <section id="build-documentation">
-<h4>2.3 Build documentation<a class="headerlink" href="#build-documentation" title="Permalink to this heading"></a></h4>
+<h4>Build documentation<a class="headerlink" href="#build-documentation" title="Permalink to this heading"></a></h4>
 <p>Once inside the container and in the <code class="docutils literal notranslate"><span class="pre">love</span></code> folder you can build the documentation as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">saluser</span><span class="o">/.</span><span class="n">setup_dev</span><span class="o">.</span><span class="n">sh</span>
 <span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">love</span><span class="o">/</span><span class="n">docsrc</span>
 <span class="o">./</span><span class="n">create_docs</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>Once the docs folder is generated succesfully you will have to adjust the permissions of the <code class="docutils literal notranslate"><span class="pre">docsrc</span></code> and <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder, as Docker makes some changes. You have to exit the container before running the following commands:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">love</span><span class="o">/</span>
-<span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span> <span class="n">docsrc</span>
-<span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="mi">1000</span><span class="p">:</span><span class="mi">1000</span> <span class="n">docs</span>
-</pre></div>
-</div>
-<p>If you faced any problem due to write permission problems on the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder, please remove the folder and repeat the 2.2 steps.</p>
 </section>
 </section>
 <section id="developing-testing-with-conda-pip">
-<h3>3. Developing/Testing with conda/pip<a class="headerlink" href="#developing-testing-with-conda-pip" title="Permalink to this heading"></a></h3>
+<h3>Developing/Testing with conda/pip<a class="headerlink" href="#developing-testing-with-conda-pip" title="Permalink to this heading"></a></h3>
 <p>To develop and test the LOVE-producer with conda do the following procedure:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">y</span> <span class="o">--</span><span class="n">name</span> <span class="n">love</span><span class="o">-</span><span class="n">dev</span> <span class="n">python</span><span class="o">=</span><span class="mf">3.8</span>
 <span class="n">conda</span> <span class="n">activate</span> <span class="n">love</span><span class="o">-</span><span class="n">dev</span>
