@@ -35,19 +35,6 @@ pipeline {
     }
 
     stages {
-        stage("Deploy documentation") {
-            steps {
-                script {
-                sh "pwd"
-                sh """
-                    source /home/saluser/.setup_dev.sh
-                    pip install ltd-conveyor
-                    ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
-                """
-                }
-            }
-        }
-
         stage ('Install dependencies') {
             steps {
                 withEnv(["WHOME=${env.WORKSPACE}"]) {
@@ -56,6 +43,22 @@ pipeline {
 
                         pip install -r requirements.txt
                     """
+                }
+            }
+        }
+
+        stage("Deploy documentation") {
+            steps {
+                script {
+                sh """
+                    source ${env.SAL_SETUP_FILE}
+                    cd ./docsrc
+                    sh ./create_docs.sh
+                    cd ..
+                    chown -R saluser:saluser ./docs
+                    pip install ltd-conveyor
+                    ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
+                """
                 }
             }
         }
