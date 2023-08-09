@@ -121,6 +121,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
 
     async def test_summary_state(self):
         async with self.setup_test_csc():
+            self.standard_timeout = 10
             await self.assert_minimum_samples_of(
                 topic_name="summaryState",
                 name_index="Test:1",
