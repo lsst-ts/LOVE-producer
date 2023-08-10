@@ -2,7 +2,7 @@
 Version History
 ===============
 
-v6.6.0
+v6.5.2
 -------
 
 * Refactor documentation `<https://github.com/lsst-ts/LOVE-producer/pull/140>`_
