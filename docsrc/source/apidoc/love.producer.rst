@@ -1,14 +1,6 @@
 love.producer package
 =====================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   love.producer.test_utils
-
 Submodules
 ----------
 
