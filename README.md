@@ -2,19 +2,28 @@
 
 This repository contains the code of the LOVE-producer application, that acts as middleware between the LOVE-manager and SAL.
 
-See the documentation here: https://lsst-ts.github.io/LOVE-producer/html/index.html
+See the documentation here: https://lsst-ts.github.io/LOVE-producer/html/index.html.
 
-## 1. Use as part of the LOVE system
+## Initialize Environment variables
+
+In order to use the LOVE-producer, some environment variables must be defined before it is run.
+All these variables are initialized with default variables defined in the :code:`.env` file defined in the corresponding deployment environment at the [LOVE-integration-tools](https://github.com/lsst-ts/LOVE-integration-tools). These are:
+
+- ``LSST_DDS_PARTITION_PREFIX``: Prefix of the DDS partition to use.
+- ``PROCESS_CONNECTION_PASS``: Password use to authenticate connections with the LOVE-manager.
+- ``LOVE_CSC_PRODUCER``: Name and salindex of the CSC to connect in the format `<CSC>:<salindex>`. E.g. `ATDome:0`.
+
+## Use as part of the LOVE system
 
 In order to use the LOVE-producer as part of the LOVE system we recommend to use the docker-compose and configuration files provided in the [LOVE-integration-tools](https://github.com/lsst-ts/LOVE-integration-tools) repo. Please follow the instructions there.
 
-## 2. Local load for development
+## Local load for development
 
 We provide docker images and a docker-compose file in order to load the LOVE-producer locally for development purposes, i.e. run tests and build documentation.
 
 This docker-compose does not copy the code into the image, but instead it mounts the repository inside the image, this way you can edit the code from outside the docker container with no need to rebuild or restart.
 
-### 2.1 Load and get into the docker image
+### Load and get into the docker image
 
 Follow these instructions to run the application in a docker container and get into it:
 
@@ -25,7 +34,7 @@ docker-compose up -d --build
 docker-compose exec producer bash
 ```
 
-### 2.2 Run tests
+### Run tests
 
 Once inside the container and in the `love` folder you can run the tests as follows:
 
@@ -35,7 +44,7 @@ pip install /usr/src/love # This step is necessary in order to install the last 
 pytest /usr/src/love/tests
 ```
 
-### 2.3 Build documentation
+### Build documentation
 
 Once inside the container and in the `love` folder you can build the documentation as follows:
 
@@ -45,17 +54,7 @@ cd /usr/src/love/docsrc
 ./create_docs.sh
 ```
 
-Once the docs folder is generated succesfully you will have to adjust the permissions of the `docsrc` and `docs` folder, as Docker makes some changes. You have to exit the container before running the following commands:
-
-```
-cd /usr/src/love/
-sudo chown -R 1000:1000 docsrc
-sudo chown -R 1000:1000 docs
-```
-
-If you faced any problem due to write permission problems on the `docs` folder, please remove the folder and repeat the 2.2 steps.
-
-## 3. Developing/Testing with conda/pip
+## Developing/Testing with conda/pip
 
 To develop and test the LOVE-producer with conda do the following procedure:
 

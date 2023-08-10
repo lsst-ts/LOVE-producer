@@ -28,10 +28,13 @@ pipeline {
         SAL_USERS_HOME = "/home/saluser"
         // SAL setup file
         SAL_SETUP_FILE = "/home/saluser/.setup_dev.sh"
+        // LTD credentials
+        user_ci = credentials('lsst-io')
+        LTD_USERNAME="${user_ci_USR}"
+        LTD_PASSWORD="${user_ci_PSW}"
     }
 
     stages {
-
         stage ('Install dependencies') {
             steps {
                 withEnv(["WHOME=${env.WORKSPACE}"]) {
@@ -40,6 +43,22 @@ pipeline {
 
                         pip install -r requirements.txt
                     """
+                }
+            }
+        }
+
+        stage("Deploy documentation") {
+            steps {
+                script {
+                sh """
+                    source ${env.SAL_SETUP_FILE}
+                    cd ./docsrc
+                    sh ./create_docs.sh
+                    cd ..
+                    chown -R saluser:saluser ./docs
+                    pip install ltd-conveyor
+                    ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
+                """
                 }
             }
         }
