@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" modified="2023-08-10T00:28:13.472Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="FZrVVH9SDX02u6lBty98" version="21.6.7" type="google">
+  <diagram name="Página-1" id="UVn3nYkofDSHOqR4WI-2">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="-ZPekSaMK_4pUb20qMD9-1" target="-ZPekSaMK_4pUb20qMD9-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-7" value="Send JSON messages" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="-ZPekSaMK_4pUb20qMD9-4">
+          <mxGeometry x="-0.1429" y="4" relative="1" as="geometry">
+            <mxPoint x="10" y="-6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="1" source="-ZPekSaMK_4pUb20qMD9-1" target="-ZPekSaMK_4pUb20qMD9-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-6" value="Read telemetries&lt;br&gt;and events" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="-ZPekSaMK_4pUb20qMD9-5">
+          <mxGeometry x="-0.0541" y="-3" relative="1" as="geometry">
+            <mxPoint y="-17" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-1" value="LOVE-producer" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-2" value="SAL" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-3" value="LOVE-manager" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="-ZPekSaMK_4pUb20qMD9-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="-ZPekSaMK_4pUb20qMD9-12" target="-ZPekSaMK_4pUb20qMD9-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#0066cc&quot;&gt;environment&lt;br&gt;variables&lt;/font&gt;" lucidchartObjectId="Uz3MTHXA16VP" id="-ZPekSaMK_4pUb20qMD9-12">
+          <mxCell style="html=1;whiteSpace=wrap;shape=document;fontSize=11;fontColor=#000000;spacing=3;strokeOpacity=100;strokeColor=#0066CC;spacingBottom=10;" vertex="1" zOrder="18" parent="1">
+            <mxGeometry x="299.38" y="180" width="89.25" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
