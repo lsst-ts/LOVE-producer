@@ -5,6 +5,7 @@ Version History
 v6.5.2
 -------
 
+* Adjust jenkinsfile pipeline to properly create apidoc `<https://github.com/lsst-ts/LOVE-producer/pull/141>`_
 * Refactor documentation `<https://github.com/lsst-ts/LOVE-producer/pull/140>`_
 
 v6.5.1
