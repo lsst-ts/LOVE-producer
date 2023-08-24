@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # This file is part of ts_salobj.
 #
-# Developed for the Rubin Observatory Telescope and Site System.
+# Developed for Inria Chile and the Rubin Observatory Telescope
+# and Site System.
 # This product includes software developed by the LSST Project
 # (https://www.lsst.org).
 # See the COPYRIGHT file at the top-level directory of this distribution
