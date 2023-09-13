@@ -2,6 +2,13 @@
 Version History
 ===============
 
+v7.0.0
+------
+
+* Update love producer to make it compatible with salobj-kafka.
+  This changes are not backward compatible.
+* Remove build directory.
+
 v6.5.2
 -------
 
