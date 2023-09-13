@@ -18,3 +18,4 @@ python/love/producer/version.py
 towncrier.toml
 build
 docs
+build/
