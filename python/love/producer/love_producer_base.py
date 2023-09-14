@@ -314,42 +314,48 @@ class LoveProducerBase:
         """
 
         while not self.done_task.done():
-            data_category_to_send_from_functions = [
-                (func(), category)
-                for func, category in self._data_to_monitor_periodically_functions
-            ]
+            try:
+                data_category_to_send_from_functions = [
+                    (func(), category)
+                    for func, category in self._data_to_monitor_periodically_functions
+                ]
 
-            data_to_send_from_coroutines = await asyncio.gather(
-                *[coro() for coro, _ in self._data_to_monitor_periodically_coroutines]
-            )
-            category_to_send_from_coroutines = [
-                category
-                for _, category in self._data_to_monitor_periodically_coroutines
-            ]
+                data_to_send_from_coroutines = await asyncio.gather(
+                    *[
+                        coro()
+                        for coro, _ in self._data_to_monitor_periodically_coroutines
+                    ]
+                )
+                category_to_send_from_coroutines = [
+                    category
+                    for _, category in self._data_to_monitor_periodically_coroutines
+                ]
 
-            for data, category in data_category_to_send_from_functions:
-                if data is not None:
+                for data, category in data_category_to_send_from_functions:
+                    if data is not None:
+                        await self.send_message(
+                            self.get_message_category_as_json(
+                                category=category,
+                                data_as_dict=self._convert_data_to_dict(data)[1],
+                            )
+                        )
+
+                for data, category in zip(
+                    data_to_send_from_coroutines, category_to_send_from_coroutines
+                ):
                     await self.send_message(
                         self.get_message_category_as_json(
                             category=category,
                             data_as_dict=self._convert_data_to_dict(data)[1],
                         )
                     )
-
-            for data, category in zip(
-                data_to_send_from_coroutines, category_to_send_from_coroutines
-            ):
-                await self.send_message(
-                    self.get_message_category_as_json(
-                        category=category,
-                        data_as_dict=self._convert_data_to_dict(data)[1],
-                    )
-                )
-
-            await asyncio.sleep(self.period_default_in_seconds)
+            except Exception:
+                self.log.exception("Error handling periodic data.")
+            finally:
+                await asyncio.sleep(self.period_default_in_seconds)
 
     async def handle_asynchronous_data_callback(self, data: Any) -> None:
-        """Callback function to handle asynchonous data.
+        """Callback function to handle asynchronous data.
 
         Parameters
         ----------
@@ -357,19 +363,22 @@ class LoveProducerBase:
             Input data.
         """
 
-        data_key, data_as_dict = self._convert_data_to_dict(data)
+        try:
+            data_key, data_as_dict = self._convert_data_to_dict(data)
 
-        self.store_samples(**{data_key: data_as_dict})
+            self.store_samples(**{data_key: data_as_dict})
 
-        await self.send_message(
-            self.get_message_category_as_json(
-                category=self.get_asynchronous_data_category(data_key),
-                data_as_dict=data_as_dict,
+            await self.send_message(
+                self.get_message_category_as_json(
+                    category=self.get_asynchronous_data_category(data_key),
+                    data_as_dict=data_as_dict,
+                )
             )
-        )
 
-        if data_key in self._additional_data_callbacks:
-            await self._additional_data_callbacks[data_key](data)
+            if data_key in self._additional_data_callbacks:
+                await self._additional_data_callbacks[data_key](data)
+        except Exception:
+            self.log.exception("Error handling asynchronous data callback.")
 
     def register_asynchronous_data_category(self, name: str, category: str) -> None:
         self._asynchronous_data_category[name] = category
