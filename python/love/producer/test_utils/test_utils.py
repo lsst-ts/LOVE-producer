@@ -1,8 +1,9 @@
 # This file is part of LOVE-producer.
 #
-# Developed for Vera C. Rubin Observatory Telescope and Site Systems.
+# Developed for the Rubin Observatory Telescope and Site System.
 # This product includes software developed by Inria Chile and
 # the LSST Project (https://www.lsst.org).
+#
 # See the COPYRIGHT file at the top-level directory of this distribution
 # for details of code ownership.
 #
