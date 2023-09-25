@@ -5,7 +5,7 @@
 # the LSST Project (https://www.lsst.org).
 #
 # See the COPYRIGHT file at the top-level directory of this distribution
-# for details of code ownership.
+# for details of code ownership and dependencies.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
