@@ -9,6 +9,8 @@ This distribution includes the following code libraries/external tools.
 These are distributed according to the licensing terms governing each
 library:
 
+```
+
 | Name                            | Version      | License                                            |
 |---------------------------------|--------------|----------------------------------------------------|
 | Babel                           | 2.8.0        | BSD                                                |
@@ -211,4 +213,3 @@ library:
 | yarl                            | 1.4.2        | Apache 2                                          |
 | zipp                            | 2.2.0        | MIT                                               |
 
-```
