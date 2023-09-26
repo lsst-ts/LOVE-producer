@@ -1,6 +1,6 @@
 ```
 L.O.V.E, the LSST Operators Visualization Environment
-Copyright (c) 2023 Inria Chile Vera C. Rubin Observatory Telescope
+Copyright (c) 2023 Inria Chile and Vera C. Rubin Observatory Telescope
 and Site Systems..
 
 *************************************************************************
