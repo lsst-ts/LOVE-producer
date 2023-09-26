@@ -2,6 +2,12 @@
 Version History
 ===============
 
+v6.5.3
+-------
+
+* Improve copyright file `<https://github.com/lsst-ts/LOVE-producer/pull/143>`_
+* LOVE License `<https://github.com/lsst-ts/LOVE-producer/pull/142>`_
+
 v6.5.2
 -------
 
