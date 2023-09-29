@@ -2,7 +2,7 @@
 
 This repository contains the code of the LOVE-producer application, that acts as middleware between the LOVE-manager and SAL.
 
-See the documentation here: https://lsst-ts.github.io/LOVE-producer/html/index.html.
+See the documentation here: https://love-producer.lsst.io/
 
 ## Initialize Environment variables
 
