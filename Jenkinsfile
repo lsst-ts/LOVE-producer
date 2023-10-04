@@ -48,19 +48,19 @@ pipeline {
         }
 
         stage("Deploy documentation") {
+            when {
+                branch "main"
+                branch "develop"
+            }
             steps {
                 script {
                 sh """
                     source ${env.SAL_SETUP_FILE}
-
-                    # Install love-producer in development mode
-                    pip install -e .
-
                     # Create docs
                     cd ./docsrc
+                    pip install -r requirements.txt
                     sh ./create_docs.sh
                     cd ..
-
                     # Upload docs
                     pip install ltd-conveyor
                     ltd upload --product love-producer --git-ref ${GIT_BRANCH} --dir ./docs
