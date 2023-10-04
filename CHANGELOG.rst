@@ -5,6 +5,7 @@ Version History
 v6.5.4
 ------
 
+* Hotfix for Jenkinsfile `<https://github.com/lsst-ts/LOVE-producer/pull/146>`_
 * Minor adjustments for documentation pipeline `<https://github.com/lsst-ts/LOVE-producer/pull/144>`_
 * Add ts_pre_commit_conf `<https://github.com/lsst-ts/LOVE-producer/pull/145>`_
 
