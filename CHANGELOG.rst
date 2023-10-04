@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.5.4
+------
+
+* Add ts_pre_commit_conf `<https://github.com/lsst-ts/LOVE-producer/pull/145>`_
+
 v6.5.3
 -------
 
