@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.6.0
+------
+
+* Refactor ScriptQueueState payload into several `<https://github.com/lsst-ts/LOVE-producer/pull/147>`_
+
 v6.5.4
 ------
 
