@@ -73,7 +73,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             enabled=False,
             running=False,
             waitingIndices=[],
-            currentIndex=0,
+            currentIndices=[],
             finishedIndices=[],
         )
 
@@ -272,17 +272,21 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             The SAL event data.
         """
         self.state["running"] = event.running == 1
-        self.state["currentIndex"] = event.currentSalIndex
+        # The ScriptQueue CSC will be extended to support multiple
+        # current scripts in the future. For now, only one is supported.
+        # See: DM-44198.
+        self.state["currentIndices"] = (
+            [event.currentSalIndex] if event.currentSalIndex > 0 else []
+        )
         self.state["finishedIndices"] = list(event.pastSalIndices[: event.pastLength])
         self.state["waitingIndices"] = list(event.salIndices[: event.length])
         self.state["enabled"] = event.enabled == 1
 
         salindex_new_scripts = set(
-            self.state["waitingIndices"] + self.state["finishedIndices"]
+            self.state["waitingIndices"]
+            + self.state["finishedIndices"]
+            + self.state["currentIndices"]
         )
-
-        if self.state["currentIndex"] > 0:
-            salindex_new_scripts.add(self.state["currentIndex"])
 
         salindex_current_scripts = set(self.scripts.keys())
 
@@ -598,11 +602,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         """
 
         data = dict(
-            current=(
-                self.scripts[self.state["currentIndex"]]
-                if self.state["currentIndex"] > 0
-                else "None"
-            ),
+            current_scripts=[
+                self.scripts[index] for index in self.state["currentIndices"]
+            ],
             waiting_scripts=[
                 self.scripts[index] for index in self.state["waitingIndices"]
             ],
@@ -727,7 +729,14 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             Payload of the message with the request to send script log message.
         """
 
-        log_messages = self.scripts_log_messages.get(self.state["currentIndex"], [])
+        # The ScriptQueue CSC will be extended to support multiple
+        # current scripts in the future. For now, only one is supported.
+        # See: DM-44198.
+        log_messages = [
+            message
+            for index in self.state["currentIndices"]
+            for message in self.scripts_log_messages.get(index, [])
+        ]
 
         try:
             for message in log_messages:
@@ -789,15 +798,12 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         """Produce script heartbeat messages."""
         while not self.done_task.done():
             try:
-                current_index = self.state["currentIndex"]
-                if current_index > 0:
-                    self.log.debug(f"Sending hb for current script: {current_index}.")
-                    await self.send_script_heartbeat(current_index)
+                scripts_indices = (
+                    self.state["currentIndices"] + self.state["waitingIndices"]
+                )
+                self.log.debug(f"Sending HB for scripts: {scripts_indices}.")
 
-                waiting_indices = self.state["waitingIndices"]
-                self.log.debug(f"Sending HB for scripts: {waiting_indices}.")
-
-                for script_id in waiting_indices:
+                for script_id in scripts_indices:
                     await self.send_script_heartbeat(script_id)
             except Exception:
                 self.log.exception("Error sending script heartbeats.")
@@ -843,7 +849,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
             self.log.debug(f"Received script log message: {data.message}")
             if (
-                data.salIndex == self.state["currentIndex"]
+                data.salIndex in self.state["currentIndices"]
                 or data.salIndex in self.state["waitingIndices"]
             ):
                 await self.send_message(

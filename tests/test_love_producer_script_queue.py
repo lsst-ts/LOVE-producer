@@ -359,7 +359,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
 
     def get_scripts_state_sample(self, finished_scripts=[]) -> Dict:
         return {
-            "current": "None",
+            "current_scripts": [],
             "waiting_scripts": [],
             "finished_scripts": finished_scripts,
         }
