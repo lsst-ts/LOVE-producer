@@ -5,6 +5,7 @@ clang-format: false
 flake8: true
 format-xmllint: false
 isort: true
-mypy: true
+# Enable mypy for type checking. See DM-44122.
+mypy: false
 ruff: false
 towncrier: false
