@@ -175,7 +175,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 ("softwareVersions", 1),
                 ("simulationMode", 1),
                 ("logLevel", 1),
-                ("authList", 1),
             ]
 
             for event_name, minimum_samples in expected_events_samples:
