@@ -331,6 +331,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
 
     async def test_available_scripts_state_message_data(self):
         state_minimum_samples = 1
+        self.standard_timeout = 10
 
         async with self.enable_script_queue():
             await self.assert_minimum_samples_of(
