@@ -20,25 +20,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
-from typing import Dict
-import yaml
-import pytest
-import shutil
 import asyncio
+import contextlib
+import json
 import logging
 import pathlib
-import unittest
-import contextlib
+import shutil
 import subprocess
+import unittest
+from typing import Dict
 
-
-from lsst.ts.idl.enums import ScriptQueue
-from lsst.ts import utils
-from lsst.ts import salobj
-
+import pytest
+import yaml
 from love.producer import LoveProducerScriptQueue
 from love.producer.test_utils import cancel_task
+from lsst.ts import salobj, utils
+from lsst.ts.idl.enums import ScriptQueue
 
 
 @pytest.fixture(scope="class")
@@ -141,7 +138,9 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
     async def test_initial_subscription_messages(self):
         initial_state_messages_received = []
 
-        async for initial_state_message in self.producer.get_initial_state_messages_as_json():
+        async for (
+            initial_state_message
+        ) in self.producer.get_initial_state_messages_as_json():
             initial_state_messages_received.append(json.loads(initial_state_message))
 
         self.assertEqual(len(initial_state_messages_received), 4)
@@ -176,7 +175,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 ("softwareVersions", 1),
                 ("simulationMode", 1),
                 ("logLevel", 1),
-                ("authList", 1),
             ]
 
             for event_name, minimum_samples in expected_events_samples:
@@ -270,12 +268,12 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_scriptqueue_state_message_data(self):
-        state_minimum_samples = 3
+        state_minimum_samples = 2
         self.standard_timeout = 10
 
         async with self.enable_script_queue():
             await self.assert_minimum_samples_of(
-                topic_name="stream",
+                topic_name="stateStream",
                 name_index="ScriptQueueState:1",
                 category="event",
                 minimum_samples=state_minimum_samples,
@@ -285,7 +283,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             script_queue_state_sample = self.get_script_queue_state_sample()
 
             await self.assert_last_sample(
-                topic_name="stream",
+                topic_name="stateStream",
                 name_index="ScriptQueueState:1",
                 category="event",
                 topic_sample=script_queue_state_sample,
@@ -296,16 +294,78 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             script_queue_state_sample["running"] = False
 
             await self.assert_last_sample(
-                topic_name="stream",
+                topic_name="stateStream",
                 name_index="ScriptQueueState:1",
                 category="event",
                 topic_sample=script_queue_state_sample,
+            )
+
+    async def test_scripts_state_message_data(self):
+        state_minimum_samples = 1
+
+        async with self.enable_script_queue():
+            await self.assert_minimum_samples_of(
+                topic_name="scriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                minimum_samples=state_minimum_samples,
+                additional_samples=5,
+            )
+
+            # It must be assumed that scripts could have already finished
+            # hence scripts directly read from the producer state are provided
+            producer_finished_scripts = [
+                self.producer.scripts[index]
+                for index in self.producer.state["finishedIndices"]
+            ]
+            scripts_state_sample = self.get_scripts_state_sample(
+                finished_scripts=producer_finished_scripts
+            )
+
+            await self.assert_last_sample(
+                topic_name="scriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                topic_sample=scripts_state_sample,
+            )
+
+    async def test_available_scripts_state_message_data(self):
+        state_minimum_samples = 1
+        self.standard_timeout = 10
+
+        async with self.enable_script_queue():
+            await self.assert_minimum_samples_of(
+                topic_name="availableScriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                minimum_samples=state_minimum_samples,
+                additional_samples=5,
+            )
+
+            available_scripts_state_sample = self.get_available_scripts_state_sample()
+
+            await self.assert_last_sample(
+                topic_name="availableScriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                topic_sample=available_scripts_state_sample,
             )
 
     def get_script_queue_state_sample(self) -> Dict:
         return {
             "enabled": True,
             "running": True,
+        }
+
+    def get_scripts_state_sample(self, finished_scripts=[]) -> Dict:
+        return {
+            "current_scripts": [],
+            "waiting_scripts": [],
+            "finished_scripts": finished_scripts,
+        }
+
+    def get_available_scripts_state_sample(self) -> Dict:
+        return {
             "available_scripts": [
                 {
                     "type": "standard",
@@ -352,10 +412,6 @@ additionalProperties: false
                     + "\n",
                 },
             ],
-            "waitingIndices": [],
-            "currentIndex": 0,
-            "waiting_scripts": [],
-            "current": "None",
         }
 
     async def asyncTearDown(self):
@@ -500,7 +556,7 @@ additionalProperties: false
                     dict(
                         csc="ScriptQueueState",
                         salindex=self.salindex,
-                        data=dict(event_name="stream"),
+                        data=dict(event_name="stateStream"),
                     )
                 ],
                 subscription="initial_state-all-all-all",

@@ -106,7 +106,9 @@ LoveProducerScriptqueue
 
 The :code:`LoveProducerScriptqueue` class inherits from :code:`LoveProducerCSC`.
 It provides custom functionality to read data from the ScriptQueue CSC.
-It gerenates a custom message to be sent to the LOVE-manager, which contains the following data:
+It generates custom messages to be sent to the LOVE-manager, there are three categories:
+
+- :code:`stateStream`: to send the queue state of the ScriptQueue CSC.
 
 .. code-block::
 
@@ -117,22 +119,57 @@ It gerenates a custom message to be sent to the LOVE-manager, which contains the
                 "csc": "ScriptQueueState",
                 "salindex": 1,
                 "data": {
-                    "stream": {
+                    "stateStream": {
                         "enabled": true,
-                        "running": false,
-                        "waitingIndices": [ ... ],
-                        "finishedIndices": [ ... ],
-                        "currentIndex": 0,
-                        "available_scripts": { ... },
-                        "finished_scripts": { ... },
-                        "waiting_scripts": { ... }
+                        "running": false
                     }
                 }
             }
         ]
     }
 
-It also provides methods to send ScriptQueue heartbeats back to the LOVE-manager.
+- :code:`scriptsStream`: to send the state of scripts that have arrived to the queue.
+
+.. code-block::
+
+    {
+        "category": "event",
+        "data": [
+            {
+                "csc": "ScriptQueueState",
+                "salindex": 1,
+                "data": {
+                    "scriptsStream": {
+                        "current_scripts": { ... },
+                        "finishedScripts": { ... },
+                        "waitingScripts": { ... }
+                    }
+                }
+            }
+        ]
+    }
+
+- :code:`availableScriptsStream`: to send the available scripts to be run into the queue.
+
+.. code-block::
+
+    {
+        "category": "event",
+        "data": [
+            {
+                "csc": "ScriptQueueState",
+                "salindex": 1,
+                "data": {
+                    "availableScriptsStream": {
+                        "standard": { ... },
+                        "external": { ... }
+                    }
+                }
+            }
+        ]
+    }
+
+It also provides methods to send Heartbeats and LogMessages data for specific Scripts.
 
 LoveProducerWatcher
 ###################
