@@ -28,7 +28,7 @@ import textwrap
 from typing import Optional
 
 import aiohttp
-from love.producer import LoveProducerFactory
+from love.producer.love_producer_factory import LoveProducerFactory
 
 from .producer_utils import ConnectedTaskDoneError
 

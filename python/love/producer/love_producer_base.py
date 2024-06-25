@@ -27,7 +27,7 @@ import hashlib
 import logging
 from typing import Any, AsyncIterator, Callable, Coroutine, List, Optional, Tuple
 
-from . import LoveManagerMessage
+from love.producer.love_manager_message import LoveManagerMessage
 
 
 class LoveProducerBase:

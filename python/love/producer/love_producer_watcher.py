@@ -25,9 +25,8 @@ __all__ = ["LoveProducerWatcher"]
 import logging
 from typing import Any, Optional
 
+from love.producer.love_producer_csc import LoveProducerCSC
 from lsst.ts.salobj import Domain
-
-from . import LoveProducerCSC
 
 
 class LoveProducerWatcher(LoveProducerCSC):

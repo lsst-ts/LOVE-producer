@@ -28,9 +28,8 @@ import logging
 import os
 import signal
 
+from love.producer.love_manager_client import LoveManagerClient
 from lsst.ts import salobj
-
-from . import LoveManagerClient
 
 logging.basicConfig(level=logging.DEBUG)
 

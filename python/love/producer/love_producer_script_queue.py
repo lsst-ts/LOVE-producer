@@ -28,12 +28,11 @@ from collections import deque
 from datetime import datetime
 from typing import Any, AsyncIterator, Dict, Optional
 
+from love.producer.love_producer_csc import LoveProducerCSC
 from lsst.ts.idl.enums import Script, ScriptQueue
 from lsst.ts.salobj import AckError, Domain, Remote
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL as SCRIPT_HEARTBEAT_INTERVAL
 from lsst.ts.utils import make_done_future
-
-from . import LoveProducerCSC
 
 
 class LoveProducerScriptQueue(LoveProducerCSC):

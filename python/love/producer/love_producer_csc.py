@@ -28,10 +28,9 @@ import datetime
 import logging
 from typing import Any, Awaitable, Optional, Tuple
 
+from love.producer.love_producer_base import LoveProducerBase
+from love.producer.producer_utils import get_data_type
 from lsst.ts.salobj import Domain, Remote
-
-from . import LoveProducerBase
-from .producer_utils import get_data_type
 
 
 class LoveProducerCSC(LoveProducerBase):
