@@ -2,7 +2,10 @@
 Version History
 ===============
 
+v6.6.1
+------
 
+* Hook up to the ts_jenkins_shared_library `<https://github.com/lsst-ts/LOVE-producer/pull/149>`_
 
 v6.6.0
 ------
