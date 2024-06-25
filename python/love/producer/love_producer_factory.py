@@ -24,11 +24,13 @@ __all__ = ["LoveProducerFactory"]
 
 from lsst.ts import salobj
 
-from . import LoveProducerBase
-from . import LoveProducerCSC
-from . import LoveProducerScriptQueue
-from . import LoveProducerWatcher
-from . import get_available_components
+from . import (
+    LoveProducerBase,
+    LoveProducerCSC,
+    LoveProducerScriptQueue,
+    LoveProducerWatcher,
+    get_available_components,
+)
 
 
 class LoveProducerFactory:

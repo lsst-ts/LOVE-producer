@@ -22,7 +22,7 @@
 
 import unittest
 
-from love.producer import LoveProducerFactory, LoveProducerBase
+from love.producer import LoveProducerBase, LoveProducerFactory
 
 
 class TestLoveProducerFactory(unittest.IsolatedAsyncioTestCase):

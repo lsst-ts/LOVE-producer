@@ -20,13 +20,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 import json
-
-import numpy as np
-
+import os
 import re
 
+import numpy as np
 from lsst.ts import idl
 
 

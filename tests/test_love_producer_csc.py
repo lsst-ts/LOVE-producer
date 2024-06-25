@@ -20,17 +20,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import json
 import asyncio
-import unittest
-import logging
 import contextlib
-
-from lsst.ts import salobj
+import json
+import logging
+import os
+import unittest
 
 from love.producer import LoveProducerCSC
 from love.producer.test_utils import cancel_task
+from lsst.ts import salobj
 
 
 class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):

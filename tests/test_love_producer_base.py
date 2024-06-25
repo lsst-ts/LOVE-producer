@@ -20,15 +20,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import json
 import asyncio
-import unittest
+import json
 import logging
+import unittest
 
 import numpy as np
-
 from astropy.time import Time
-
 from love.producer import LoveProducerBase
 from love.producer.test_utils import cancel_task
 

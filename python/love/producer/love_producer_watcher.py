@@ -24,6 +24,7 @@ __all__ = ["LoveProducerWatcher"]
 
 import logging
 from typing import Any, Optional
+
 from lsst.ts.salobj import Domain
 
 from . import LoveProducerCSC

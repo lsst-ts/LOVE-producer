@@ -22,11 +22,11 @@
 
 __all__ = ["LoveProducerSet", "run_love_producer"]
 
-import os
-import signal
+import argparse
 import asyncio
 import logging
-import argparse
+import os
+import signal
 
 from lsst.ts import salobj
 

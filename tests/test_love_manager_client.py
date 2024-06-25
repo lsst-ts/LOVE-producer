@@ -20,15 +20,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import json
 import asyncio
-import logging
-import unittest
 import contextlib
+import json
+import logging
+import os
+import unittest
+
 import websockets
-
-
 from love.producer import LoveManagerClient, LoveManagerMessage
 from love.producer.test_utils import cancel_task
 
