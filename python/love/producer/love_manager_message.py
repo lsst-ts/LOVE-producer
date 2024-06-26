@@ -22,12 +22,11 @@
 
 __all__ = ["NumpyEncoder", "LoveManagerMessage"]
 
-import json
 import datetime
+import json
+from typing import Any
 
 import numpy as np
-
-from typing import Any
 
 
 class NumpyEncoder(json.JSONEncoder):

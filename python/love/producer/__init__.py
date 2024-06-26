@@ -24,12 +24,12 @@ try:
 except ImportError:
     __version__ = "?"
 
-from .producer_utils import *
+from .love_manager_client import *
 from .love_manager_message import *
 from .love_producer_base import *
 from .love_producer_csc import *
-from .love_producer_script_queue import *
-from .love_producer_watcher import *
 from .love_producer_factory import *
-from .love_manager_client import *
+from .love_producer_script_queue import *
 from .love_producer_set import *
+from .love_producer_watcher import *
+from .producer_utils import *

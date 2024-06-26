@@ -1,6 +1,0 @@
-eventlet~=0.33
-gevent~=23.7
-greenlet~=2.0
-six~=1.16
-websocket-client~=1.6
-websockets~=11.0

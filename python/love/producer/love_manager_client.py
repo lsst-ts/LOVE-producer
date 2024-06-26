@@ -20,16 +20,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import json
-import aiohttp
 import asyncio
+import json
 import logging
+import os
 import textwrap
-
 from typing import Optional
 
-from love.producer import LoveProducerFactory
+import aiohttp
+from love.producer.love_producer_factory import LoveProducerFactory
+
 from .producer_utils import ConnectedTaskDoneError
 
 
@@ -151,7 +151,9 @@ class LoveManagerClient:
         for producer in self.producers:
             self.log.debug(f"Registering {producer.component_name} producer.")
 
-            async for initial_state_message in producer.get_initial_state_messages_as_json():
+            async for (
+                initial_state_message
+            ) in producer.get_initial_state_messages_as_json():
                 await self.send_message(initial_state_message)
 
     async def _send_initial_data(self) -> None:

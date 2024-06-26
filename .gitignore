@@ -16,3 +16,5 @@ python/love/producer/version.py
 .mypy.ini
 .ruff.toml
 towncrier.toml
+build
+docs

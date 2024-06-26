@@ -22,15 +22,14 @@
 
 __all__ = ["LoveProducerSet", "run_love_producer"]
 
-import os
-import signal
+import argparse
 import asyncio
 import logging
-import argparse
+import os
+import signal
 
+from love.producer.love_manager_client import LoveManagerClient
 from lsst.ts import salobj
-
-from . import LoveManagerClient
 
 logging.basicConfig(level=logging.DEBUG)
 

@@ -23,9 +23,9 @@
 
 __all__ = ["LoveStdScript"]
 
-import yaml
 import asyncio
 
+import yaml
 from lsst.ts.salobj import BaseScript
 
 

@@ -25,18 +25,9 @@ __all__ = ["LoveProducerBase"]
 import asyncio
 import hashlib
 import logging
+from typing import Any, AsyncIterator, Callable, Coroutine, List, Optional, Tuple
 
-from typing import (
-    Any,
-    Callable,
-    Coroutine,
-    List,
-    Optional,
-    Tuple,
-    AsyncIterator,
-)
-
-from . import LoveManagerMessage
+from love.producer.love_manager_message import LoveManagerMessage
 
 
 class LoveProducerBase:
