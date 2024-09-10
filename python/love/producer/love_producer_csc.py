@@ -254,12 +254,22 @@ class LoveProducerCSC(LoveProducerBase):
         the producer can assign the name of the topics from the samples.
         """
         for periodic_topic in self.periodic_data:
-            self.log.debug(f"creating mapping for {periodic_topic}")
-            self.create_revcode_mapping(periodic_topic)
+            if hasattr(self.remote, periodic_topic):
+                self.log.debug(f"creating mapping for {periodic_topic}")
+                self.create_revcode_mapping(periodic_topic)
+            else:
+                self.log.debug(
+                    f"Topic {periodic_topic} not defined in remote, skipping."
+                )
 
         for asynchronous_topic in self.asynchronous_data:
-            self.log.debug(f"creating mapping for {asynchronous_topic}")
-            self.create_revcode_mapping(asynchronous_topic)
+            if hasattr(self.remote, asynchronous_topic):
+                self.log.debug(f"creating mapping for {asynchronous_topic}")
+                self.create_revcode_mapping(asynchronous_topic)
+            else:
+                self.log.debug(
+                    f"Topic {asynchronous_topic} not defined in remote, skipping."
+                )
 
     def get_topic_attribute_name(self, rev_code: str) -> str:
         """Returns the associated topic attribute name (e.g. evt_heartbeat) for
