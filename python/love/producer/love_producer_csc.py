@@ -48,6 +48,9 @@ class LoveProducerCSC(LoveProducerBase):
             csc,
             index=kwargs.get("salindex", 0),
             readonly=kwargs.get("remote_readonly", True),
+            includes=None
+            if "periodic_data" not in kwargs and "asynchronous_data" not in kwargs
+            else kwargs.get("periodic_data", []) + kwargs.get("asynchronous_data", []),
         )
 
         self._events_special_cases = {"evt_heartbeat"}
@@ -362,9 +365,9 @@ class LoveProducerCSC(LoveProducerBase):
             asynchronous_data_name, asynchronous_data_category
         )
 
-        getattr(self.remote, asynchronous_data_name).callback = (
-            self.handle_asynchronous_data_callback
-        )
+        getattr(
+            self.remote, asynchronous_data_name
+        ).callback = self.handle_asynchronous_data_callback
 
     async def set_monitor_heartbeat(self):
         if hasattr(self.remote, "evt_heartbeat"):
@@ -396,9 +399,9 @@ class LoveProducerCSC(LoveProducerBase):
 
             try:
                 if heartbeat_send_timer.done():
-                    heartbeat_message["producer_snd"] = (
-                        datetime.datetime.now().timestamp()
-                    )
+                    heartbeat_message[
+                        "producer_snd"
+                    ] = datetime.datetime.now().timestamp()
 
                     await self.send_message(
                         self._love_manager_message.get_message_as_json(
