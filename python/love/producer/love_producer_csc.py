@@ -43,14 +43,22 @@ class LoveProducerCSC(LoveProducerBase):
 
         self.add_metadata(**kwargs)
 
+        include = (
+            None
+            if "periodic_data" not in kwargs and "asynchronous_data" not in kwargs
+            else [
+                topic.split("_", maxsplit=1)[1]
+                for topic in kwargs.get("periodic_data", [])
+                + kwargs.get("asynchronous_data", [])
+            ]
+        )
+
         self.remote: Remote = Remote(
             domain,
             csc,
             index=kwargs.get("salindex", 0),
             readonly=kwargs.get("remote_readonly", True),
-            include=None
-            if "periodic_data" not in kwargs and "asynchronous_data" not in kwargs
-            else kwargs.get("periodic_data", []) + kwargs.get("asynchronous_data", []),
+            include=include,
         )
 
         self._events_special_cases = {"evt_heartbeat"}
