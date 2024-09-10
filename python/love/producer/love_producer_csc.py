@@ -48,7 +48,7 @@ class LoveProducerCSC(LoveProducerBase):
             csc,
             index=kwargs.get("salindex", 0),
             readonly=kwargs.get("remote_readonly", True),
-            includes=None
+            include=None
             if "periodic_data" not in kwargs and "asynchronous_data" not in kwargs
             else kwargs.get("periodic_data", []) + kwargs.get("asynchronous_data", []),
         )
