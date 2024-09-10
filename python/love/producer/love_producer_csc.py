@@ -325,12 +325,22 @@ class LoveProducerCSC(LoveProducerBase):
     def set_topic_template_manager_message_format(self) -> None:
         """Generate manager message format for each registered topic."""
         for periodic_topic in self.periodic_data:
-            self.log.debug(f"creating manager message for {periodic_topic}")
-            self.create_template_manager_message(periodic_topic)
+            if hasattr(self.remote, periodic_topic):
+                self.log.debug(f"creating manager message for {periodic_topic}")
+                self.create_template_manager_message(periodic_topic)
+            else:
+                self.log.debug(
+                    f"Topic {periodic_topic} not defined, skipping manager message."
+                )
 
         for asynchronous_topic in self.asynchronous_data:
-            self.log.debug(f"creating manager message for {asynchronous_topic}")
-            self.create_template_manager_message(asynchronous_topic)
+            if hasattr(self.remote, asynchronous_topic):
+                self.log.debug(f"creating manager message for {asynchronous_topic}")
+                self.create_template_manager_message(asynchronous_topic)
+            else:
+                self.log.debug(
+                    f"Topic {asynchronous_topic} not defined, skipping manager message."
+                )
 
     def create_template_manager_message(self, topic_name):
         """Create template manager message for given topic."""
