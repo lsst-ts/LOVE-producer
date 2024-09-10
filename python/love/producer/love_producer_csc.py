@@ -322,10 +322,18 @@ class LoveProducerCSC(LoveProducerBase):
 
     async def set_monitor_periodic_data(self) -> None:
         for periodic_data_name in self.periodic_data:
-            self.register_monitor_data_periodically(
-                getattr(self.remote, periodic_data_name).get,
-                category=self.periodic_data[periodic_data_name],
-            )
+            if hasattr(self.remote, periodic_data_name):
+                self.log.debug(
+                    f"Setting up periodic data monitor for {periodic_data_name}."
+                )
+                self.register_monitor_data_periodically(
+                    getattr(self.remote, periodic_data_name).get,
+                    category=self.periodic_data[periodic_data_name],
+                )
+            else:
+                self.log.debug(
+                    f"Topic {periodic_data_name} not defined, skipping setting up periodic data monitor."
+                )
 
     def set_topic_template_manager_message_format(self) -> None:
         """Generate manager message format for each registered topic."""
@@ -383,6 +391,7 @@ class LoveProducerCSC(LoveProducerBase):
                 )
                 for asynchronous_data_name in self.asynchronous_data
                 if asynchronous_data_name not in self._events_special_cases
+                and hasattr(self.remote, asynchronous_data_name)
             ]
         )
 
