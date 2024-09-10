@@ -243,11 +243,16 @@ class LoveProducerCSC(LoveProducerBase):
         return periodic_data_list
 
     async def start(self) -> None:
+        self.log.info("Waiting for remote to start.")
         await self.remote.start_task
 
+        self.log.info("Set monitor for periodic data.")
         await self.set_monitor_periodic_data()
+        self.log.info("Set monitor for asynchronous data.")
         await self.set_monitor_asynchronous_data()
+        self.log.info("Set heartbeat monitor.")
         await self.set_monitor_heartbeat()
+        self.log.info("LOVE producer started.")
 
     def set_topic_name_revcode_mapping(self) -> None:
         """Create a mapping between topic name and revcode for all topics so
