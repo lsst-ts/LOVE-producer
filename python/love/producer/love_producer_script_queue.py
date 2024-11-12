@@ -104,7 +104,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
         self._non_topic_data_stream = {
             "stateStream",
-            "scriptsStream",
+            "currentScriptsStream",
+            "waitingScriptsStream",
+            "finishedScriptsStream",
             "availableScriptsStream",
         }
 
@@ -124,16 +126,40 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         )
 
         self.register_asynchronous_data_category("stateStream", "_stateStream")
-        self.register_asynchronous_data_category("scriptsStream", "_scriptsStream")
+        self.register_asynchronous_data_category(
+            "currentScriptsStream", "_currentScriptsStream"
+        )
+        self.register_asynchronous_data_category(
+            "waitingScriptsStream", "_waitingScriptsStream"
+        )
+        self.register_asynchronous_data_category(
+            "finishedScriptsStream", "_finishedScriptsStream"
+        )
         self.register_asynchronous_data_category(
             "availableScriptsStream", "_availableScriptsStream"
         )
 
         self.store_samples(_stateStream=self.scriptqueue_state_message_data)
-        self.store_samples(_scriptsStream=self.scripts_state_message_data)
+        self.store_samples(
+            _currentScriptsStream=self.current_scripts_state_message_data
+        )
+        self.store_samples(
+            _waitingScriptsStream=self.waiting_scripts_state_message_data
+        )
+        self.store_samples(
+            _finishedScriptsStream=self.finished_scripts_state_message_data
+        )
         self.store_samples(
             _availableScriptsStream=self.available_scripts_state_message_data
         )
+
+    def create_random_finished_scripts_array(self):
+        finished_scripts = []
+        for i in range(400):
+            index = 100 + i
+            new_script = self.get_empty_script(index)
+            finished_scripts.append(new_script)
+        return finished_scripts
 
     async def start(self) -> None:
         await super().start()
@@ -227,39 +253,27 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `ScriptQueue_logevent_script`
             ScriptQueue_logevent_script event data.
         """
-        if event.scriptSalIndex not in self.scripts:
-            self.scripts[event.scriptSalIndex] = self.get_empty_script(
-                event.scriptSalIndex
-            )
+        salindex = event.scriptSalIndex
+        if salindex not in self.scripts:
+            self.scripts[salindex] = self.get_empty_script(salindex)
 
-        self.scripts[event.scriptSalIndex]["type"] = (
-            "standard" if event.isStandard else "external"
-        )
-        self.scripts[event.scriptSalIndex]["path"] = event.path
-        self.scripts[event.scriptSalIndex]["process_state"] = (
-            ScriptQueue.ScriptProcessState(event.processState).name
-        )
-        self.scripts[event.scriptSalIndex]["script_state"] = Script.ScriptState(
+        self.scripts[salindex]["type"] = "standard" if event.isStandard else "external"
+        self.scripts[salindex]["path"] = event.path
+        self.scripts[salindex]["process_state"] = ScriptQueue.ScriptProcessState(
+            event.processState
+        ).name
+        self.scripts[salindex]["script_state"] = Script.ScriptState(
             event.scriptState
         ).name
-        self.scripts[event.scriptSalIndex][
-            "timestampConfigureEnd"
-        ] = event.timestampConfigureEnd
-        self.scripts[event.scriptSalIndex][
+        self.scripts[salindex]["timestampConfigureEnd"] = event.timestampConfigureEnd
+        self.scripts[salindex][
             "timestampConfigureStart"
         ] = event.timestampConfigureStart
-        self.scripts[event.scriptSalIndex][
-            "timestampProcessEnd"
-        ] = event.timestampProcessEnd
-        self.scripts[event.scriptSalIndex][
-            "timestampProcessStart"
-        ] = event.timestampProcessStart
-        self.scripts[event.scriptSalIndex][
-            "timestampRunStart"
-        ] = event.timestampRunStart
+        self.scripts[salindex]["timestampProcessEnd"] = event.timestampProcessEnd
+        self.scripts[salindex]["timestampProcessStart"] = event.timestampProcessStart
+        self.scripts[salindex]["timestampRunStart"] = event.timestampRunStart
 
-        self.store_samples(_scriptsStream=self.scripts_state_message_data)
-        await self.send_scripts_state()
+        self.handle_script_new_data(salindex)
 
     async def handle_event_scriptqueue_queue(self, event: Any) -> None:
         """Saves the queue state using the event data and queries the state of
@@ -271,22 +285,36 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             The SAL event data.
         """
         self.state["running"] = event.running == 1
+        self.state["enabled"] = event.enabled == 1
+
         # The ScriptQueue CSC will be extended to support multiple
         # current scripts in the future. For now, only one is supported.
         # See: DM-44198.
-        self.state["currentIndices"] = (
+        current_sal_indices = (
             [event.currentSalIndex] if event.currentSalIndex > 0 else []
         )
-        self.state["finishedIndices"] = list(event.pastSalIndices[: event.pastLength])
-        self.state["waitingIndices"] = list(event.salIndices[: event.length])
-        self.state["enabled"] = event.enabled == 1
+        waiting_sal_indices = list(event.salIndices[: event.length])
+        finished_sal_indices = list(event.pastSalIndices[: event.pastLength])
+
+        current_indices_changed = set(current_sal_indices) != set(
+            self.state["currentIndices"]
+        )
+        waiting_indices_changed = set(waiting_sal_indices) != set(
+            self.state["waitingIndices"]
+        )
+        finished_indices_changed = set(finished_sal_indices) != set(
+            self.state["finishedIndices"]
+        )
+
+        self.state["currentIndices"] = current_sal_indices
+        self.state["waitingIndices"] = waiting_sal_indices
+        self.state["finishedIndices"] = finished_sal_indices
 
         salindex_new_scripts = set(
             self.state["waitingIndices"]
             + self.state["finishedIndices"]
             + self.state["currentIndices"]
         )
-
         salindex_current_scripts = set(self.scripts.keys())
 
         for salindex in salindex_current_scripts - salindex_new_scripts:
@@ -301,10 +329,23 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             self.add_new_script(salindex)
 
         self.store_samples(_stateStream=self.scriptqueue_state_message_data)
-        self.store_samples(_scriptsStream=self.scripts_state_message_data)
-
         await self.send_scriptqueue_state()
-        await self.send_scripts_state()
+
+        if current_indices_changed:
+            self.store_samples(
+                _currentScriptsStream=self.current_scripts_state_message_data
+            )
+            await self.send_current_scripts_state()
+        if waiting_indices_changed:
+            self.store_samples(
+                _waitingScriptsStream=self.waiting_scripts_state_message_data
+            )
+            await self.send_waiting_scripts_state()
+        if finished_indices_changed:
+            self.store_samples(
+                _finishedScriptsStream=self.finished_scripts_state_message_data
+            )
+            await self.send_finished_scripts_state()
 
     async def handle_event_scriptqueue_available_scripts(self, data: Any) -> None:
         """Additional action for availableScripts events.
@@ -382,9 +423,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             Event data.
         """
         if event.salIndex in self.scripts:
-            self.scripts[event.salIndex]["expected_duration"] = event.duration
-            self.store_samples(_scriptsStream=self.scripts_state_message_data)
-            await self.send_scripts_state()
+            salindex = event.salIndex
+            self.scripts[salindex]["expected_duration"] = event.duration
+            self.handle_script_new_data(salindex)
 
     async def handle_event_script_state(self, event: Any) -> None:
         """Callback for the Script_logevent_state event.
@@ -397,12 +438,12 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             Event data.
         """
         if event.salIndex in self.scripts:
-            self.scripts[event.salIndex]["script_state"] = Script.ScriptState(
+            salindex = event.salIndex
+            self.scripts[salindex]["script_state"] = Script.ScriptState(
                 event.state
             ).name
-            self.scripts[event.salIndex]["last_checkpoint"] = event.lastCheckpoint
-            self.store_samples(_scriptsStream=self.scripts_state_message_data)
-            await self.send_scripts_state()
+            self.scripts[salindex]["last_checkpoint"] = event.lastCheckpoint
+            self.handle_script_new_data(salindex)
 
     async def handle_event_script_description(self, event: Any) -> None:
         """Callback for the logevent_description.
@@ -419,8 +460,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             self.scripts[salindex]["description"] = event.description
             self.scripts[salindex]["classname"] = event.classname
             self.scripts[salindex]["remotes"] = event.remotes
-            self.store_samples(_scriptsStream=self.scripts_state_message_data)
-            await self.send_scripts_state()
+            self.handle_script_new_data(salindex)
 
     async def handle_event_script_checkpoints(self, event: Any) -> None:
         """Callback for the logevent_checkpoints.
@@ -436,8 +476,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             salindex = event.salIndex
             self.scripts[salindex]["pause_checkpoints"] = event.pause
             self.scripts[salindex]["stop_checkpoints"] = event.stop
-            self.store_samples(_scriptsStream=self.scripts_state_message_data)
-            await self.send_scripts_state()
+            self.handle_script_new_data(salindex)
 
     async def handle_event_script_log_level(self, event: Any) -> None:
         """Listens to the logLevel event.
@@ -450,8 +489,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         if event.salIndex in self.scripts:
             salindex = event.salIndex
             self.scripts[salindex]["log_level"] = event.level
-            self.store_samples(_scriptsStream=self.scripts_state_message_data)
-            await self.send_scripts_state()
+            self.handle_script_new_data(salindex)
 
     async def update_scripts_schema(self) -> None:
         """Update scripts schema."""
@@ -462,7 +500,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
                 path=script_path,
                 timeout=self.cmd_timeout,
             )
-            for script_path in self.available_scripts["standard"]
+            # for script_path in self.available_scripts["standard"]
+            for script_path in []
         ] + [
             self.remote.cmd_showSchema.set_start(
                 isStandard=False,
@@ -470,6 +509,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
                 timeout=self.cmd_timeout,
             )
             for script_path in self.available_scripts["external"]
+            if "stress" in script_path
         ]
 
         for show_schema in show_schema_all:
@@ -594,8 +634,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         )
 
     @property
-    def scripts_state_message_data(self) -> dict:
-        """Scripts state message.
+    def current_scripts_state_message_data(self) -> dict:
+        """Current scripts state message.
 
         The data structure matches the required by the manager/frontend view.
         """
@@ -604,18 +644,51 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             current_scripts=[
                 self.scripts[index] for index in self.state["currentIndices"]
             ],
+        )
+
+        return dict(
+            csc="ScriptQueueState",
+            salindex=self.remote.salinfo.index,
+            data=dict(currentScriptsStream=data),
+        )
+
+    @property
+    def waiting_scripts_state_message_data(self) -> dict:
+        """Waiting scripts state message.
+
+        The data structure matches the required by the manager/frontend view.
+        """
+
+        data = dict(
             waiting_scripts=[
                 self.scripts[index] for index in self.state["waitingIndices"]
-            ],
-            finished_scripts=[
-                self.scripts[index] for index in self.state["finishedIndices"]
             ],
         )
 
         return dict(
             csc="ScriptQueueState",
             salindex=self.remote.salinfo.index,
-            data=dict(scriptsStream=data),
+            data=dict(waitingScriptsStream=data),
+        )
+
+    @property
+    def finished_scripts_state_message_data(self) -> dict:
+        """Finished scripts state message.
+
+        The data structure matches the required by the manager/frontend view.
+        """
+
+        data = dict(
+            finished_scripts=[
+                self.scripts[index] for index in self.state["finishedIndices"]
+            ]
+            + self.create_random_finished_scripts_array(),
+        )
+
+        return dict(
+            csc="ScriptQueueState",
+            salindex=self.remote.salinfo.index,
+            data=dict(finishedScriptsStream=data),
         )
 
     @property
@@ -665,7 +738,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             data=self.scriptqueue_state_message_data,
         )
 
-    def get_scripts_state_message_as_json(self) -> str:
+    def get_current_scripts_state_message_as_json(self) -> str:
         """Parses the current scripts state into a LOVE friendly format.
 
         Returns
@@ -676,7 +749,36 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
         return self._love_manager_message.get_message_category_as_json(
             category="event",
-            data=self.scripts_state_message_data,
+            data=self.current_scripts_state_message_data,
+        )
+
+    def get_waiting_scripts_state_message_as_json(self) -> str:
+        """Parses the waiting scripts state into a LOVE friendly format.
+
+        Returns
+        -------
+        `str`
+            Scripts state message.
+        """
+
+        return self._love_manager_message.get_message_category_as_json(
+            category="event",
+            data=self.waiting_scripts_state_message_data,
+        )
+
+    def get_finished_scripts_state_message_as_json(self) -> str:
+        """Parses the current finished scripts state
+        into a LOVE friendly format.
+
+        Returns
+        -------
+        `str`
+            Scripts state message.
+        """
+
+        return self._love_manager_message.get_message_category_as_json(
+            category="event",
+            data=self.finished_scripts_state_message_data,
         )
 
     def get_available_scripts_state_message_as_json(self) -> str:
@@ -697,9 +799,17 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         """Send script queue state."""
         await self.send_message(self.get_scriptqueue_state_message_as_json())
 
-    async def send_scripts_state(self):
-        """Send scripts state."""
-        await self.send_message(self.get_scripts_state_message_as_json())
+    async def send_current_scripts_state(self):
+        """Send current scripts state."""
+        await self.send_message(self.get_current_scripts_state_message_as_json())
+
+    async def send_waiting_scripts_state(self):
+        """Send waiting scripts state."""
+        await self.send_message(self.get_waiting_scripts_state_message_as_json())
+
+    async def send_finished_scripts_state(self):
+        """Send finished scripts state."""
+        await self.send_message(self.get_finished_scripts_state_message_as_json())
 
     async def send_available_scripts(self):
         """Send available scripts."""
@@ -744,6 +854,26 @@ class LoveProducerScriptQueue(LoveProducerCSC):
                 )
         except Exception:
             self.log.exception("Error sending script log message.")
+
+    async def handle_script_new_data(self, salindex):
+        """Store samples and send scripts state
+        with respect to its salindex."""
+
+        if salindex in self.state["currentIndices"]:
+            self.store_samples(
+                _currentScriptsStream=self.current_scripts_state_message_data
+            )
+            await self.send_current_scripts_state()
+        elif salindex in self.state["waitingIndices"]:
+            self.store_samples(
+                _waitingScriptsStream=self.waiting_scripts_state_message_data
+            )
+            await self.send_waiting_scripts_state()
+        elif salindex in self.state["finishedIndices"]:
+            self.store_samples(
+                _finishedScriptsStream=self.finished_scripts_state_message_data
+            )
+            await self.send_finished_scripts_state()
 
     def _get_script_heartbeat_message(self, salindex: int) -> Dict:
         """Get script heartbeat message.
