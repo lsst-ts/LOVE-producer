@@ -24,6 +24,7 @@ __all__ = ["LoveProducerScriptQueue"]
 
 import asyncio
 import logging
+import pickle
 from collections import deque
 from datetime import datetime
 from typing import Any, AsyncIterator, Dict, Optional
@@ -137,6 +138,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
     async def start(self) -> None:
         await super().start()
+
+        self.load_state()
 
         await self.set_script_heartbeat_producer()
 
@@ -781,8 +784,36 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
         return script_heartbeat_message
 
+    def persist_state(self):
+        """Persist state."""
+        state = {
+            "available_scripts": self.available_scripts,
+            "scripts": self.scripts,
+            "scripts_heartbeat": self.scripts_heartbeat,
+            "scripts_log_messages": self.scripts_log_messages,
+        }
+        self.log.info("Persisting state.")
+        with open("script_queue_state.pkl", "wb") as f:
+            pickle.dump(state, f)
+
+    def load_state(self):
+        """Load state."""
+        try:
+            self.log.info("Loading state.")
+            with open("script_queue_state.pkl", "rb") as f:
+                state = pickle.load(f)
+                self.available_scripts = state["available_scripts"]
+                self.scripts = state["scripts"]
+                self.scripts_heartbeat = state["scripts_heartbeat"]
+                self.scripts_log_messages = state["scripts_log_messages"]
+        except FileNotFoundError:
+            self.log.warning("No state file found.")
+        except Exception as e:
+            self.log.error(f"Error loading state: {e}")
+
     async def close(self):
         await self.remote_scripts.close()
+        self.persist_state()
         return await super().close()
 
     async def set_script_heartbeat_producer(self) -> None:
