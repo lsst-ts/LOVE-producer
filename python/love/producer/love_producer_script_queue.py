@@ -24,7 +24,9 @@ __all__ = ["LoveProducerScriptQueue"]
 
 import asyncio
 import logging
+import os
 import pickle
+import signal
 from collections import deque
 from datetime import datetime
 from typing import Any, AsyncIterator, Dict, Optional
@@ -88,6 +90,8 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
         self.scripts_log_messages = dict()
 
+        self.load_state()
+
         self.script_reply = dict(evt_logMessage=self.send_script_log_message)
 
         self._set_revcode_mapping(
@@ -136,10 +140,10 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             _availableScriptsStream=self.available_scripts_state_message_data
         )
 
+        self.logevent_count_script = 0
+
     async def start(self) -> None:
         await super().start()
-
-        self.load_state()
 
         await self.set_script_heartbeat_producer()
 
@@ -273,6 +277,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         event : `ScriptQueue_logevent_queue`
             The SAL event data.
         """
+
         self.state["running"] = event.running == 1
         # The ScriptQueue CSC will be extended to support multiple
         # current scripts in the future. For now, only one is supported.
@@ -308,6 +313,11 @@ class LoveProducerScriptQueue(LoveProducerCSC):
 
         await self.send_scriptqueue_state()
         await self.send_scripts_state()
+
+        self.logevent_count_script += 1
+        self.log.debug("Received script ScriptQueue_logevent_queue")
+        if self.logevent_count_script == 5:
+            os.kill(os.getpid(), signal.SIGTERM)
 
     async def handle_event_scriptqueue_available_scripts(self, data: Any) -> None:
         """Additional action for availableScripts events.
@@ -466,14 +476,16 @@ class LoveProducerScriptQueue(LoveProducerCSC):
                 timeout=self.cmd_timeout,
             )
             for script_path in self.available_scripts["standard"]
-        ] + [
-            self.remote.cmd_showSchema.set_start(
-                isStandard=False,
-                path=script_path,
-                timeout=self.cmd_timeout,
-            )
-            for script_path in self.available_scripts["external"]
+            if ("summary_state" in script_path or "sleep" in script_path)
         ]
+        # ] + [
+        #     self.remote.cmd_showSchema.set_start(
+        #         isStandard=False,
+        #         path=script_path,
+        #         timeout=self.cmd_timeout,
+        #     )
+        #     for script_path in self.available_scripts["external"]
+        # ]
 
         for show_schema in show_schema_all:
             try:
@@ -500,6 +512,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         salindex : `int`
             The SAL index of the stript
         """
+        print("######", flush=True)
+        print(f"Adding new script: {salindex}")
+        print("######", flush=True)
         if salindex not in self.scripts:
             self.scripts[salindex] = self.get_empty_script(salindex)
 
@@ -787,21 +802,31 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     def persist_state(self):
         """Persist state."""
         state = {
+            "state": self.state,
             "available_scripts": self.available_scripts,
             "scripts": self.scripts,
             "scripts_heartbeat": self.scripts_heartbeat,
             "scripts_log_messages": self.scripts_log_messages,
         }
         self.log.info("Persisting state.")
-        with open("script_queue_state.pkl", "wb") as f:
+        with open("/usr/var/script_queue_state.pkl", "wb") as f:
             pickle.dump(state, f)
+        print("########", flush=True)
+        print("Persisted state:")
+        print(f"State: {state['state']}")
+        # print(f"Available scripts: {state['available_scripts']}")
+        print(f"Scripts: {state['scripts']}")
+        print(f"Scripts heartbeat: {state['scripts_heartbeat']}")
+        # print(f"Scripts log messages: {state['scripts_log_messages']}")
+        print("########", flush=True)
 
     def load_state(self):
         """Load state."""
         try:
             self.log.info("Loading state.")
-            with open("script_queue_state.pkl", "rb") as f:
+            with open("/usr/var/script_queue_state.pkl", "rb") as f:
                 state = pickle.load(f)
+                self.state = state["state"]
                 self.available_scripts = state["available_scripts"]
                 self.scripts = state["scripts"]
                 self.scripts_heartbeat = state["scripts_heartbeat"]
@@ -810,6 +835,15 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             self.log.warning("No state file found.")
         except Exception as e:
             self.log.error(f"Error loading state: {e}")
+
+        print("########", flush=True)
+        print("Loaded state:")
+        print(f"State: {self.state}")
+        # print(f"Available scripts: {self.available_scripts}")
+        print(f"Scripts: {self.scripts}")
+        print(f"Scripts heartbeat: {self.scripts_heartbeat}")
+        # print(f"Scripts log messages: {self.scripts_log_messages}")
+        print("########", flush=True)
 
     async def close(self):
         await self.remote_scripts.close()
