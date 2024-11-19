@@ -83,8 +83,8 @@ class LoveProducerSet:
         ):
             try:
                 await task
-            except Exception:
-                self.log.exception("Error in execution task.")
+            except Exception as e:
+                self.log.exception(f"Error in execution task: {e}")
             finally:
                 break
 
