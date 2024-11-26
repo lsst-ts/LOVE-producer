@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.7.0
+------
+
+* Limit size of stored finished scripts list. `<https://github.com/lsst-ts/LOVE-producer/pull/150>`_
+
 v6.6.1
 ------
 
