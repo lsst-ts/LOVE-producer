@@ -31,7 +31,7 @@ from typing import Any, AsyncIterator, Dict, Optional
 
 from love.producer.love_producer_csc import LoveProducerCSC
 from lsst.ts.idl.enums import Script, ScriptQueue
-from lsst.ts.salobj import AckError, Domain, Remote
+from lsst.ts.salobj import Domain, Remote
 from lsst.ts.salobj.base_script import HEARTBEAT_INTERVAL as SCRIPT_HEARTBEAT_INTERVAL
 from lsst.ts.utils import make_done_future
 
@@ -344,9 +344,6 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         )
         await self.send_available_scripts()
 
-        self.log.debug("Scheduling update of script schemas.")
-        self.scripts_schema_task = asyncio.create_task(self.update_scripts_schema())
-
     async def handle_event_scriptqueue_config_schema(self, event: Any) -> None:
         """Additional action for configSchema event.
 
@@ -455,42 +452,6 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             self.scripts[salindex]["log_level"] = event.level
             self.store_samples(_scriptsStream=self.scripts_state_message_data)
             await self.send_scripts_state()
-
-    async def update_scripts_schema(self) -> None:
-        """Update scripts schema."""
-
-        show_schema_all = [
-            self.remote.cmd_showSchema.set_start(
-                isStandard=True,
-                path=script_path,
-                timeout=self.cmd_timeout,
-            )
-            for script_path in self.available_scripts["standard"]
-        ] + [
-            self.remote.cmd_showSchema.set_start(
-                isStandard=False,
-                path=script_path,
-                timeout=self.cmd_timeout,
-            )
-            for script_path in self.available_scripts["external"]
-        ]
-
-        for show_schema in show_schema_all:
-            try:
-                await show_schema
-            except asyncio.CancelledError:
-                self.log.exception("showSchema command task canceled.")
-            except AckError as ack_err:
-                self.log.exception(
-                    f"showSchema command rejectedwith {ack_err.ackcmd.ack}: {ack_err.ackcmd.result}."
-                )
-            except Exception:
-                self.log.exception("Error getting schema for script.")
-
-        self.store_samples(
-            _availableScriptsStream=self.available_scripts_state_message_data
-        )
-        await self.send_available_scripts()
 
     def add_new_script(self, salindex: int) -> None:
         """Add new script to the internal script database.
