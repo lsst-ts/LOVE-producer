@@ -24,6 +24,7 @@ __all__ = ["LoveProducerScriptQueue"]
 
 import asyncio
 import logging
+import os
 from collections import deque
 from datetime import datetime
 from typing import Any, AsyncIterator, Dict, Optional
@@ -277,7 +278,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         self.state["currentIndices"] = (
             [event.currentSalIndex] if event.currentSalIndex > 0 else []
         )
-        self.state["finishedIndices"] = list(event.pastSalIndices[: event.pastLength])
+
+        custom_past_length = min(event.pastLength, self.finished_scripts_list_size)
+        self.state["finishedIndices"] = list(event.pastSalIndices[:custom_past_length])
         self.state["waitingIndices"] = list(event.salIndices[: event.length])
         self.state["enabled"] = event.enabled == 1
 
@@ -862,3 +865,7 @@ class LoveProducerScriptQueue(LoveProducerCSC):
             "ScriptQueueState",
             "Script",
         }
+
+    @property
+    def finished_scripts_list_size(self) -> int:
+        return int(os.environ.get("FINISHED_SCRIPTS_LIST_SIZE", 10))
