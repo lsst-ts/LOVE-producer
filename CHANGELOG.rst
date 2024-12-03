@@ -5,6 +5,7 @@ Version History
 v6.7.0
 ------
 
+* Log exception to identify issues when the producer process ends suddenly. `<https://github.com/lsst-ts/LOVE-producer/pull/151>`_
 * Limit size of stored finished scripts list. `<https://github.com/lsst-ts/LOVE-producer/pull/150>`_
 
 v6.6.1
