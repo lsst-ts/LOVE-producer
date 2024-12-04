@@ -31,7 +31,6 @@ import unittest
 from typing import Dict
 
 import pytest
-import yaml
 from love.producer import LoveProducerScriptQueue
 from love.producer.test_utils import cancel_task
 from lsst.ts import salobj, utils
@@ -370,46 +369,12 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 {
                     "type": "standard",
                     "path": "love_std_script.py",
-                    "configSchema": yaml.safe_dump(
-                        yaml.safe_load(
-                            """
-$schema: http://json-schema.org/draft-07/schema#
-$id: https://github.com/lsst-ts/LOVE-producer/blob/develop/tests/data/standard/love_std_script.py
-title: LoveStdScript v1
-description: Configuration for LoveStdScript.
-type: object
-properties:
-    sleep_time:
-        description: How long to sleep for.
-        type: number
-        default: 0.0
-additionalProperties: false
-        """
-                        )
-                    )
-                    + "\n",
+                    "configSchema": "",
                 },
                 {
                     "type": "external",
                     "path": "love_ext_script.py",
-                    "configSchema": yaml.safe_dump(
-                        yaml.safe_load(
-                            """
-$schema: http://json-schema.org/draft-07/schema#
-$id: https://github.com/lsst-ts/LOVE-producer/blob/develop/tests/data/external/love_ext_script.py
-title: LoveExtScript v1
-description: Configuration for LoveExtScript.
-type: object
-properties:
-    sleep_time:
-        description: How long to sleep for.
-        type: number
-        default: 0.0
-additionalProperties: false
-        """
-                        )
-                    )
-                    + "\n",
+                    "configSchema": "",
                 },
             ],
         }
