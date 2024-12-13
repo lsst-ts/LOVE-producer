@@ -41,12 +41,15 @@ class LoveManagerClient:
 
         self.connection_failed_wait_time: float = 3.0
 
+        self.register_initial_data_wait_time: float = 60.0
+
         self.text_width_max = 110
 
         self.websocket: Optional[aiohttp.ClientWebSocketResponse] = None
 
         self.connected_task: Optional[asyncio.Future] = None
         self.done_task: Optional[asyncio.Future] = None
+        self._register_producers_loop_task: Optional[asyncio.Task] = None
 
         self.producers: list = []
 
@@ -141,23 +144,36 @@ class LoveManagerClient:
 
     async def handle_connected(self) -> None:
         """Handle a recently established connection with the LOVE manager."""
-        await self._register_producers()
+
+        if (
+            self._register_producers_loop_task is None
+            or self._register_producers_loop_task.done()
+        ):
+            self.log.debug("Creating register_producers_loop_task.")
+            self._register_producers_loop_task = asyncio.create_task(
+                self._register_producers_loop()
+            )
+
         await self._send_initial_data()
         await self._handle_message_reception()
 
-    async def _register_producers(self) -> None:
-        """Register producers with the manager."""
+    async def _register_producers_loop(self) -> None:
+        """Register producers with the manager periodically."""
+        while not self.done_task.done():
+            try:
+                for producer in self.producers:
+                    self.log.debug(f"Registering {producer.component_name} producer.")
 
-        for producer in self.producers:
-            self.log.debug(f"Registering {producer.component_name} producer.")
-
-            async for (
-                initial_state_message
-            ) in producer.get_initial_state_messages_as_json():
-                await self.send_message(initial_state_message)
+                    async for (
+                        initial_state_message
+                    ) in producer.get_initial_state_messages_as_json():
+                        await self.send_message(initial_state_message)
+                await asyncio.sleep(self.register_initial_data_wait_time)
+            except Exception as e:
+                self.log.exception(f"Error in register_producers_loop: {e}")
 
     async def _send_initial_data(self) -> None:
-        """Send initial data from producers"""
+        """Send initial data from producers."""
 
         for producer in self.producers:
             self.log.debug(
