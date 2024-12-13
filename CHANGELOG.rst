@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v6.8.0
+------
+
+* Make subscriptions to initial state periodically. `<https://github.com/lsst-ts/LOVE-producer/pull/152>`_
+
 v6.7.0
 ------
 
