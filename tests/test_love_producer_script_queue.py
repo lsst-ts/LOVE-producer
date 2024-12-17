@@ -24,6 +24,7 @@ import asyncio
 import contextlib
 import json
 import logging
+import os
 import pathlib
 import shutil
 import subprocess
@@ -332,6 +333,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
     async def test_available_scripts_state_message_data(self):
         state_minimum_samples = 1
         self.standard_timeout = 10
+        os.environ["UPDATE_SCRIPTS_SCHEMA_ON_START"] = "True"
 
         async with self.enable_script_queue():
             await self.assert_minimum_samples_of(
@@ -342,9 +344,36 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 additional_samples=5,
             )
 
-            available_scripts_state_sample = self.get_available_scripts_state_sample()
+            available_scripts_state_sample = (
+                self.get_available_scripts_state_sample_with_schema()
+            )
 
             await self.assert_last_sample(
+                topic_name="availableScriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                topic_sample=available_scripts_state_sample,
+            )
+        os.environ.pop("UPDATE_SCRIPTS_SCHEMA_ON_START")
+
+    async def test_available_scripts_state_message_data_without_schema(self):
+        state_minimum_samples = 2
+        self.standard_timeout = 10
+
+        async with self.enable_script_queue():
+            await self.assert_minimum_samples_of(
+                topic_name="availableScriptsStream",
+                name_index="ScriptQueueState:1",
+                category="event",
+                minimum_samples=state_minimum_samples,
+                additional_samples=5,
+            )
+
+            available_scripts_state_sample = (
+                self.get_available_scripts_state_sample_without_schema()
+            )
+
+            await self.assert_first_sample(
                 topic_name="availableScriptsStream",
                 name_index="ScriptQueueState:1",
                 category="event",
@@ -364,7 +393,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             "finished_scripts": finished_scripts,
         }
 
-    def get_available_scripts_state_sample(self) -> Dict:
+    def get_available_scripts_state_sample_with_schema(self) -> Dict:
         return {
             "available_scripts": [
                 {
@@ -410,6 +439,22 @@ additionalProperties: false
                         )
                     )
                     + "\n",
+                },
+            ],
+        }
+
+    def get_available_scripts_state_sample_without_schema(self) -> Dict:
+        return {
+            "available_scripts": [
+                {
+                    "type": "standard",
+                    "path": "love_std_script.py",
+                    "configSchema": "",
+                },
+                {
+                    "type": "external",
+                    "path": "love_ext_script.py",
+                    "configSchema": "",
                 },
             ],
         }
@@ -471,6 +516,30 @@ additionalProperties: false
                 f"Mismatched item '{key}' in {topic_name}. "
                 f"Expected: {topic_sample[key]}"
                 f"Got: {last_sample[key]}",
+            )
+
+    async def assert_first_sample(
+        self,
+        topic_name,
+        name_index,
+        category,
+        topic_sample,
+    ):
+        first_sample = self.messages_received[category][name_index][topic_name][0][
+            topic_name
+        ]
+
+        self.log.debug(
+            f"First sample of {category}-{name_index}-{topic_name}: {first_sample}"
+        )
+        self.log.debug(f"Expected first sample: {topic_sample}")
+        for key in topic_sample:
+            self.assertEqual(
+                topic_sample[key],
+                first_sample[key],
+                f"Mismatched item '{key}' in {topic_name}. "
+                f"Expected: {topic_sample[key]}"
+                f"Got: {first_sample[key]}",
             )
 
     async def wait_for_number_of_samples_of_topic(
