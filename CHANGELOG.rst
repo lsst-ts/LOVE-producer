@@ -5,6 +5,7 @@ Version History
 v6.8.0
 ------
 
+* Make scripts schemas load on startup optional for the love_producer_script_queue. `<https://github.com/lsst-ts/LOVE-producer/pull/153>`_
 * Make subscriptions to initial state periodically. `<https://github.com/lsst-ts/LOVE-producer/pull/152>`_
 
 v6.7.0

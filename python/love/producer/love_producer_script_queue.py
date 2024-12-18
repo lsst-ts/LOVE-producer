@@ -344,8 +344,9 @@ class LoveProducerScriptQueue(LoveProducerCSC):
         )
         await self.send_available_scripts()
 
-        self.log.debug("Scheduling update of script schemas.")
-        self.scripts_schema_task = asyncio.create_task(self.update_scripts_schema())
+        if self.update_scripts_schema_on_start:
+            self.log.debug("Scheduling update of script schemas.")
+            self.scripts_schema_task = asyncio.create_task(self.update_scripts_schema())
 
     async def handle_event_scriptqueue_config_schema(self, event: Any) -> None:
         """Additional action for configSchema event.
@@ -869,3 +870,10 @@ class LoveProducerScriptQueue(LoveProducerCSC):
     @property
     def finished_scripts_list_size(self) -> int:
         return int(os.environ.get("FINISHED_SCRIPTS_LIST_SIZE", 10))
+
+    @property
+    def update_scripts_schema_on_start(self) -> bool:
+        return os.environ.get("UPDATE_SCRIPTS_SCHEMA_ON_START", "False").lower() in (
+            "true",
+            "1",
+        )
