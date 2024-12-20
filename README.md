@@ -12,6 +12,8 @@ All these variables are initialized with default variables defined in the :code:
 - ``LSST_DDS_PARTITION_PREFIX``: Prefix of the DDS partition to use.
 - ``PROCESS_CONNECTION_PASS``: Password use to authenticate connections with the LOVE-manager.
 - ``LOVE_CSC_PRODUCER``: Name and salindex of the CSC to connect in the format `<CSC>:<salindex>`. E.g. `ATDome:0`.
+- ``FINISHED_SCRIPTS_LIST_SIZE``: Size of the list of finished scripts to keep in memory for the ScriptQueue producer.
+- ``UPDATE_SCRIPTS_SCHEMA_ON_START``: If `True`, the producer will update the scripts schema on start.
 
 ## Use as part of the LOVE system
 
