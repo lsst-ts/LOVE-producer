@@ -644,10 +644,17 @@ additionalProperties: false
         try:
             self.log.debug("Waiting for CSC to become alive")
 
+            start_time = utils.current_tai()
             try:
-                await self.remote.evt_heartbeat.next(
+                hb = await self.remote.evt_heartbeat.next(
                     flush=True, timeout=self.csc_construction_timeout
                 )
+                while hb.private_sndStamp < start_time:
+                    self.log.debug(f"Discarding old sample: {hb}.")
+                    hb = await self.remote.evt_heartbeat.next(
+                        flush=True, timeout=self.csc_construction_timeout
+                    )
+
             except asyncio.TimeoutError:
                 self.log.error(
                     f"No heartbeat from ScriptQueue in the last {self.csc_construction_timeout}. "
