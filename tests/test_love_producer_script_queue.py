@@ -460,11 +460,7 @@ additionalProperties: false
         }
 
     async def asyncTearDown(self):
-        # There seems to be a problem in the C wrapper which
-        # uses remote.close() along domain.close().
-        # Once Kafka is being used this shouldn't happen anymore.
-        # Make the change once that's ready. See DM-44985.
-        # await self.remote.close()
+        await self.remote.close()
         await self.producer.close()
         await self.domain.close()
 
