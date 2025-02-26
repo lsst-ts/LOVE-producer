@@ -41,7 +41,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         cls.csc_construction_timeout = 30.0
 
     async def asyncSetUp(self):
-        salobj.set_random_lsst_dds_partition_prefix()
+        salobj.set_test_topic_subname()
         os.environ["LSST_SITE"] = "test"
 
         self.salindex = 1
