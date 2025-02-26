@@ -41,7 +41,7 @@ from lsst.ts.idl.enums import ScriptQueue
 
 @pytest.fixture(scope="class")
 def run_script_queue(request):
-    salobj.set_test_topic_subname()
+    salobj.set_test_topic_subname(randomize=True)
 
     index = 1
 
