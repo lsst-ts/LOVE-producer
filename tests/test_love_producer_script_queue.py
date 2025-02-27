@@ -74,6 +74,15 @@ def run_script_queue(request):
     process.wait()
 
 
+@pytest.fixture
+def set_update_scripts_schema_env_var():
+    """Fixture to set the UPDATE_SCRIPTS_SCHEMA_ON_START
+    environment variable."""
+    os.environ["UPDATE_SCRIPTS_SCHEMA_ON_START"] = "True"
+    yield
+    os.environ.pop("UPDATE_SCRIPTS_SCHEMA_ON_START")
+
+
 @pytest.mark.usefixtures("run_script_queue")
 class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
     @classmethod
@@ -330,10 +339,10 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 topic_sample=scripts_state_sample,
             )
 
+    @pytest.mark.usefixtures("set_update_scripts_schema_env_var")
     async def test_available_scripts_state_message_data(self):
-        state_minimum_samples = 1
+        state_minimum_samples = 2
         self.standard_timeout = 10
-        os.environ["UPDATE_SCRIPTS_SCHEMA_ON_START"] = "True"
 
         async with self.enable_script_queue():
             await self.assert_minimum_samples_of(
@@ -354,7 +363,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 category="event",
                 topic_sample=available_scripts_state_sample,
             )
-        os.environ.pop("UPDATE_SCRIPTS_SCHEMA_ON_START")
 
     async def test_available_scripts_state_message_data_without_schema(self):
         state_minimum_samples = 2
