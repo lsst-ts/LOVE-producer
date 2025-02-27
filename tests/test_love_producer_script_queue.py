@@ -41,7 +41,7 @@ from lsst.ts.idl.enums import ScriptQueue
 
 @pytest.fixture(scope="class")
 def run_script_queue(request):
-    salobj.set_random_lsst_dds_partition_prefix()
+    salobj.set_test_topic_subname(randomize=True)
 
     index = 1
 
@@ -72,6 +72,15 @@ def run_script_queue(request):
 
     process.terminate()
     process.wait()
+
+
+@pytest.fixture
+def set_update_scripts_schema_env_var():
+    """Fixture to set the UPDATE_SCRIPTS_SCHEMA_ON_START
+    environment variable."""
+    os.environ["UPDATE_SCRIPTS_SCHEMA_ON_START"] = "True"
+    yield
+    os.environ.pop("UPDATE_SCRIPTS_SCHEMA_ON_START")
 
 
 @pytest.mark.usefixtures("run_script_queue")
@@ -330,10 +339,10 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 topic_sample=scripts_state_sample,
             )
 
+    @pytest.mark.usefixtures("set_update_scripts_schema_env_var")
     async def test_available_scripts_state_message_data(self):
-        state_minimum_samples = 1
+        state_minimum_samples = 2
         self.standard_timeout = 10
-        os.environ["UPDATE_SCRIPTS_SCHEMA_ON_START"] = "True"
 
         async with self.enable_script_queue():
             await self.assert_minimum_samples_of(
@@ -354,7 +363,6 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
                 category="event",
                 topic_sample=available_scripts_state_sample,
             )
-        os.environ.pop("UPDATE_SCRIPTS_SCHEMA_ON_START")
 
     async def test_available_scripts_state_message_data_without_schema(self):
         state_minimum_samples = 2
@@ -460,11 +468,7 @@ additionalProperties: false
         }
 
     async def asyncTearDown(self):
-        # There seems to be a problem in the C wrapper which
-        # uses remote.close() along domain.close().
-        # Once Kafka is being used this shouldn't happen anymore.
-        # Make the change once that's ready. See DM-44985.
-        # await self.remote.close()
+        await self.remote.close()
         await self.producer.close()
         await self.domain.close()
 
@@ -644,10 +648,17 @@ additionalProperties: false
         try:
             self.log.debug("Waiting for CSC to become alive")
 
+            start_time = utils.current_tai()
             try:
-                await self.remote.evt_heartbeat.next(
+                hb = await self.remote.evt_heartbeat.next(
                     flush=True, timeout=self.csc_construction_timeout
                 )
+                while hb.private_sndStamp < start_time:
+                    self.log.debug(f"Discarding old sample: {hb}.")
+                    hb = await self.remote.evt_heartbeat.next(
+                        flush=True, timeout=self.csc_construction_timeout
+                    )
+
             except asyncio.TimeoutError:
                 self.log.error(
                     f"No heartbeat from ScriptQueue in the last {self.csc_construction_timeout}. "

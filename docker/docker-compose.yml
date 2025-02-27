@@ -1,5 +1,9 @@
 version: "3.7"
 
+networks:
+  kafka:
+    external: true
+
 services:
   producer:
     container_name: love-producer-mount
@@ -16,3 +20,5 @@ services:
     command: ["/usr/src/love/docker/setup-dev.sh"]
     stdin_open: true
     tty: true
+    networks:
+      - kafka

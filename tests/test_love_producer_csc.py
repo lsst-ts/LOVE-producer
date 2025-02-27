@@ -29,7 +29,7 @@ import unittest
 
 from love.producer import LoveProducerCSC
 from love.producer.test_utils import cancel_task
-from lsst.ts import salobj
+from lsst.ts import salobj, utils
 
 
 class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
@@ -41,7 +41,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
         cls.csc_construction_timeout = 30.0
 
     async def asyncSetUp(self):
-        salobj.set_random_lsst_dds_partition_prefix()
+        salobj.set_test_topic_subname()
         os.environ["LSST_SITE"] = "test"
 
         self.salindex = 1
@@ -255,6 +255,7 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
             )
 
             self.log.debug("Waiting for CSC to become alive")
+            start_time = utils.current_tai()
             async with salobj.Remote(
                 self.domain,
                 "Test",
@@ -262,9 +263,14 @@ class TestLoveProducerCSC(unittest.IsolatedAsyncioTestCase):
                 include=["heartbeat", "summaryState"],
             ) as r:
                 try:
-                    await r.evt_heartbeat.next(
+                    hb = await r.evt_heartbeat.next(
                         flush=True, timeout=self.csc_construction_timeout
                     )
+                    while hb.private_sndStamp < start_time:
+                        self.log.info(f"Discarding old sample: {hb}.")
+                        hb = await r.evt_heartbeat.next(
+                            flush=True, timeout=self.csc_construction_timeout
+                        )
                 except asyncio.TimeoutError:
                     self.log.error(
                         f"No heartbeat from CSC in the last {self.csc_construction_timeout}. "

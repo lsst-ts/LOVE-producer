@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v7.0.0
+------
+
+* Update love producer to make it compatible with salobj-kafka. `<https://github.com/lsst-ts/LOVE-producer/pull/154>`_
+
 v6.8.0
 ------
 
