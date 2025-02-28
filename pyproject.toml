@@ -28,6 +28,7 @@ __version__ = "{version}"
 """
 
 [tool.pytest.ini_options]
+adopts = "-vsx"
 asyncio_mode = "auto"
 
 [project.optional-dependencies]

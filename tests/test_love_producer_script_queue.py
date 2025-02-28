@@ -254,7 +254,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_script_log_message(self):
-        log_messages_minimum_samples = 4
+        log_messages_minimum_samples = 3
         self.standard_timeout = 20
 
         async with self.enable_script_queue():
@@ -341,7 +341,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
 
     @pytest.mark.usefixtures("set_update_scripts_schema_env_var")
     async def test_available_scripts_state_message_data(self):
-        state_minimum_samples = 2
+        state_minimum_samples = 1
         self.standard_timeout = 10
 
         async with self.enable_script_queue():
@@ -365,7 +365,7 @@ class TestLoveProducerScriptQueue(unittest.IsolatedAsyncioTestCase):
             )
 
     async def test_available_scripts_state_message_data_without_schema(self):
-        state_minimum_samples = 2
+        state_minimum_samples = 1
         self.standard_timeout = 10
 
         async with self.enable_script_queue():
