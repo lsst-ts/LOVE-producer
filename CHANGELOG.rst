@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v7.1.0
+------
+
+* Update love producer to support splitting up telemetries. `<https://github.com/lsst-ts/LOVE-producer/pull/155>`_
+
 v7.0.0
 ------
 
