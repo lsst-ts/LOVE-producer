@@ -326,15 +326,16 @@ class LoveProducerCSC(LoveProducerBase):
         topic_name : `str`
             Name of the topic. This will
         """
-        topic_data = topic.DataType().get_vars()
+        topic_data = topic.DataType()
+        field_info = topic.topic_info.fields
 
         self._template_manager_message[topic_name] = {
             topic_attribute: {
-                "value": topic_data[topic_attribute],
-                "dataType": get_data_type(topic_data[topic_attribute]),
-                "units": f"{topic.metadata.field_info[topic_attribute].units}",
+                "value": getattr(topic_data, topic_attribute),
+                "dataType": get_data_type(getattr(topic_data, topic_attribute)),
+                "units": f"{field_info[topic_attribute].units}",
             }
-            for topic_attribute in topic.metadata.field_info
+            for topic_attribute in field_info
         }
 
     async def set_monitor_asynchronous_data(self) -> None:
@@ -508,10 +509,8 @@ class LoveProducerCSC(LoveProducerBase):
         data_stream = copy.deepcopy(
             self._template_manager_message[topic_attribute_name]
         )
-        data_vars = data.get_vars()
-
-        for topic_attribute in data_vars:
-            data_stream[topic_attribute]["value"] = data_vars[topic_attribute]
+        for topic_attribute in data_stream:
+            data_stream[topic_attribute]["value"] = getattr(data, topic_attribute)
 
         payload = (
             data_stream
