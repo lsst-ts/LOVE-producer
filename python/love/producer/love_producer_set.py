@@ -37,7 +37,7 @@ logging.basicConfig(level=logging.DEBUG)
 class LoveProducerSet:
     """Container class to configure and host a list of LOVE producers."""
 
-    def __init__(self, components, log_level=logging.INFO) -> None:
+    def __init__(self, components, log_level=logging.INFO, **kwargs) -> None:
         self.log = logging.getLogger()
 
         if not self.log.hasHandlers():
@@ -54,6 +54,7 @@ class LoveProducerSet:
             components=components,
             domain=self.domain,
             log=self.log,
+            **kwargs,
         )
 
         self.standard_timeout = 5.0
@@ -113,9 +114,16 @@ class LoveProducerSet:
                 "See `--help` for more information."
             )
 
+        kwargs = dict()
+        if args.periodic_data is not None:
+            kwargs["periodic_data"] = args.periodic_data
+        if args.asynchronous_data is not None:
+            kwargs["asynchronous_data"] = args.asynchronous_data
+
         love_producer_set = cls(
             components=args.components,
             log_level=args.log_level,
+            **kwargs,
         )
 
         await love_producer_set.run_producer()
@@ -132,6 +140,19 @@ class LoveProducerSet:
             "components",
             nargs="*",
             help="Names of SAL components, e.g. ATDome, ATDomeTrajectory, MTHexapod:1.",
+        )
+
+        parser.add_argument(
+            "--periodic-data",
+            nargs="*",
+            help="Optional list of topic names to treat as periodic data"
+            "(will be pooled at set frequency, e.g. telemetry).",
+        )
+
+        parser.add_argument(
+            "--asynchronous-data",
+            nargs="*",
+            help="Optional list of topic names to treat as asynchonous data (e.g. events).",
         )
 
         parser.add_argument(
