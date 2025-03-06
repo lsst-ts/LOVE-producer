@@ -243,7 +243,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         self._run_wesocket_server = True
 
         socket = websockets.serve(
-            ws_handler=self.handle_websocket_server_received_message,
+            handler=self.handle_websocket_server_received_message,
             host="0.0.0.0",
             port=9999,
         )
@@ -254,7 +254,7 @@ class TestLoveManagerClient(unittest.IsolatedAsyncioTestCase):
         finally:
             self.log.info("Closing web server")
             self._run_wesocket_server = False
-            socket.ws_server.close()
+            socket.server.close()
 
     @contextlib.asynccontextmanager
     async def handle_connection_with_manager(self):
