@@ -43,11 +43,22 @@ class LoveProducerCSC(LoveProducerBase):
 
         self.add_metadata(**kwargs)
 
+        include = (
+            None
+            if "periodic_data" not in kwargs and "asynchronous_data" not in kwargs
+            else [
+                topic.split("_", maxsplit=1)[1]
+                for topic in kwargs.get("periodic_data", [])
+                + kwargs.get("asynchronous_data", [])
+            ]
+        )
+
         self.remote: Remote = Remote(
             domain,
             csc,
             index=kwargs.get("salindex", 0),
             readonly=kwargs.get("remote_readonly", True),
+            include=include,
         )
 
         self._events_special_cases = {"evt_heartbeat"}
@@ -232,23 +243,38 @@ class LoveProducerCSC(LoveProducerBase):
         return periodic_data_list
 
     async def start(self) -> None:
+        self.log.info("Waiting for remote to start.")
         await self.remote.start_task
 
+        self.log.info("Set monitor for periodic data.")
         await self.set_monitor_periodic_data()
+        self.log.info("Set monitor for asynchronous data.")
         await self.set_monitor_asynchronous_data()
+        self.log.info("Set heartbeat monitor.")
         await self.set_monitor_heartbeat()
+        self.log.info("LOVE producer started.")
 
     def set_topic_name_revcode_mapping(self) -> None:
         """Create a mapping between topic name and revcode for all topics so
         the producer can assign the name of the topics from the samples.
         """
         for periodic_topic in self.periodic_data:
-            self.log.debug(f"creating mapping for {periodic_topic}")
-            self.create_revcode_mapping(periodic_topic)
+            if hasattr(self.remote, periodic_topic):
+                self.log.debug(f"creating mapping for {periodic_topic}")
+                self.create_revcode_mapping(periodic_topic)
+            else:
+                self.log.debug(
+                    f"Topic {periodic_topic} not defined in remote, skipping."
+                )
 
         for asynchronous_topic in self.asynchronous_data:
-            self.log.debug(f"creating mapping for {asynchronous_topic}")
-            self.create_revcode_mapping(asynchronous_topic)
+            if hasattr(self.remote, asynchronous_topic):
+                self.log.debug(f"creating mapping for {asynchronous_topic}")
+                self.create_revcode_mapping(asynchronous_topic)
+            else:
+                self.log.debug(
+                    f"Topic {asynchronous_topic} not defined in remote, skipping."
+                )
 
     def get_topic_attribute_name(self, rev_code: str) -> str:
         """Returns the associated topic attribute name (e.g. evt_heartbeat) for
@@ -296,20 +322,38 @@ class LoveProducerCSC(LoveProducerBase):
 
     async def set_monitor_periodic_data(self) -> None:
         for periodic_data_name in self.periodic_data:
-            self.register_monitor_data_periodically(
-                getattr(self.remote, periodic_data_name).get,
-                category=self.periodic_data[periodic_data_name],
-            )
+            if hasattr(self.remote, periodic_data_name):
+                self.log.debug(
+                    f"Setting up periodic data monitor for {periodic_data_name}."
+                )
+                self.register_monitor_data_periodically(
+                    getattr(self.remote, periodic_data_name).get,
+                    category=self.periodic_data[periodic_data_name],
+                )
+            else:
+                self.log.debug(
+                    f"Topic {periodic_data_name} not defined, skipping setting up periodic data monitor."
+                )
 
     def set_topic_template_manager_message_format(self) -> None:
         """Generate manager message format for each registered topic."""
         for periodic_topic in self.periodic_data:
-            self.log.debug(f"creating manager message for {periodic_topic}")
-            self.create_template_manager_message(periodic_topic)
+            if hasattr(self.remote, periodic_topic):
+                self.log.debug(f"creating manager message for {periodic_topic}")
+                self.create_template_manager_message(periodic_topic)
+            else:
+                self.log.debug(
+                    f"Topic {periodic_topic} not defined, skipping manager message."
+                )
 
         for asynchronous_topic in self.asynchronous_data:
-            self.log.debug(f"creating manager message for {asynchronous_topic}")
-            self.create_template_manager_message(asynchronous_topic)
+            if hasattr(self.remote, asynchronous_topic):
+                self.log.debug(f"creating manager message for {asynchronous_topic}")
+                self.create_template_manager_message(asynchronous_topic)
+            else:
+                self.log.debug(
+                    f"Topic {asynchronous_topic} not defined, skipping manager message."
+                )
 
     def create_template_manager_message(self, topic_name):
         """Create template manager message for given topic."""
@@ -347,6 +391,7 @@ class LoveProducerCSC(LoveProducerBase):
                 )
                 for asynchronous_data_name in self.asynchronous_data
                 if asynchronous_data_name not in self._events_special_cases
+                and hasattr(self.remote, asynchronous_data_name)
             ]
         )
 
