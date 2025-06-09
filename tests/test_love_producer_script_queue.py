@@ -36,7 +36,7 @@ import yaml
 from love.producer import LoveProducerScriptQueue
 from love.producer.test_utils import cancel_task
 from lsst.ts import salobj, utils
-from lsst.ts.idl.enums import ScriptQueue
+from lsst.ts.xml.enums import ScriptQueue
 
 
 @pytest.fixture(scope="class")
