@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v7.1.1
+------
+
+* Remove IDL references. `<https://github.com/lsst-ts/LOVE-producer/pull/156>`_
+
 v7.1.0
 ------
 
