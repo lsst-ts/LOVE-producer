@@ -26,7 +26,6 @@ requirements:
     - setuptools
     - setuptools_scm
     - six
-    - ts-idl
     - ts-salobj
     - websocket-client
     - websockets
