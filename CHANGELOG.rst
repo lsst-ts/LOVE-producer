@@ -2,6 +2,12 @@
 Version History
 ===============
 
+v7.1.1
+------
+
+* Change the build string in the conda recipe. `<https://github.com/lsst-ts/LOVE-producer/pull/157>`_
+* Remove IDL references. `<https://github.com/lsst-ts/LOVE-producer/pull/156>`_
+
 v7.1.0
 ------
 

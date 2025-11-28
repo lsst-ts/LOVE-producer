@@ -22,27 +22,20 @@
 
 import json
 import os
-import re
 
 import numpy as np
-from lsst.ts import idl
+from lsst.ts import xml
 
 
 def get_available_components():
-    """Return a list of all CSCs available in the idl directory.
+    """Return a list of all CSCs available from the XML interface.
 
     Returns
     -------
     `set` of `str`
-        CSCs with idl files in the idl directory.
+        CSCs available from the XML interface.
     """
-    pattern_match = re.compile("sal_revCoded_(.*)")
-
-    return {
-        pattern_match.findall(idl_files.stem)[0]
-        for idl_files in idl.get_idl_dir().glob("*.idl")
-        if pattern_match.match(idl_files.stem) is not None
-    }
+    return set(xml.subsystems)
 
 
 class Settings:
