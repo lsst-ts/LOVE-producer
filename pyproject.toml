@@ -3,7 +3,7 @@ requires = [ "setuptools", "setuptools_scm" ]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "love-producer"
+name = "LOVE-producer"
 description = "LSST Operators Visualization Environment (LOVE) producer."
 license = { text = "GPL" }
 classifiers = [ "Programming Language :: Python :: 3" ]

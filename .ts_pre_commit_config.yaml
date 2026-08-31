@@ -9,3 +9,4 @@ isort: true
 mypy: false
 ruff: false
 towncrier: false
+insert-license: true
