@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "LOVE-producer"
-description = "LSST Operators Visualization Environment (LOVE) producer."
+description = "LSST Operators Visualization Environment (LOVE) service that acts as middleware between the LOVE-manager and SAL using salobj."
 license = { text = "GPL" }
 classifiers = [ "Programming Language :: Python :: 3" ]
-urls = { documentation = "https://jira.lsstcorp.org/secure/Dashboard.jspa", repository = "https://github.com/lsst-ts/LOVE-producer" }
+urls = { documentation = "https://love-producer.lsst.io", repository = "https://github.com/lsst-ts/LOVE-producer" }
 dynamic = [ "version" ]
 
 [project.scripts]
