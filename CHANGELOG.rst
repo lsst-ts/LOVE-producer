@@ -2,6 +2,11 @@
 Version History
 ===============
 
+v7.2.0
+------
+
+* Add insert-license pre-commit hook and make LICENSE and COPYRIGHT standard. `<https://github.com/lsst-ts/LOVE-producer/pull/158>`_
+
 v7.1.1
 ------
 

@@ -19,3 +19,4 @@ towncrier.toml
 build
 docs
 build/
+.LICENSE.txt
