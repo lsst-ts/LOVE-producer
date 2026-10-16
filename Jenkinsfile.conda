@@ -1,2 +1,2 @@
 @Library('JenkinsShared')_
-CondaPipeline([], "love-producer", "producer")
+CondaPipeline([], "love-producer", "love.producer", "noarch")
